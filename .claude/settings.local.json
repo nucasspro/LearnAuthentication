@@ -4,7 +4,10 @@
       "Read(//d/**)",
       "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-git --eslint --import-alias --src-dir)",
       "Bash(npx create-next-app@latest learnauthentication --typescript --tailwind --app --no-git --eslint --import-alias --src-dir --skip-install)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(npm install bcryptjs jsonwebtoken @types/bcryptjs @types/jsonwebtoken)",
+      "Bash(npm install speakeasy qrcode)",
+      "Bash(npm install --save-dev @types/speakeasy @types/qrcode)"
     ],
     "deny": [],
     "ask": []
