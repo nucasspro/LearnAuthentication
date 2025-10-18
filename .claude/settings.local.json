@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/**)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-git --eslint --import-alias --src-dir)",
+      "Bash(npx create-next-app@latest learnauthentication --typescript --tailwind --app --no-git --eslint --import-alias --src-dir --skip-install)",
+      "Bash(npm run build)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
