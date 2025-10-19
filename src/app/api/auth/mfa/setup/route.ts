@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { mockDB } from '@/lib/mock-db';
 import { generateTOTPSecret, generateBackupCodes } from '@/lib/mfa';
 
@@ -42,32 +42,34 @@ import { generateTOTPSecret, generateBackupCodes } from '@/lib/mfa';
  * Reference: SPECIFICATION Section 4.4.1, Section 5.1.9
  * RFC 6238: TOTP Algorithm
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request: Request) {
   try {
-    const { userId } = req.body;
+    const body = await request.json();
+    const { userId } = body;
 
     // Validate required parameters
     if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
+      return NextResponse.json(
+        { error: 'userId is required' },
+        { status: 400 }
+      );
     }
 
     if (typeof userId !== 'number') {
-      return res.status(400).json({ error: 'Invalid userId format' });
+      return NextResponse.json(
+        { error: 'Invalid userId format' },
+        { status: 400 }
+      );
     }
 
     // Check if user exists
     const user = mockDB.users[userId];
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
     }
 
     // Generate TOTP secret and QR code
@@ -92,7 +94,7 @@ export default async function handler(
     // Return setup data to client
     // IMPORTANT: This is the ONLY time backup codes are shown
     // User must save them securely
-    return res.status(200).json({
+    return NextResponse.json({
       secret: totpData.secret,
       qrCode: totpData.qrCode,
       manualEntry: totpData.manualEntry,
@@ -101,6 +103,9 @@ export default async function handler(
 
   } catch (error) {
     console.error('MFA setup error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

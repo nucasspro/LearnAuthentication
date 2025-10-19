@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { mockDB } from '@/lib/mock-db';
 
 /**
@@ -19,26 +20,22 @@ import { mockDB } from '@/lib/mock-db';
  *
  * Reference: SPECIFICATION Section 5.1.7 (Debug endpoints)
  */
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function GET(request: Request) {
   try {
     // Get sessionId from HTTP-Only cookie
-    const sessionId = req.cookies.SessionID;
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('SessionID')?.value;
 
     // No session cookie
     if (!sessionId) {
-      return res.status(401).json({
-        error: 'No session cookie found',
-        sessionId: null,
-        sessionExists: false,
-      });
+      return NextResponse.json(
+        {
+          error: 'No session cookie found',
+          sessionId: null,
+          sessionExists: false,
+        },
+        { status: 401 }
+      );
     }
 
     // Look up session in mockDB
@@ -46,11 +43,14 @@ export default function handler(
 
     // Session cookie exists but not in database
     if (!session) {
-      return res.status(401).json({
-        error: 'Session cookie exists but session not found in database',
-        sessionId: sessionId,
-        sessionExists: false,
-      });
+      return NextResponse.json(
+        {
+          error: 'Session cookie exists but session not found in database',
+          sessionId: sessionId,
+          sessionExists: false,
+        },
+        { status: 401 }
+      );
     }
 
     // Session exists - check if expired
@@ -61,7 +61,7 @@ export default function handler(
     const timeRemaining = session.expiresAt.getTime() - now.getTime();
     const minutesRemaining = Math.floor(timeRemaining / 60000);
 
-    return res.status(200).json({
+    return NextResponse.json({
       sessionId: sessionId,
       userId: session.userId,
       createdAt: session.createdAt,
@@ -77,6 +77,9 @@ export default function handler(
 
   } catch (error) {
     console.error('Session check error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

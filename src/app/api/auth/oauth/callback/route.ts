@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { mockOAuthProvider } from '@/lib/mock-oauth';
 import { mockDB } from '@/lib/mock-db';
 import { generateAccessToken } from '@/lib/jwt';
@@ -40,54 +41,54 @@ import { generateAccessToken } from '@/lib/jwt';
  * Reference: SPECIFICATION Section 4.3, Section 8.3
  * RFC 6749 Section 4.1.2 - Authorization Response
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function GET(request: NextRequest) {
   try {
     // Extract query parameters
-    const { code, state, error, error_description } = req.query;
+    const searchParams = request.nextUrl.searchParams;
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+    const error = searchParams.get('error');
+    const error_description = searchParams.get('error_description');
 
     // Check if OAuth provider returned an error
     if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error,
-        error_description: error_description || 'Authorization failed',
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          error: error,
+          error_description: error_description || 'Authorization failed',
+        },
+        { status: 400 }
+      );
     }
 
     // Validate required parameters
     if (!code) {
-      return res.status(400).json({
-        success: false,
-        error: 'invalid_request',
-        error_description: 'Missing authorization code',
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'invalid_request',
+          error_description: 'Missing authorization code',
+        },
+        { status: 400 }
+      );
     }
 
     // In production: Validate state parameter
     // const storedState = req.session?.oauthState;
     // if (!state || state !== storedState) {
-    //   return res.status(400).json({
+    //   return NextResponse.json({
     //     error: 'invalid_state',
     //     error_description: 'State parameter mismatch - possible CSRF attack',
-    //   });
+    //   }, { status: 400 });
     // }
-
-    const codeStr = Array.isArray(code) ? code[0] : code;
 
     try {
       // Exchange auth code for OAuth provider access token
       // In production: This would call the real OAuth provider's token endpoint
       // For mock: We simulate the exchange locally
       const tokenResponse = mockOAuthProvider.exchangeCode(
-        codeStr,
+        code,
         'mock-client-id', // Should match client_id from authorize step
         'mock-client-secret'
       );
@@ -101,10 +102,13 @@ export default async function handler(
       const user = mockDB.users[userId];
 
       if (!user) {
-        return res.status(404).json({
-          success: false,
-          error: 'user_not_found',
-        });
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'user_not_found',
+          },
+          { status: 404 }
+        );
       }
 
       // Generate our own JWT token for this user
@@ -128,7 +132,7 @@ export default async function handler(
       };
 
       // Return success with user data and our JWT
-      return res.status(200).json({
+      return NextResponse.json({
         success: true,
         user: {
           id: user.id,
@@ -148,19 +152,25 @@ export default async function handler(
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-      return res.status(401).json({
-        success: false,
-        error: 'invalid_grant',
-        error_description: errorMessage,
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'invalid_grant',
+          error_description: errorMessage,
+        },
+        { status: 401 }
+      );
     }
 
   } catch (error) {
     console.error('Callback endpoint error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'server_error',
-      error_description: 'Internal server error',
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'server_error',
+        error_description: 'Internal server error',
+      },
+      { status: 500 }
+    );
   }
 }

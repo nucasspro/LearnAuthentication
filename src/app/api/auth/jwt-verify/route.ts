@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/jwt';
 
 /**
@@ -24,53 +24,58 @@ import { verifyAccessToken } from '@/lib/jwt';
  *
  * Reference: SPECIFICATION Section 5.1.5, RFC 7519
  */
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request: Request) {
   try {
-    const { token } = req.body;
+    const body = await request.json();
+    const { token } = body;
 
     // Validate input
     if (!token) {
-      return res.status(400).json({
-        valid: false,
-        error: 'Token is required'
-      });
+      return NextResponse.json(
+        {
+          valid: false,
+          error: 'Token is required'
+        },
+        { status: 400 }
+      );
     }
 
     if (typeof token !== 'string') {
-      return res.status(400).json({
-        valid: false,
-        error: 'Invalid token format'
-      });
+      return NextResponse.json(
+        {
+          valid: false,
+          error: 'Invalid token format'
+        },
+        { status: 400 }
+      );
     }
 
     // Verify the access token
     const result = verifyAccessToken(token);
 
     if (result.valid) {
-      return res.status(200).json({
+      return NextResponse.json({
         valid: true,
         decoded: result.decoded,
       });
     } else {
-      return res.status(401).json({
-        valid: false,
-        error: result.error,
-      });
+      return NextResponse.json(
+        {
+          valid: false,
+          error: result.error,
+        },
+        { status: 401 }
+      );
     }
 
   } catch (error) {
     console.error('JWT verify error:', error);
-    return res.status(500).json({
-      valid: false,
-      error: 'Internal server error'
-    });
+    return NextResponse.json(
+      {
+        valid: false,
+        error: 'Internal server error'
+      },
+      { status: 500 }
+    );
   }
 }

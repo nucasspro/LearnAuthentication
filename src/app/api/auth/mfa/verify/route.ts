@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { mockDB } from '@/lib/mock-db';
 import { verifyTOTPCode, verifyBackupCode } from '@/lib/mfa';
 
@@ -60,39 +60,44 @@ import { verifyTOTPCode, verifyBackupCode } from '@/lib/mfa';
  * Reference: SPECIFICATION Section 4.4.2, Section 5.1.10
  * RFC 6238: TOTP Verification
  */
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request: Request) {
   try {
-    const { userId, code, useBackupCode = false } = req.body;
+    const body = await request.json();
+    const { userId, code, useBackupCode = false } = body;
 
     // Validate required parameters
     if (!userId || !code) {
-      return res.status(400).json({ error: 'userId and code are required' });
+      return NextResponse.json(
+        { error: 'userId and code are required' },
+        { status: 400 }
+      );
     }
 
     if (typeof userId !== 'number' || typeof code !== 'string') {
-      return res.status(400).json({ error: 'Invalid parameter format' });
+      return NextResponse.json(
+        { error: 'Invalid parameter format' },
+        { status: 400 }
+      );
     }
 
     // Check if user exists
     const user = mockDB.users[userId];
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
     }
 
     // Check if user has MFA setup
     const mfaSecret = mockDB.mfaSecrets[userId];
 
     if (!mfaSecret) {
-      return res.status(400).json({ error: 'MFA not set up for this user' });
+      return NextResponse.json(
+        { error: 'MFA not set up for this user' },
+        { status: 400 }
+      );
     }
 
     // Handle Backup Code Verification
@@ -105,10 +110,13 @@ export default function handler(
       );
 
       if (!isValidBackupCode) {
-        return res.status(401).json({
-          error: 'Invalid backup code',
-          message: 'Backup code is invalid or has already been used',
-        });
+        return NextResponse.json(
+          {
+            error: 'Invalid backup code',
+            message: 'Backup code is invalid or has already been used',
+          },
+          { status: 401 }
+        );
       }
 
       // Mark backup code as used
@@ -120,7 +128,7 @@ export default function handler(
         user.mfaEnabled = true;
       }
 
-      return res.status(200).json({
+      return NextResponse.json({
         success: true,
         message: 'Backup code verified successfully',
         remainingBackupCodes: mfaSecret.backupCodes.length - mfaSecret.usedCodes.length,
@@ -131,10 +139,13 @@ export default function handler(
     const isValidTOTPCode = verifyTOTPCode(mfaSecret.secret, code);
 
     if (!isValidTOTPCode) {
-      return res.status(401).json({
-        error: 'Invalid code',
-        message: 'The verification code is invalid or has expired',
-      });
+      return NextResponse.json(
+        {
+          error: 'Invalid code',
+          message: 'The verification code is invalid or has expired',
+        },
+        { status: 401 }
+      );
     }
 
     // Enable MFA if this is initial setup verification
@@ -143,13 +154,16 @@ export default function handler(
       user.mfaEnabled = true;
     }
 
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
       message: 'MFA verified successfully',
     });
 
   } catch (error) {
     console.error('MFA verification error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

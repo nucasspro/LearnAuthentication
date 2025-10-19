@@ -1,10 +1,10 @@
 /* Import Design System */
-@import '../styles/design-system.css';
-@import '../styles/animations.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import '../styles/design-system.css';
+@import '../styles/animations.css';
 
 /* Base Styles */
 @layer base {
@@ -17,11 +17,16 @@
     color: var(--color-text-primary);
     background-color: var(--color-background);
     transition: background-color var(--duration-base) var(--ease-in-out),
-                color var(--duration-base) var(--ease-in-out);
+      color var(--duration-base) var(--ease-in-out);
   }
 
   /* Headings */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: var(--font-bold);
     line-height: var(--leading-tight);
     color: var(--color-text-primary);
@@ -103,6 +108,7 @@
 
 /* Component Layer */
 @layer components {
+
   /* Button Base */
   .btn {
     display: inline-flex;
@@ -296,6 +302,7 @@
 
 /* Utility Layer */
 @layer utilities {
+
   /* Gradient Text */
   .gradient-text {
     background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-secondary-600) 100%);

@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { mockOAuthProvider } from '@/lib/mock-oauth';
 
 /**
@@ -30,46 +31,37 @@ import { mockOAuthProvider } from '@/lib/mock-oauth';
  * Reference: SPECIFICATION Section 4.3, Section 8.3
  * RFC 6749 Section 4.1 - Authorization Code Flow
  */
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function GET(request: NextRequest) {
   try {
     // Extract query parameters
-    const {
-      client_id,
-      redirect_uri,
-      response_type = 'code',
-      scope = 'openid email profile',
-      state,
-    } = req.query;
+    const searchParams = request.nextUrl.searchParams;
+    const client_id = searchParams.get('client_id');
+    const redirect_uri = searchParams.get('redirect_uri');
+    const response_type = searchParams.get('response_type') || 'code';
+    const scope = searchParams.get('scope') || 'openid email profile';
+    const state = searchParams.get('state');
 
     // Validate required parameters
     if (!client_id || !redirect_uri) {
-      return res.status(400).json({
-        error: 'invalid_request',
-        error_description: 'Missing required parameters: client_id, redirect_uri',
-      });
+      return NextResponse.json(
+        {
+          error: 'invalid_request',
+          error_description: 'Missing required parameters: client_id, redirect_uri',
+        },
+        { status: 400 }
+      );
     }
 
     // Validate response_type
     if (response_type !== 'code') {
-      return res.status(400).json({
-        error: 'unsupported_response_type',
-        error_description: 'Only authorization_code flow is supported',
-      });
+      return NextResponse.json(
+        {
+          error: 'unsupported_response_type',
+          error_description: 'Only authorization_code flow is supported',
+        },
+        { status: 400 }
+      );
     }
-
-    // Ensure parameters are strings
-    const clientIdStr = Array.isArray(client_id) ? client_id[0] : client_id;
-    const redirectUriStr = Array.isArray(redirect_uri) ? redirect_uri[0] : redirect_uri;
-    const scopeStr = Array.isArray(scope) ? scope[0] : scope;
-    const stateStr = Array.isArray(state) ? state[0] : state;
 
     // In real implementation:
     // 1. Verify client_id is registered
@@ -83,37 +75,43 @@ export default function handler(
     try {
       // Generate authorization code
       const { authCode } = mockOAuthProvider.authorize(
-        clientIdStr,
-        redirectUriStr,
-        scopeStr,
+        client_id,
+        redirect_uri,
+        scope,
         1 // Mock user ID (would be logged-in user in production)
       );
 
       // Build redirect URL with auth code and state
-      const redirectUrl = new URL(redirectUriStr);
+      const redirectUrl = new URL(redirect_uri);
       redirectUrl.searchParams.append('code', authCode);
 
-      if (stateStr) {
-        redirectUrl.searchParams.append('state', stateStr);
+      if (state) {
+        redirectUrl.searchParams.append('state', state);
       }
 
       // Redirect user back to app with auth code
-      return res.redirect(302, redirectUrl.toString());
+      return NextResponse.redirect(redirectUrl.toString());
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-      return res.status(400).json({
-        error: 'server_error',
-        error_description: errorMessage,
-      });
+      return NextResponse.json(
+        {
+          error: 'server_error',
+          error_description: errorMessage,
+        },
+        { status: 400 }
+      );
     }
 
   } catch (error) {
     console.error('Authorization endpoint error:', error);
-    return res.status(500).json({
-      error: 'server_error',
-      error_description: 'Internal server error',
-    });
+    return NextResponse.json(
+      {
+        error: 'server_error',
+        error_description: 'Internal server error',
+      },
+      { status: 500 }
+    );
   }
 }

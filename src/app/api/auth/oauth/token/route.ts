@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { mockOAuthProvider } from '@/lib/mock-oauth';
 
 /**
@@ -44,20 +44,10 @@ import { mockOAuthProvider } from '@/lib/mock-oauth';
  * RFC 6749 Section 4.1.3 - Access Token Request
  * RFC 6749 Section 6 - Refreshing an Access Token
  */
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      error: 'method_not_allowed',
-      error_description: 'Only POST requests are allowed',
-    });
-  }
-
+export async function POST(request: Request) {
   try {
     // Extract request body
+    const body = await request.json();
     const {
       grant_type,
       code,
@@ -65,24 +55,30 @@ export default function handler(
       client_id,
       client_secret,
       refresh_token,
-    } = req.body;
+    } = body;
 
     // Validate grant_type
     if (!grant_type || (grant_type !== 'authorization_code' && grant_type !== 'refresh_token')) {
-      return res.status(400).json({
-        error: 'invalid_request',
-        error_description: 'grant_type must be "authorization_code" or "refresh_token"',
-      });
+      return NextResponse.json(
+        {
+          error: 'invalid_request',
+          error_description: 'grant_type must be "authorization_code" or "refresh_token"',
+        },
+        { status: 400 }
+      );
     }
 
     // Handle Authorization Code Flow (grant_type=authorization_code)
     if (grant_type === 'authorization_code') {
       // Validate required parameters for authorization_code flow
       if (!code || !client_id) {
-        return res.status(400).json({
-          error: 'invalid_request',
-          error_description: 'Missing required parameters: code, client_id',
-        });
+        return NextResponse.json(
+          {
+            error: 'invalid_request',
+            error_description: 'Missing required parameters: code, client_id',
+          },
+          { status: 400 }
+        );
       }
 
       try {
@@ -90,7 +86,7 @@ export default function handler(
         const tokenResponse = mockOAuthProvider.exchangeCode(code, client_id, client_secret);
 
         // Return token response
-        return res.status(200).json({
+        return NextResponse.json({
           access_token: tokenResponse.accessToken,
           refresh_token: tokenResponse.refreshToken,
           expires_in: tokenResponse.expiresIn,
@@ -111,10 +107,13 @@ export default function handler(
           errorCode = 'invalid_grant'; // Invalid code or client_id
         }
 
-        return res.status(400).json({
-          error: errorCode,
-          error_description: errorMessage,
-        });
+        return NextResponse.json(
+          {
+            error: errorCode,
+            error_description: errorMessage,
+          },
+          { status: 400 }
+        );
       }
     }
 
@@ -122,17 +121,20 @@ export default function handler(
     if (grant_type === 'refresh_token') {
       // Validate required parameters for refresh_token flow
       if (!refresh_token || !client_id) {
-        return res.status(400).json({
-          error: 'invalid_request',
-          error_description: 'Missing required parameters: refresh_token, client_id',
-        });
+        return NextResponse.json(
+          {
+            error: 'invalid_request',
+            error_description: 'Missing required parameters: refresh_token, client_id',
+          },
+          { status: 400 }
+        );
       }
 
       try {
         // Refresh the access token
         const newTokenResponse = mockOAuthProvider.refreshAccessToken(refresh_token);
 
-        return res.status(200).json({
+        return NextResponse.json({
           access_token: newTokenResponse.accessToken,
           refresh_token: refresh_token, // Same refresh token (in some implementations)
           expires_in: newTokenResponse.expiresIn,
@@ -142,18 +144,24 @@ export default function handler(
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-        return res.status(400).json({
-          error: 'invalid_grant',
-          error_description: errorMessage,
-        });
+        return NextResponse.json(
+          {
+            error: 'invalid_grant',
+            error_description: errorMessage,
+          },
+          { status: 400 }
+        );
       }
     }
 
   } catch (error) {
     console.error('Token endpoint error:', error);
-    return res.status(500).json({
-      error: 'server_error',
-      error_description: 'Internal server error',
-    });
+    return NextResponse.json(
+      {
+        error: 'server_error',
+        error_description: 'Internal server error',
+      },
+      { status: 500 }
+    );
   }
 }

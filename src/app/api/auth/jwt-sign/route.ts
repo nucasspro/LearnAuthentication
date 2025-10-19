@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { mockDB } from '@/lib/mock-db';
 import { comparePassword } from '@/lib/crypto';
 import { generateAccessToken, generateRefreshToken } from '@/lib/jwt';
@@ -30,25 +30,24 @@ import { JWT_EXPIRATION } from '@/lib/constants';
  *
  * Reference: SPECIFICATION Section 4.2, Section 5.1.4, Section 8.2
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request: Request) {
   try {
-    const { username, password } = req.body;
+    const body = await request.json();
+    const { username, password } = body;
 
     // Validate input - required fields
     if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
+      return NextResponse.json(
+        { error: 'Username and password are required' },
+        { status: 400 }
+      );
     }
 
     if (typeof username !== 'string' || typeof password !== 'string') {
-      return res.status(400).json({ error: 'Invalid input format' });
+      return NextResponse.json(
+        { error: 'Invalid input format' },
+        { status: 400 }
+      );
     }
 
     // Find user in mockDB - search by username or email
@@ -58,14 +57,20 @@ export default async function handler(
 
     // Generic error message - don't reveal if user exists
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
     }
 
     // Compare password using bcryptjs
     const isPasswordValid = await comparePassword(password, user.passwordHash);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return NextResponse.json(
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
     }
 
     // Generate JWT access token (15 minutes)
@@ -103,7 +108,7 @@ export default async function handler(
     };
 
     // Return success with tokens and user info
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
       accessToken,
       refreshToken,
@@ -118,6 +123,9 @@ export default async function handler(
 
   } catch (error) {
     console.error('JWT sign error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

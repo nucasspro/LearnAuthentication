@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { mockDB } from '@/lib/mock-db';
 import type { User } from '@/lib/types';
 
@@ -19,35 +20,34 @@ import type { User } from '@/lib/types';
  *
  * Reference: SPECIFICATION Section 5.1.3
  */
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function GET(request: Request) {
   try {
     // Get sessionId from HTTP-Only cookie
-    const sessionId = req.cookies.SessionID;
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('SessionID')?.value;
 
     // Check if session exists
     if (!sessionId) {
-      return res.status(401).json({
-        authenticated: false,
-        error: 'No valid session',
-      });
+      return NextResponse.json(
+        {
+          authenticated: false,
+          error: 'No valid session',
+        },
+        { status: 401 }
+      );
     }
 
     // Look up session in mockDB
     const session = mockDB.sessions[sessionId];
 
     if (!session) {
-      return res.status(401).json({
-        authenticated: false,
-        error: 'No valid session',
-      });
+      return NextResponse.json(
+        {
+          authenticated: false,
+          error: 'No valid session',
+        },
+        { status: 401 }
+      );
     }
 
     // Check if session has expired
@@ -56,10 +56,13 @@ export default function handler(
       // Clean up expired session
       delete mockDB.sessions[sessionId];
 
-      return res.status(401).json({
-        authenticated: false,
-        error: 'No valid session',
-      });
+      return NextResponse.json(
+        {
+          authenticated: false,
+          error: 'No valid session',
+        },
+        { status: 401 }
+      );
     }
 
     // Update last activity timestamp
@@ -72,10 +75,13 @@ export default function handler(
       // User was deleted but session still exists
       delete mockDB.sessions[sessionId];
 
-      return res.status(401).json({
-        authenticated: false,
-        error: 'No valid session',
-      });
+      return NextResponse.json(
+        {
+          authenticated: false,
+          error: 'No valid session',
+        },
+        { status: 401 }
+      );
     }
 
     // Return user info (excluding passwordHash)
@@ -88,7 +94,7 @@ export default function handler(
       createdAt: user.createdAt,
     };
 
-    return res.status(200).json({
+    return NextResponse.json({
       authenticated: true,
       user: userResponse,
       method: 'session',
@@ -96,6 +102,9 @@ export default function handler(
 
   } catch (error) {
     console.error('Verify error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

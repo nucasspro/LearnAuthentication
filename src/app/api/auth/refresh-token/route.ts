@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { mockDB } from '@/lib/mock-db';
 import { verifyRefreshToken, generateAccessToken, generateRefreshToken } from '@/lib/jwt';
 import { JWT_EXPIRATION } from '@/lib/constants';
@@ -28,34 +28,34 @@ import { JWT_EXPIRATION } from '@/lib/constants';
  *
  * Reference: SPECIFICATION Section 4.2.3, Section 5.1.6, Section 8.2
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request: Request) {
   try {
-    const { refreshToken } = req.body;
+    const body = await request.json();
+    const { refreshToken } = body;
 
     // Validate input
     if (!refreshToken) {
-      return res.status(400).json({ error: 'Refresh token is required' });
+      return NextResponse.json(
+        { error: 'Refresh token is required' },
+        { status: 400 }
+      );
     }
 
     if (typeof refreshToken !== 'string') {
-      return res.status(400).json({ error: 'Invalid token format' });
+      return NextResponse.json(
+        { error: 'Invalid token format' },
+        { status: 400 }
+      );
     }
 
     // Verify the refresh token signature and expiration
     const verifyResult = verifyRefreshToken(refreshToken);
 
     if (!verifyResult.valid) {
-      return res.status(401).json({
-        error: 'Invalid or expired refresh token'
-      });
+      return NextResponse.json(
+        { error: 'Invalid or expired refresh token' },
+        { status: 401 }
+      );
     }
 
     // Extract userId from decoded token
@@ -65,32 +65,36 @@ export default async function handler(
     const tokenRecord = mockDB.refreshTokens[refreshToken];
 
     if (!tokenRecord) {
-      return res.status(401).json({
-        error: 'Invalid or expired refresh token'
-      });
+      return NextResponse.json(
+        { error: 'Invalid or expired refresh token' },
+        { status: 401 }
+      );
     }
 
     if (tokenRecord.revokedAt !== null) {
-      return res.status(401).json({
-        error: 'Refresh token has been revoked'
-      });
+      return NextResponse.json(
+        { error: 'Refresh token has been revoked' },
+        { status: 401 }
+      );
     }
 
     // Verify token hasn't expired in database
     const now = new Date();
     if (tokenRecord.expiresAt < now) {
-      return res.status(401).json({
-        error: 'Invalid or expired refresh token'
-      });
+      return NextResponse.json(
+        { error: 'Invalid or expired refresh token' },
+        { status: 401 }
+      );
     }
 
     // Get user from database
     const user = mockDB.users[userId];
 
     if (!user) {
-      return res.status(401).json({
-        error: 'User not found'
-      });
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 401 }
+      );
     }
 
     // Generate new access token
@@ -134,7 +138,7 @@ export default async function handler(
       };
 
       // Return new tokens (both access and refresh)
-      return res.status(200).json({
+      return NextResponse.json({
         success: true,
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
@@ -143,7 +147,7 @@ export default async function handler(
     }
 
     // Without rotation: return only new access token
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
       accessToken: newAccessToken,
       expiresIn: JWT_EXPIRATION,
@@ -151,6 +155,9 @@ export default async function handler(
 
   } catch (error) {
     console.error('Refresh token error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

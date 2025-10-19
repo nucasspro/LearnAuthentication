@@ -16,7 +16,7 @@ export default function Home() {
       difficulty: 'Beginner',
       time: '30 min',
       link: '/learn/session',
-      demoLink: '/session-demo',
+      demoLink: '/session',
     },
     {
       id: 2,
@@ -27,7 +27,7 @@ export default function Home() {
       difficulty: 'Intermediate',
       time: '45 min',
       link: '/learn/jwt',
-      demoLink: '/jwt-demo',
+      demoLink: '/jwt',
     },
     {
       id: 3,
@@ -38,7 +38,7 @@ export default function Home() {
       difficulty: 'Advanced',
       time: '60 min',
       link: '/learn/oauth',
-      demoLink: '/oauth-demo',
+      demoLink: '/oauth',
     },
     {
       id: 4,
@@ -49,7 +49,7 @@ export default function Home() {
       difficulty: 'Advanced',
       time: '45 min',
       link: '/learn/mfa',
-      demoLink: '/mfa-demo',
+      demoLink: '/mfa',
     },
   ];
 

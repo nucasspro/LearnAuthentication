@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import { mockDB } from '@/lib/mock-db';
 import { verifyAccessToken } from '@/lib/jwt';
 
@@ -35,34 +35,32 @@ import { verifyAccessToken } from '@/lib/jwt';
  *
  * Reference: SPECIFICATION Section 4.2.4, Section 8.2
  */
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow GET requests
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function GET(request: Request) {
   try {
     // Extract Authorization header
-    const authHeader = req.headers.authorization;
+    const authHeader = request.headers.get('authorization');
 
     if (!authHeader) {
-      return res.status(401).json({
-        error: 'Authentication required',
-        message: 'No Authorization header provided'
-      });
+      return NextResponse.json(
+        {
+          error: 'Authentication required',
+          message: 'No Authorization header provided'
+        },
+        { status: 401 }
+      );
     }
 
     // Validate Authorization header format: "Bearer <token>"
     const parts = authHeader.split(' ');
 
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      return res.status(401).json({
-        error: 'Authentication required',
-        message: 'Invalid Authorization header format. Expected: Bearer <token>'
-      });
+      return NextResponse.json(
+        {
+          error: 'Authentication required',
+          message: 'Invalid Authorization header format. Expected: Bearer <token>'
+        },
+        { status: 401 }
+      );
     }
 
     const token = parts[1];
@@ -71,10 +69,13 @@ export default function handler(
     const verifyResult = verifyAccessToken(token);
 
     if (!verifyResult.valid) {
-      return res.status(401).json({
-        error: 'Authentication required',
-        message: verifyResult.error || 'Invalid token'
-      });
+      return NextResponse.json(
+        {
+          error: 'Authentication required',
+          message: verifyResult.error || 'Invalid token'
+        },
+        { status: 401 }
+      );
     }
 
     // Extract userId from decoded token
@@ -84,24 +85,30 @@ export default function handler(
     const user = mockDB.users[userId];
 
     if (!user) {
-      return res.status(401).json({
-        error: 'Authentication required',
-        message: 'User not found'
-      });
+      return NextResponse.json(
+        {
+          error: 'Authentication required',
+          message: 'User not found'
+        },
+        { status: 401 }
+      );
     }
 
     // Check if token exists in database and is not revoked (optional check)
     const tokenRecord = mockDB.tokens[token];
 
     if (tokenRecord && tokenRecord.revokedAt !== null) {
-      return res.status(401).json({
-        error: 'Authentication required',
-        message: 'Token has been revoked'
-      });
+      return NextResponse.json(
+        {
+          error: 'Authentication required',
+          message: 'Token has been revoked'
+        },
+        { status: 401 }
+      );
     }
 
     // Successfully authenticated - return protected resource
-    return res.status(200).json({
+    return NextResponse.json({
       message: 'You have access to protected resource',
       data: {
         secretInfo: 'This is confidential data only accessible with valid JWT',
@@ -119,6 +126,9 @@ export default function handler(
 
   } catch (error) {
     console.error('Protected endpoint error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { mockDB } from '@/lib/mock-db';
 
 /**
@@ -13,18 +14,11 @@ import { mockDB } from '@/lib/mock-db';
  *
  * Reference: SPECIFICATION Section 5.1.2
  */
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request: Request) {
   try {
     // Get sessionId from HTTP-Only cookie
-    const sessionId = req.cookies.SessionID;
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('SessionID')?.value;
 
     // Delete session from mockDB if it exists
     if (sessionId && mockDB.sessions[sessionId]) {
@@ -33,16 +27,18 @@ export default function handler(
 
     // Clear cookie by setting Max-Age=0
     // This works even if no cookie existed
-    const cookieValue = 'SessionID=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/';
-    res.setHeader('Set-Cookie', cookieValue);
+    cookieStore.delete('SessionID');
 
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
       message: 'Logged out',
     });
 
   } catch (error) {
     console.error('Logout error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
