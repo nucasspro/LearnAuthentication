@@ -42,6 +42,9 @@ const demoPasswordHash = bcryptjs.hashSync("demo123", BCRYPT_COST);
  * Mock Database Instance
  * Singleton pattern - single source of truth for all auth data
  *
+ * IMPORTANT: Uses globalThis to persist across Next.js hot-reloads
+ * Without this, sessions would be lost on every file change in dev mode
+ *
  * Structure:
  * - users[]: Array of all users
  * - sessions{}: Map of sessionId -> Session (for session-based auth)
@@ -50,7 +53,14 @@ const demoPasswordHash = bcryptjs.hashSync("demo123", BCRYPT_COST);
  * - mfaSecrets{}: Map of userId -> MFASecret (for 2FA)
  * - auditLogs[]: Chronological auth event log
  */
-export const mockDB: MockDatabase = {
+
+// Declare global type for TypeScript
+declare global {
+  var __mockDB: MockDatabase | undefined;
+}
+
+// Initialize mockDB once and persist across hot reloads
+const initializeMockDB = (): MockDatabase => ({
   /**
    * Users Array
    * Section 5.2.1
@@ -223,7 +233,18 @@ export const mockDB: MockDatabase = {
    * ✅ Comply with regulations
    */
   auditLogs: [],
-};
+});
+
+// Use global instance if available, otherwise initialize new one
+// This persists the database across Next.js hot-reloads in development
+if (!global.__mockDB) {
+  global.__mockDB = initializeMockDB();
+  console.log('[MockDB] Initialized new mock database');
+} else {
+  console.log('[MockDB] Reusing existing mock database (hot reload)');
+}
+
+export const mockDB: MockDatabase = global.__mockDB;
 
 /**
  * Database Operations

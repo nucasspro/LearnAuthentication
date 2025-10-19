@@ -25,14 +25,16 @@ export async function POST(request: Request) {
       delete mockDB.sessions[sessionId];
     }
 
-    // Clear cookie by setting Max-Age=0
-    // This works even if no cookie existed
-    cookieStore.delete('SessionID');
-
-    return NextResponse.json({
+    // Create response and clear cookie
+    const response = NextResponse.json({
       success: true,
       message: 'Logged out',
     });
+
+    // Clear cookie by setting Max-Age=0
+    response.cookies.delete('SessionID');
+
+    return response;
 
   } catch (error) {
     console.error('Logout error:', error);

@@ -25,31 +25,62 @@ export default function SessionDemo() {
     setIsLoading(true);
     setError('');
 
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    if (username === 'admin' && password === 'admin123') {
-      const sessionId = 'sess_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-      setSessionData({
-        sessionId,
-        username,
-        expiresAt: expiresAt.toISOString(),
-        createdAt: new Date().toISOString(),
-        status: 'Active',
+    try {
+      // Call the real login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
       });
-      setIsLoggedIn(true);
-    } else {
-      setError('Invalid credentials. Try "admin" / "admin123"');
-    }
 
-    setIsLoading(false);
+      const data = await response.json();
+
+      if (response.ok) {
+        // Get session info from the server
+        const sessionResponse = await fetch('/api/auth/session-check');
+        const sessionInfo = await sessionResponse.json();
+
+        if (sessionResponse.ok) {
+          setSessionData({
+            sessionId: sessionInfo.sessionId,
+            username: data.user.username,
+            expiresAt: sessionInfo.expiresAt,
+            createdAt: sessionInfo.createdAt || new Date().toISOString(),
+            status: 'Active',
+          });
+          setIsLoggedIn(true);
+        } else {
+          setError('Failed to get session info');
+        }
+      } else {
+        setError(data.error || 'Invalid credentials');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Network error');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setSessionData(null);
-    setError('');
+  const handleLogout = async () => {
+    try {
+      // Call the real logout API
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+
+      setIsLoggedIn(false);
+      setSessionData(null);
+      setError('');
+    } catch (err) {
+      console.error('Logout error:', err);
+      // Clear local state even if API call fails
+      setIsLoggedIn(false);
+      setSessionData(null);
+      setError('');
+    }
   };
 
   const flowSteps = [

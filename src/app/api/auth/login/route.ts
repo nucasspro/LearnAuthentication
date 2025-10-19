@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { mockDB } from '@/lib/mock-db';
 import { comparePassword, generateSessionId } from '@/lib/crypto';
 import { SESSION_EXPIRATION } from '@/lib/constants';
@@ -100,19 +99,6 @@ export async function POST(request: Request) {
       expiresAt: expiresAt.toISOString(),
     });
 
-    // Set HTTP-Only secure cookie
-    // Note: In production, ensure HTTPS is enabled for Secure flag to work
-    const cookieStore = await cookies();
-    cookieStore.set('SessionID', sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Use 'lax' for better compatibility in development
-      maxAge: SESSION_EXPIRATION / 1000,
-      path: '/',
-    });
-
-    console.log('[Login] Cookie set successfully');
-
     // Return success with user info (excluding passwordHash)
     const userResponse: Omit<User, 'passwordHash'> = {
       id: user.id,
@@ -123,10 +109,34 @@ export async function POST(request: Request) {
       createdAt: user.createdAt,
     };
 
-    return NextResponse.json({
+    // Set HTTP-Only secure cookie in response
+    // Note: In production, ensure HTTPS is enabled for Secure flag to work
+    const response = NextResponse.json({
       success: true,
       user: userResponse,
     });
+
+    // Set cookie with proper attributes
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: SESSION_EXPIRATION / 1000,
+      path: '/',
+    };
+
+    console.log('[Login] Setting cookie with options:', {
+      name: 'SessionID',
+      value: sessionId.substring(0, 20) + '...',
+      ...cookieOptions,
+    });
+
+    response.cookies.set('SessionID', sessionId, cookieOptions);
+
+    // Log response headers to verify cookie is set
+    console.log('[Login] Response Set-Cookie header:', response.headers.get('Set-Cookie'));
+
+    return response;
 
   } catch (error) {
     console.error('Login error:', error);
