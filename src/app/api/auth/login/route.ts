@@ -93,16 +93,25 @@ export async function POST(request: Request) {
       lastActivity: now,
     };
 
+    console.log('[Login] Session created:', {
+      sessionId: sessionId.substring(0, 10) + '...',
+      userId: user.id,
+      username: user.username,
+      expiresAt: expiresAt.toISOString(),
+    });
+
     // Set HTTP-Only secure cookie
     // Note: In production, ensure HTTPS is enabled for Secure flag to work
     const cookieStore = await cookies();
     cookieStore.set('SessionID', sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // Use 'lax' for better compatibility in development
       maxAge: SESSION_EXPIRATION / 1000,
       path: '/',
     });
+
+    console.log('[Login] Cookie set successfully');
 
     // Return success with user info (excluding passwordHash)
     const userResponse: Omit<User, 'passwordHash'> = {

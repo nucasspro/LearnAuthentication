@@ -26,12 +26,16 @@ export async function GET(request: Request) {
     const cookieStore = await cookies();
     const sessionId = cookieStore.get('SessionID')?.value;
 
+    // Debug logging
+    console.log('[Verify] SessionID from cookie:', sessionId ? 'exists' : 'missing');
+    console.log('[Verify] Active sessions:', Object.keys(mockDB.sessions).length);
+
     // Check if session exists
     if (!sessionId) {
       return NextResponse.json(
         {
           authenticated: false,
-          error: 'No valid session',
+          error: 'No session cookie found',
         },
         { status: 401 }
       );
@@ -41,10 +45,11 @@ export async function GET(request: Request) {
     const session = mockDB.sessions[sessionId];
 
     if (!session) {
+      console.log('[Verify] Session not found in database');
       return NextResponse.json(
         {
           authenticated: false,
-          error: 'No valid session',
+          error: 'Session not found - please log in again',
         },
         { status: 401 }
       );
@@ -55,11 +60,12 @@ export async function GET(request: Request) {
     if (session.expiresAt < now) {
       // Clean up expired session
       delete mockDB.sessions[sessionId];
+      console.log('[Verify] Session expired');
 
       return NextResponse.json(
         {
           authenticated: false,
-          error: 'No valid session',
+          error: 'Session expired - please log in again',
         },
         { status: 401 }
       );

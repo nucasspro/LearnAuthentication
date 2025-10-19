@@ -16,7 +16,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { Badge, Card, CardContent, Input } from '@/components/shared';
 import {
   AlertCircle,
   ArrowRight,
@@ -27,7 +27,7 @@ import {
   Shield,
   XCircle
 } from 'lucide-react';
-import { Button, Input, Card, CardContent, Badge } from '@/components/shared';
+import { useState } from 'react';
 
 type Tab = 'overview' | 'flow' | 'pkce' | 'security';
 
@@ -203,7 +203,7 @@ export default function OAuthDemoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100 dark:from-gray-900 dark:via-purple-950 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">

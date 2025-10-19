@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Alert, AlertDescription, Badge, Button, Card, CardContent, Progress } from '@/components/shared';
 import {
   AlertCircle,
   CheckCircle2,
@@ -22,7 +22,7 @@ import {
   Shield,
   Smartphone
 } from 'lucide-react';
-import { Button, Input, Card, CardContent, Alert, AlertDescription, Badge, Progress } from '@/components/shared';
+import { useEffect, useState } from 'react';
 
 export default function MFADemoPage() {
   const [step, setStep] = useState<'setup' | 'verified'>('setup');
@@ -92,7 +92,7 @@ export default function MFADemoPage() {
   const progressVariant = timeRemaining > 20 ? 'success' : timeRemaining > 10 ? 'warning' : 'danger';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 dark:from-gray-900 dark:via-orange-950 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">

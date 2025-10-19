@@ -16,7 +16,7 @@ export default function Home() {
       difficulty: 'Beginner',
       time: '30 min',
       link: '/session/learn',
-      demoLink: '/session',
+      demoLink: '/session/demo',
     },
     {
       id: 2,
@@ -27,7 +27,7 @@ export default function Home() {
       difficulty: 'Intermediate',
       time: '45 min',
       link: '/jwt/learn',
-      demoLink: '/jwt',
+      demoLink: '/jwt/demo',
     },
     {
       id: 3,
@@ -38,7 +38,7 @@ export default function Home() {
       difficulty: 'Advanced',
       time: '60 min',
       link: '/oauth/learn',
-      demoLink: '/oauth',
+      demoLink: '/oauth/demo',
     },
     {
       id: 4,
@@ -49,7 +49,7 @@ export default function Home() {
       difficulty: 'Advanced',
       time: '45 min',
       link: '/mfa/learn',
-      demoLink: '/mfa',
+      demoLink: '/mfa/demo',
     },
   ];
 
@@ -79,7 +79,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Hero Section */}
-      <section className="container-custom py-20 md:py-32">
+      <section className="container-custom py-20">
         <div className="text-center animate-fade-in-up">
           <div className="inline-block mb-4">
             <span className="text-6xl md:text-8xl">🔐</span>
@@ -104,26 +104,6 @@ export default function Home() {
             >
               Compare Methods
             </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            <div className="animate-fade-in-up animate-delay-300">
-              <div className="text-4xl font-bold text-primary-600 dark:text-primary-400">4</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Auth Methods</div>
-            </div>
-            <div className="animate-fade-in-up animate-delay-500">
-              <div className="text-4xl font-bold text-secondary-600 dark:text-secondary-400">10+</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Live Demos</div>
-            </div>
-            <div className="animate-fade-in-up animate-delay-700">
-              <div className="text-4xl font-bold text-success-600 dark:text-success-400">100%</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Free & Open</div>
-            </div>
-            <div className="animate-fade-in-up animate-delay-1000">
-              <div className="text-4xl font-bold text-warning-600 dark:text-warning-400">3hr</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total Content</div>
-            </div>
           </div>
         </div>
       </section>
@@ -188,63 +168,6 @@ export default function Home() {
               </div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="container-custom py-20 bg-white/50 dark:bg-gray-800/50 rounded-3xl">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Why Learn Here?
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            Built by developers, for developers. Everything you need to master auth.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="text-center p-6 rounded-2xl hover:bg-white dark:hover:bg-gray-700 transition-colors animate-fade-in-up"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="text-5xl mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="container-custom py-20">
-        <div className="card gradient-primary text-white text-center p-12 md:p-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Ready to Get Started?
-          </h2>
-          <p className="text-lg md:text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Join thousands of developers learning authentication the right way.
-            No sign-up required, completely free.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/learn/session"
-              className="px-8 py-4 bg-white text-primary-600 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg"
-            >
-              Begin with Sessions
-            </Link>
-            <Link
-              href="/dashboard"
-              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border-2 border-white rounded-lg font-bold text-lg hover:bg-white/20 transition-colors"
-            >
-              Try Dashboard
-            </Link>
-          </div>
         </div>
       </section>
 
