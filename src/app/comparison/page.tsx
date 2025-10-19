@@ -7,9 +7,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/shared/Card';
-import { Badge } from '@/components/shared/Badge';
-import { Button } from '@/components/shared/Button';
+import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/shared';
 import {
   Check,
   X,
@@ -111,7 +109,7 @@ const StatusBadge: React.FC<{ status: 'yes' | 'no' | 'partial'; text: string }> 
 }) => {
   if (status === 'yes') {
     return (
-      <Badge variant="success" size="sm" className="inline-flex items-center gap-1">
+      <Badge className="inline-flex items-center gap-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-200 dark:border-green-700">
         <CheckCircle2 className="w-3 h-3" />
         {text}
       </Badge>
@@ -120,7 +118,7 @@ const StatusBadge: React.FC<{ status: 'yes' | 'no' | 'partial'; text: string }> 
 
   if (status === 'no') {
     return (
-      <Badge variant="danger" size="sm" className="inline-flex items-center gap-1">
+      <Badge className="inline-flex items-center gap-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100 border-red-200 dark:border-red-700">
         <XCircle className="w-3 h-3" />
         {text}
       </Badge>
@@ -128,7 +126,7 @@ const StatusBadge: React.FC<{ status: 'yes' | 'no' | 'partial'; text: string }> 
   }
 
   return (
-    <Badge variant="warning" size="sm" className="inline-flex items-center gap-1">
+    <Badge className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700">
       <AlertCircle className="w-3 h-3" />
       {text}
     </Badge>
@@ -144,10 +142,10 @@ export default function ComparisonPage() {
           <Button
             variant="ghost"
             size="sm"
-            icon={<ArrowLeft className="w-4 h-4" />}
             className="mb-6"
             onClick={() => window.history.back()}
           >
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
@@ -159,7 +157,7 @@ export default function ComparisonPage() {
         </div>
 
         {/* Desktop Table View - Hidden on mobile */}
-        <Card className="hidden lg:block mb-12" noPadding>
+        <Card className="hidden lg:block mb-12 p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -243,7 +241,7 @@ export default function ComparisonPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Session/Cookie */}
-            <Card hover className="group">
+            <Card className="group hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg group-hover:scale-110 transition-transform">
@@ -292,7 +290,7 @@ export default function ComparisonPage() {
             </Card>
 
             {/* JWT */}
-            <Card hover className="group">
+            <Card className="group hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg group-hover:scale-110 transition-transform">
@@ -341,7 +339,7 @@ export default function ComparisonPage() {
             </Card>
 
             {/* OAuth 2.0 */}
-            <Card hover className="group">
+            <Card className="group hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg group-hover:scale-110 transition-transform">
@@ -390,7 +388,7 @@ export default function ComparisonPage() {
             </Card>
 
             {/* SAML */}
-            <Card hover className="group">
+            <Card className="group hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg group-hover:scale-110 transition-transform">

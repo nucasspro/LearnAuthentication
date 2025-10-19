@@ -21,10 +21,10 @@ export default function LearnJWTPage() {
           <Button
             variant="ghost"
             size="sm"
-            icon={<ArrowLeft className="w-4 h-4" />}
             className="mb-6"
             onClick={() => window.history.back()}
           >
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">

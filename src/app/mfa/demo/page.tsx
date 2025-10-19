@@ -22,12 +22,7 @@ import {
   Shield,
   Smartphone
 } from 'lucide-react';
-import { Button } from '@/components/shared/Button';
-import { Input } from '@/components/shared/Input';
-import { Card, CardContent } from '@/components/shared/Card';
-import { Alert } from '@/components/shared/Alert';
-import { Badge } from '@/components/shared/Badge';
-import { ProgressBar } from '@/components/shared/ProgressBar';
+import { Button, Input, Card, CardContent, Alert, AlertDescription, Badge, Progress } from '@/components/shared';
 
 export default function MFADemoPage() {
   const [step, setStep] = useState<'setup' | 'verified'>('setup');
@@ -202,7 +197,7 @@ export default function MFADemoPage() {
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {['Google Authenticator', 'Authy', '1Password', 'Microsoft Authenticator'].map((app) => (
-                        <Badge key={app} variant="primary" size="sm">
+                        <Badge key={app} variant="default">
                           {app}
                         </Badge>
                       ))}
@@ -234,12 +229,11 @@ export default function MFADemoPage() {
                       </h3>
                       {!secretGenerated ? (
                         <Button
-                          variant="primary"
-                          fullWidth
+                          variant="default"
                           onClick={generateSecret}
-                          icon={<RefreshCw className="w-4 h-4" />}
-                          className="!bg-orange-600 hover:!bg-orange-700"
+                          className="!bg-orange-600 hover:!bg-orange-700 w-full"
                         >
+                          <RefreshCw className="w-4 h-4 mr-2" />
                           Generate Secret Key
                         </Button>
                       ) : (
@@ -330,21 +324,15 @@ export default function MFADemoPage() {
                           </p>
 
                           {error && (
-                            <div className="mb-4">
-                              <Alert
-                                variant="error"
-                                message={error}
-                              />
-                            </div>
+                            <Alert variant="destructive" className="mb-4">
+                              <AlertDescription>{error}</AlertDescription>
+                            </Alert>
                           )}
 
                           {isVerified && (
-                            <div className="mb-4">
-                              <Alert
-                                variant="success"
-                                message="Code verified! MFA setup complete."
-                              />
-                            </div>
+                            <Alert className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 border-green-300 dark:border-green-700 mb-4">
+                              <AlertDescription>Code verified! MFA setup complete.</AlertDescription>
+                            </Alert>
                           )}
 
                           <div className="flex gap-3">
@@ -358,10 +346,9 @@ export default function MFADemoPage() {
                               maxLength={6}
                             />
                             <Button
-                              variant="success"
+                              className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 px-6 py-3"
                               onClick={handleVerify}
                               disabled={userCode.length !== 6}
-                              className="!px-6 !py-3"
                             >
                               Verify
                             </Button>
@@ -422,7 +409,6 @@ export default function MFADemoPage() {
 
                     <Button
                       variant="secondary"
-                      fullWidth
                       onClick={() => {
                         setStep('setup');
                         setIsVerified(false);
@@ -430,7 +416,7 @@ export default function MFADemoPage() {
                         setError('');
                         setSecretGenerated(false);
                       }}
-                      className="!bg-gray-200 dark:!bg-gray-700 !text-gray-700 dark:!text-gray-200"
+                      className="!bg-gray-200 dark:!bg-gray-700 !text-gray-700 dark:!text-gray-200 w-full"
                     >
                       Start Over
                     </Button>
@@ -465,18 +451,15 @@ export default function MFADemoPage() {
                         {totpCode}
                       </div>
                       <Button
-                        variant="primary"
-                        size="sm"
+                        variant="default"
                         onClick={() => copyToClipboard(totpCode, 'totp')}
-                        icon={
-                          copiedItem === 'totp' ? (
-                            <CheckCircle2 className="w-4 h-4" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )
-                        }
                         className="!bg-orange-600 hover:!bg-orange-700 mx-auto"
                       >
+                        {copiedItem === 'totp' ? (
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                        ) : (
+                          <Copy className="w-4 h-4 mr-2" />
+                        )}
                         {copiedItem === 'totp' ? 'Copied!' : 'Copy Code'}
                       </Button>
                     </div>
@@ -491,11 +474,9 @@ export default function MFADemoPage() {
                           {timeRemaining}s
                         </span>
                       </div>
-                      <ProgressBar
+                      <Progress
                         value={progressPercentage}
-                        variant={progressVariant}
-                        height="lg"
-                        animated
+                        className="h-2"
                       />
                     </div>
                   </div>

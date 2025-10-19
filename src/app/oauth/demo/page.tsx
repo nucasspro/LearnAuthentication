@@ -27,10 +27,7 @@ import {
   Shield,
   XCircle
 } from 'lucide-react';
-import { Button } from '@/components/shared/Button';
-import { Input } from '@/components/shared/Input';
-import { Card, CardContent } from '@/components/shared/Card';
-import { Badge } from '@/components/shared/Badge';
+import { Button, Input, Card, CardContent, Badge } from '@/components/shared';
 
 type Tab = 'overview' | 'flow' | 'pkce' | 'security';
 
@@ -505,7 +502,7 @@ export default function OAuthDemoPage() {
                     <Settings className="w-7 h-7 md:w-8 md:h-8 text-purple-600 dark:text-purple-400" />
                     Live Demo
                   </h2>
-                  <Badge variant="success" size="sm">
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
                     Demo Mode
                   </Badge>
                 </div>
@@ -513,32 +510,50 @@ export default function OAuthDemoPage() {
                 {/* Configuration Form or Flow Visualization */}
                 {!flowStarted ? (
                   <div className="space-y-5">
-                    <Input
-                      label="Client ID"
-                      value={clientId}
-                      onChange={(e) => setClientId(e.target.value)}
-                      placeholder="mock-client-id"
-                      helperText="Unique identifier for your application"
-                      disabled={isSimulating}
-                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Client ID
+                      </label>
+                      <Input
+                        value={clientId}
+                        onChange={(e) => setClientId(e.target.value)}
+                        placeholder="mock-client-id"
+                        disabled={isSimulating}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Unique identifier for your application
+                      </p>
+                    </div>
 
-                    <Input
-                      label="Redirect URI"
-                      value={redirectUri}
-                      onChange={(e) => setRedirectUri(e.target.value)}
-                      placeholder="http://localhost:3000/callback"
-                      helperText="Where to send the authorization code"
-                      disabled={isSimulating}
-                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Redirect URI
+                      </label>
+                      <Input
+                        value={redirectUri}
+                        onChange={(e) => setRedirectUri(e.target.value)}
+                        placeholder="http://localhost:3000/callback"
+                        disabled={isSimulating}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Where to send the authorization code
+                      </p>
+                    </div>
 
-                    <Input
-                      label="Scope"
-                      value={scope}
-                      onChange={(e) => setScope(e.target.value)}
-                      placeholder="openid email profile"
-                      helperText="Permissions requested (space-separated)"
-                      disabled={isSimulating}
-                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Scope
+                      </label>
+                      <Input
+                        value={scope}
+                        onChange={(e) => setScope(e.target.value)}
+                        placeholder="openid email profile"
+                        disabled={isSimulating}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Permissions requested (space-separated)
+                      </p>
+                    </div>
 
                     <button
                       onClick={startOAuthFlow}
