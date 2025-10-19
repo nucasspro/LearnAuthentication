@@ -1,17 +1,5 @@
-/**
- * Session-Based Authentication Demo Page
- * Integrated with Bolt Design + shadcn/ui components
- */
-
-'use client';
-
 import { AlertCircle, ArrowRight, CheckCircle2, Clock, Cookie, Lock, Shield } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 export default function SessionDemo() {
   const [username, setUsername] = useState('admin');
@@ -167,21 +155,21 @@ export default function SessionDemo() {
             {!isLoggedIn ? (
               <div className="space-y-5 md:space-y-6">
                 {error && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="w-5 h-5" />
-                    <AlertDescription className="ml-2">{error}</AlertDescription>
-                  </Alert>
+                  <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                    <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+                  </div>
                 )}
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Username
                   </label>
-                  <Input
+                  <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="text-sm md:text-base"
+                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors text-sm md:text-base"
                     placeholder="admin"
                   />
                 </div>
@@ -190,37 +178,37 @@ export default function SessionDemo() {
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Password
                   </label>
-                  <Input
+                  <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                    className="text-sm md:text-base"
+                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors text-sm md:text-base"
                     placeholder="password"
                   />
                 </div>
 
-                <Button
+                <button
                   onClick={handleLogin}
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white font-semibold py-6 text-sm md:text-base"
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-sm md:text-base"
                 >
                   {isLoading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Logging in...
                     </>
                   ) : (
                     <>
                       Login with Session
-                      <ArrowRight className="w-5 h-5 ml-2" />
+                      <ArrowRight className="w-5 h-5" />
                     </>
                   )}
-                </Button>
+                </button>
 
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
                   <p className="text-xs md:text-sm text-blue-800 dark:text-blue-300">
-                    <strong>Demo credentials:</strong> Try &quot;admin&quot; / &quot;admin123&quot; or &quot;user&quot; / &quot;password&quot;
+                    <strong>Demo credentials:</strong> Try "admin" / "admin123" or "user" / "password"
                   </p>
                 </div>
               </div>
@@ -236,29 +224,27 @@ export default function SessionDemo() {
                   </p>
                 </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-                      <Lock className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
-                      Session Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-200 dark:border-gray-700 gap-1">
+                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 rounded-xl p-5 md:p-6">
+                  <h3 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <Lock className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
+                    Session Information
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-blue-200 dark:border-blue-800 gap-1">
                       <span className="text-gray-600 dark:text-gray-300 font-medium text-sm">Session ID:</span>
                       <span className="text-gray-800 dark:text-gray-100 font-mono text-xs sm:text-sm break-all">{sessionData?.sessionId}</span>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-200 dark:border-gray-700 gap-1">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-blue-200 dark:border-blue-800 gap-1">
                       <span className="text-gray-600 dark:text-gray-300 font-medium text-sm">Username:</span>
                       <span className="text-gray-800 dark:text-gray-100 font-semibold text-sm">{sessionData?.username}</span>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-200 dark:border-gray-700 gap-1">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-blue-200 dark:border-blue-800 gap-1">
                       <span className="text-gray-600 dark:text-gray-300 font-medium text-sm">Status:</span>
-                      <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50">
+                      <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-semibold">
                         {sessionData?.status}
-                      </Badge>
+                      </span>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-200 dark:border-gray-700 gap-1">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-blue-200 dark:border-blue-800 gap-1">
                       <span className="text-gray-600 dark:text-gray-300 font-medium text-sm">Created:</span>
                       <span className="text-gray-800 dark:text-gray-100 text-xs sm:text-sm">
                         {new Date(sessionData?.createdAt).toLocaleString()}
@@ -270,44 +256,39 @@ export default function SessionDemo() {
                         {new Date(sessionData?.expiresAt).toLocaleString()}
                       </span>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
-                      <Cookie className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
-                      Cookie Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 font-mono text-xs sm:text-sm space-y-2 overflow-x-auto">
-                      <div className="text-gray-700 dark:text-gray-300">
-                        <span className="text-blue-600 dark:text-blue-400">Set-Cookie:</span> sessionId={sessionData?.sessionId}
-                      </div>
-                      <div className="text-gray-700 dark:text-gray-300 pl-4">
-                        <span className="text-cyan-600 dark:text-cyan-400">HttpOnly;</span> <span className="text-gray-500 dark:text-gray-400">{`// JS cannot access`}</span>
-                      </div>
-                      <div className="text-gray-700 dark:text-gray-300 pl-4">
-                        <span className="text-cyan-600 dark:text-cyan-400">Secure;</span> <span className="text-gray-500 dark:text-gray-400">{`// HTTPS only`}</span>
-                      </div>
-                      <div className="text-gray-700 dark:text-gray-300 pl-4">
-                        <span className="text-cyan-600 dark:text-cyan-400">SameSite=Strict;</span> <span className="text-gray-500 dark:text-gray-400">{`// CSRF protection`}</span>
-                      </div>
-                      <div className="text-gray-700 dark:text-gray-300 pl-4">
-                        <span className="text-cyan-600 dark:text-cyan-400">Max-Age=86400;</span> <span className="text-gray-500 dark:text-gray-400">{`// 24 hours`}</span>
-                      </div>
+                <div className="bg-white dark:bg-gray-700 border-2 border-blue-200 dark:border-blue-700 rounded-xl p-5 md:p-6">
+                  <h3 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                    <Cookie className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
+                    Cookie Details
+                  </h3>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 font-mono text-xs sm:text-sm space-y-2 overflow-x-auto">
+                    <div className="text-gray-700 dark:text-gray-300">
+                      <span className="text-blue-600 dark:text-blue-400">Set-Cookie:</span> sessionId={sessionData?.sessionId}
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="text-gray-700 dark:text-gray-300 pl-4">
+                      <span className="text-cyan-600 dark:text-cyan-400">HttpOnly;</span> <span className="text-gray-500 dark:text-gray-400">// JS cannot access</span>
+                    </div>
+                    <div className="text-gray-700 dark:text-gray-300 pl-4">
+                      <span className="text-cyan-600 dark:text-cyan-400">Secure;</span> <span className="text-gray-500 dark:text-gray-400">// HTTPS only</span>
+                    </div>
+                    <div className="text-gray-700 dark:text-gray-300 pl-4">
+                      <span className="text-cyan-600 dark:text-cyan-400">SameSite=Strict;</span> <span className="text-gray-500 dark:text-gray-400">// CSRF protection</span>
+                    </div>
+                    <div className="text-gray-700 dark:text-gray-300 pl-4">
+                      <span className="text-cyan-600 dark:text-cyan-400">Max-Age=86400;</span> <span className="text-gray-500 dark:text-gray-400">// 24 hours</span>
+                    </div>
+                  </div>
+                </div>
 
-                <Button
+                <button
                   onClick={handleLogout}
-                  variant="secondary"
-                  className="w-full text-sm md:text-base py-6"
+                  className="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold py-3 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm md:text-base"
                 >
                   Logout
-                </Button>
+                </button>
               </div>
             )}
           </div>

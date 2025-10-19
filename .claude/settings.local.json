@@ -7,7 +7,14 @@
       "Bash(npm run build)",
       "Bash(npm install bcryptjs jsonwebtoken @types/bcryptjs @types/jsonwebtoken)",
       "Bash(npm install speakeasy qrcode)",
-      "Bash(npm install --save-dev @types/speakeasy @types/qrcode)"
+      "Bash(npm install --save-dev @types/speakeasy @types/qrcode)",
+      "Bash(npm install react-hot-toast)",
+      "Bash(npx shadcn@latest init -y)",
+      "Bash(npx shadcn@latest add button card input tabs alert badge dialog progress -y)",
+      "Bash(npm install clsx tailwind-merge class-variance-authority lucide-react @radix-ui/react-slot @radix-ui/react-tabs @radix-ui/react-dialog @radix-ui/react-progress)",
+      "Bash(npx shadcn@latest add button -y)",
+      "Bash(npx shadcn@latest add card input tabs alert badge dialog progress -y)",
+      "Bash(npm install @radix-ui/react-icons)"
     ],
     "deny": [],
     "ask": []
