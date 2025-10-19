@@ -112,7 +112,7 @@ export default function LearnJWTPage() {
             </p>
 
             <div className="bg-gray-900 text-green-400 p-6 rounded-lg mb-6 overflow-x-auto">
-              <code className="text-sm">
+              <code className="block bg-gray-900 text-sm">
                 <span className="text-red-400">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>
                 <span className="text-white">.</span>
                 <span className="text-blue-400">eyJzdWIiOiIxMjM0IiwiZW1haWwiOiJ1c2VyQGV4YW1wbGUuY29tIn0</span>
