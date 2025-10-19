@@ -6,6 +6,8 @@
 
 'use client';
 
+import { Button } from '@/components/shared';
+import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function LearnSessionPage() {
@@ -16,6 +18,15 @@ export default function LearnSessionPage() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-12">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<ArrowLeft className="w-4 h-4" />}
+            className="mb-6"
+            onClick={() => window.history.back()}
+          >
+            Back
+          </Button>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
             Session-Based Authentication
           </h1>
@@ -257,7 +268,7 @@ export default function LearnSessionPage() {
               Experience session-based authentication with our interactive demo
             </p>
             <button
-              onClick={() => router.push('/session-demo')}
+              onClick={() => router.push('/session/demo')}
               className="px-8 py-4 bg-white text-blue-600 rounded-lg font-bold text-lg hover:bg-blue-50 transition-colors shadow-lg"
             >
               Go to Session Demo →

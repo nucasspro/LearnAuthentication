@@ -15,7 +15,7 @@ export default function Home() {
       color: 'from-blue-500 to-cyan-500',
       difficulty: 'Beginner',
       time: '30 min',
-      link: '/learn/session',
+      link: '/session/learn',
       demoLink: '/session',
     },
     {
@@ -26,7 +26,7 @@ export default function Home() {
       color: 'from-green-500 to-emerald-500',
       difficulty: 'Intermediate',
       time: '45 min',
-      link: '/learn/jwt',
+      link: '/jwt/learn',
       demoLink: '/jwt',
     },
     {
@@ -37,7 +37,7 @@ export default function Home() {
       color: 'from-purple-500 to-pink-500',
       difficulty: 'Advanced',
       time: '60 min',
-      link: '/learn/oauth',
+      link: '/oauth/learn',
       demoLink: '/oauth',
     },
     {
@@ -48,7 +48,7 @@ export default function Home() {
       color: 'from-orange-500 to-red-500',
       difficulty: 'Advanced',
       time: '45 min',
-      link: '/learn/mfa',
+      link: '/mfa/learn',
       demoLink: '/mfa',
     },
   ];
