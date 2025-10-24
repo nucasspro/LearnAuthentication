@@ -15,8 +15,8 @@ export default function Home() {
       color: 'from-blue-500 to-cyan-500',
       difficulty: 'Beginner',
       time: '30 min',
-      link: '/session/learn',
-      demoLink: '/session/demo',
+      link: '/session',
+      demoLink: '/session',
     },
     {
       id: 2,
@@ -93,7 +93,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              href="/learn/session"
+              href="/session"
               className="btn btn-primary text-lg px-8 py-4 shadow-primary animate-fade-in-up animate-delay-100"
             >
               Start Learning →

@@ -33,7 +33,7 @@ export default function LearnSessionPage() {
           <p className="text-xl text-gray-600">
             Learn how server-side sessions and HTTP cookies provide stateful authentication
           </p>
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
               RFC 6265
             </span>

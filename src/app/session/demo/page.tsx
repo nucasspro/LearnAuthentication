@@ -147,25 +147,149 @@ export default function SessionDemo() {
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950 rounded-xl p-5 md:p-6">
-              <h3 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-white mb-5 md:mb-6">Authentication Flow</h3>
-              <div className="space-y-3 md:space-y-4">
-                {flowSteps.map((step, index) => (
-                  <div key={step.num}>
-                    <div className="flex items-start gap-3 md:gap-4">
-                      <div className="flex-shrink-0 w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-cyan-600 dark:from-blue-600 dark:to-cyan-700 text-white rounded-full flex items-center justify-center font-bold text-sm md:text-base shadow-lg">
-                        {step.num}
-                      </div>
-                      <div className="flex-1 pt-1 md:pt-2">
-                        <p className="text-gray-700 dark:text-gray-200 font-medium text-sm md:text-base">{step.text}</p>
-                        <p className="text-gray-500 dark:text-gray-400 text-xs md:text-sm mt-1">{step.detail}</p>
+            {/* Visual Diagram */}
+            <div className="bg-gray-900 rounded-xl p-6 md:p-8 overflow-x-auto">
+              <h3 className="text-xl md:text-2xl font-bold text-yellow-400 mb-6">Authentication Flow Diagram</h3>
+
+              {/* Diagram */}
+              <div className="min-w-[600px]">
+                {/* Row 1: User -> Server */}
+                <div className="flex items-center mb-4">
+                  <div className="flex-shrink-0 w-24 text-center">
+                    <div className="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center mb-2">
+                      <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-white text-sm font-bold">User</span>
+                  </div>
+
+                  <div className="flex-1 px-4">
+                    <div className="relative">
+                      <div className="border-t-2 border-dashed border-red-500"></div>
+                      <div className="absolute top-0 right-0 -mt-1 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[10px] border-l-red-500"></div>
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6">
+                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded font-bold whitespace-nowrap">① Login</span>
                       </div>
                     </div>
-                    {index < flowSteps.length - 1 && (
-                      <div className="ml-4 md:ml-5 h-6 md:h-8 w-0.5 bg-gradient-to-b from-blue-300 to-cyan-300 dark:from-blue-700 dark:to-cyan-700"></div>
-                    )}
                   </div>
-                ))}
+
+                  <div className="flex-shrink-0 w-24 text-center">
+                    <div className="w-16 h-16 mx-auto bg-red-500 rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+                        <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+                      </svg>
+                    </div>
+                    <span className="text-white text-sm font-bold">Server</span>
+                  </div>
+                </div>
+
+                {/* Row 2: Server -> Session Store */}
+                <div className="flex items-center mb-4 ml-24">
+                  <div className="flex-shrink-0 w-24"></div>
+
+                  <div className="flex-1 px-4">
+                    <div className="relative">
+                      <div className="border-t-2 border-dashed border-purple-500"></div>
+                      <div className="absolute top-0 right-0 -mt-1 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[10px] border-l-purple-500"></div>
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6">
+                        <span className="bg-purple-500 text-white text-xs px-2 py-1 rounded font-bold whitespace-nowrap">③ Store Session</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-shrink-0 w-24 text-center">
+                    <div className="w-16 h-16 mx-auto bg-cyan-500 rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z" />
+                        <path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z" />
+                      </svg>
+                    </div>
+                    <span className="text-white text-sm font-bold">Session DB</span>
+                  </div>
+                </div>
+
+                {/* Row 3: Server -> User (Cookie) */}
+                <div className="flex items-center mb-4">
+                  <div className="flex-shrink-0 w-24"></div>
+
+                  <div className="flex-1 px-4">
+                    <div className="relative">
+                      <div className="border-t-2 border-dashed border-blue-500"></div>
+                      <div className="absolute top-0 left-0 -mt-1 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[10px] border-r-blue-500"></div>
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6">
+                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded font-bold whitespace-nowrap">④ Set-Cookie</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-shrink-0 w-24"></div>
+                </div>
+
+                {/* Row 4: User -> Server (with Cookie) */}
+                <div className="flex items-center mb-4">
+                  <div className="flex-shrink-0 w-24"></div>
+
+                  <div className="flex-1 px-4">
+                    <div className="relative">
+                      <div className="border-t-2 border-dashed border-green-500"></div>
+                      <div className="absolute top-0 right-0 -mt-1 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[10px] border-l-green-500"></div>
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6">
+                        <span className="bg-green-500 text-white text-xs px-2 py-1 rounded font-bold whitespace-nowrap">⑥ Request + Cookie</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-shrink-0 w-24"></div>
+                </div>
+
+                {/* Row 5: Server -> Session Store (Verify) */}
+                <div className="flex items-center mb-4 ml-24">
+                  <div className="flex-shrink-0 w-24"></div>
+
+                  <div className="flex-1 px-4">
+                    <div className="relative">
+                      <div className="border-t-2 border-dashed border-cyan-500"></div>
+                      <div className="absolute top-0 right-0 -mt-1 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[10px] border-l-cyan-500"></div>
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6">
+                        <span className="bg-cyan-500 text-white text-xs px-2 py-1 rounded font-bold whitespace-nowrap">⑦ Verify Session</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-shrink-0 w-24"></div>
+                </div>
+
+                {/* Row 6: Server -> User (Response) */}
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 w-24"></div>
+
+                  <div className="flex-1 px-4">
+                    <div className="relative">
+                      <div className="border-t-2 border-dashed border-emerald-500"></div>
+                      <div className="absolute top-0 left-0 -mt-1 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[10px] border-r-emerald-500"></div>
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6">
+                        <span className="bg-emerald-500 text-white text-xs px-2 py-1 rounded font-bold whitespace-nowrap">⑧ Response</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-shrink-0 w-24"></div>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="mt-8 pt-6 border-t border-gray-700">
+                <h4 className="text-gray-400 text-sm font-bold mb-3">FLOW STEPS:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                  {flowSteps.map((step) => (
+                    <div key={step.num} className="flex items-start gap-2">
+                      <span className="text-yellow-400 font-bold flex-shrink-0">{step.num}.</span>
+                      <span className="text-gray-300">{step.text}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
