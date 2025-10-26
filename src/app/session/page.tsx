@@ -10,9 +10,21 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { AlertCircle, ArrowRight, CheckCircle2, Clock, Cookie, Lock, Shield, ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Clock, Cookie, Lock, Shield } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import csharp from 'react-syntax-highlighter/dist/cjs/languages/hljs/csharp';
+import js from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
+import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
+import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/light';
+import { github } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
+
+// Register languages
+SyntaxHighlighter.registerLanguage('javascript', js);
+SyntaxHighlighter.registerLanguage('csharp', csharp);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('ruby', ruby);
 
 export default function SessionPage() {
   const router = useRouter();
@@ -107,13 +119,14 @@ export default function SessionPage() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* LEFT SIDEBAR - Learning Content (Sticky & Scrollable) */}
-          <aside className="lg:w-[500px] xl:w-[580px] lg:sticky lg:top-32 lg:self-start lg:h-[calc(100vh-9rem)] lg:overflow-y-auto space-y-6">
+          <aside className="lg:w-[600px] xl:w-[680px] lg:sticky lg:top-32 lg:self-start lg:h-[calc(100vh-9rem)] lg:overflow-y-auto space-y-6">
 
             {/* How It Works */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">How It Works</h2>
-
-              <div className="space-y-4 text-gray-700 dark:text-gray-300">
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl">How It Works</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
                 <p className="text-base leading-relaxed">
                   Session-based authentication stores user state on the <strong>server</strong>.
                   When a user logs in, the server creates a session object in memory or database,
@@ -176,14 +189,15 @@ export default function SessionPage() {
                     </li>
                   </ol>
                 </div>
-              </div>
-            </section>
+              </CardContent>
+            </Card>
 
             {/* Cookie Security Attributes */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Cookie Security Attributes</h2>
-
-              <div className="space-y-4">
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl">Cookie Security Attributes</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4">
                   <h3 className="text-lg font-bold text-green-900 dark:text-green-200 mb-2">HttpOnly</h3>
                   <p className="text-green-800 dark:text-green-300 mb-2 text-sm">
@@ -217,14 +231,16 @@ export default function SessionPage() {
                     <p><strong>None:</strong> Always sent (requires Secure flag)</p>
                   </div>
                 </div>
-              </div>
-            </section>
+              </CardContent>
+            </Card>
 
             {/* Vulnerabilities */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Security Vulnerabilities & Mitigations</h2>
-
-              <div className="overflow-x-auto">
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl">Security Vulnerabilities & Mitigations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead className="bg-gray-100 dark:bg-gray-700">
                     <tr>
@@ -273,21 +289,33 @@ export default function SessionPage() {
                   </tbody>
                 </table>
               </div>
-            </section>
+              </CardContent>
+            </Card>
 
             {/* Real-World Usage */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Real-World Usage</h2>
-
-              <div className="grid grid-cols-1 gap-4">
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl">Real-World Usage</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4">
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">Django (Python)</h3>
                   <p className="text-gray-700 dark:text-gray-300 text-xs mb-2">
                     Uses session middleware with database-backed sessions
                   </p>
-                  <code className="block bg-gray-900 text-green-400 p-2 rounded text-xs overflow-x-auto">
-                    SESSION_ENGINE = &apos;django.contrib.sessions.backends.db&apos;
-                  </code>
+                  <SyntaxHighlighter
+                    language="python"
+                    style={github}
+                    customStyle={{
+                      fontSize: '0.75rem',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem',
+                      margin: 0,
+                    }}
+                  >
+{`SESSION_ENGINE = 'django.contrib.sessions.backends.db'`}
+                  </SyntaxHighlighter>
                 </div>
 
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -295,9 +323,18 @@ export default function SessionPage() {
                   <p className="text-gray-700 dark:text-gray-300 text-xs mb-2">
                     Uses express-session with various stores (Redis, Memory, MongoDB)
                   </p>
-                  <code className="block bg-gray-900 text-green-400 p-2 rounded text-xs overflow-x-auto">
-                    app.use(session({`{ store: new RedisStore() }`}))
-                  </code>
+                  <SyntaxHighlighter
+                    language="javascript"
+                    style={github}
+                    customStyle={{
+                      fontSize: '0.75rem',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem',
+                      margin: 0,
+                    }}
+                  >
+{`app.use(session({ store: new RedisStore() }))`}
+                  </SyntaxHighlighter>
                 </div>
 
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -305,9 +342,18 @@ export default function SessionPage() {
                   <p className="text-gray-700 dark:text-gray-300 text-xs mb-2">
                     Cookie-based sessions encrypted with secret key base
                   </p>
-                  <code className="block bg-gray-900 text-green-400 p-2 rounded text-xs overflow-x-auto">
-                    config.session_store :cookie_store
-                  </code>
+                  <SyntaxHighlighter
+                    language="ruby"
+                    style={github}
+                    customStyle={{
+                      fontSize: '0.75rem',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem',
+                      margin: 0,
+                    }}
+                  >
+{`config.session_store :cookie_store`}
+                  </SyntaxHighlighter>
                 </div>
 
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -315,18 +361,30 @@ export default function SessionPage() {
                   <p className="text-gray-700 dark:text-gray-300 text-xs mb-2">
                     Session state with distributed cache support
                   </p>
-                  <code className="block bg-gray-900 text-green-400 p-2 rounded text-xs overflow-x-auto">
-                    services.AddSession(options =&gt; ...)
-                  </code>
+                  <SyntaxHighlighter
+                    language="csharp"
+                    style={github}
+                    customStyle={{
+                      fontSize: '0.75rem',
+                      borderRadius: '0.5rem',
+                      padding: '0.75rem',
+                      margin: 0,
+                    }}
+                  >
+{`services.AddSession(options => ...)`}
+                  </SyntaxHighlighter>
                 </div>
               </div>
-            </section>
+              </CardContent>
+            </Card>
 
             {/* Implementation Code */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Implementation Code</h2>
-
-              <div className="space-y-4">
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl">Implementation Code</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
                 {/* React/Next.js Frontend */}
                 <div>
                   <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
@@ -334,23 +392,41 @@ export default function SessionPage() {
                   </h3>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Login API call:</p>
-                      <code className="block bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-semibold">Login API call:</p>
+                      <SyntaxHighlighter
+                        language="javascript"
+                        style={github}
+                        customStyle={{
+                          fontSize: '0.75rem',
+                          borderRadius: '0.5rem',
+                          padding: '1rem',
+                          margin: 0,
+                        }}
+                      >
 {`const res = await fetch('/api/auth/login', {
   method: 'POST',
   credentials: 'include', // Important!
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ username, password })
 });`}
-                      </code>
+                      </SyntaxHighlighter>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Protected request:</p>
-                      <code className="block bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-semibold">Protected request:</p>
+                      <SyntaxHighlighter
+                        language="javascript"
+                        style={github}
+                        customStyle={{
+                          fontSize: '0.75rem',
+                          borderRadius: '0.5rem',
+                          padding: '1rem',
+                          margin: 0,
+                        }}
+                      >
 {`const res = await fetch('/api/protected', {
   credentials: 'include' // Auto-sends cookie
 });`}
-                      </code>
+                      </SyntaxHighlighter>
                     </div>
                   </div>
                 </div>
@@ -362,8 +438,17 @@ export default function SessionPage() {
                   </h3>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Program.cs - Configure session:</p>
-                      <code className="block bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-semibold">Program.cs - Configure session:</p>
+                      <SyntaxHighlighter
+                        language="csharp"
+                        style={github}
+                        customStyle={{
+                          fontSize: '0.75rem',
+                          borderRadius: '0.5rem',
+                          padding: '1rem',
+                          margin: 0,
+                        }}
+                      >
 {`builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options => {
     options.Cookie.HttpOnly = true;
@@ -373,11 +458,20 @@ builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromHours(24);
 });
 app.UseSession();`}
-                      </code>
+                      </SyntaxHighlighter>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Login endpoint:</p>
-                      <code className="block bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-semibold">Login endpoint:</p>
+                      <SyntaxHighlighter
+                        language="csharp"
+                        style={github}
+                        customStyle={{
+                          fontSize: '0.75rem',
+                          borderRadius: '0.5rem',
+                          padding: '1rem',
+                          margin: 0,
+                        }}
+                      >
 {`[HttpPost("login")]
 public IActionResult Login(LoginDto dto) {
     var user = _db.Users
@@ -388,16 +482,24 @@ public IActionResult Login(LoginDto dto) {
         return Unauthorized();
 
     HttpContext.Session.SetInt32("UserId", user.Id);
-    HttpContext.Session.SetString("Username",
-        user.Username);
+    HttpContext.Session.SetString("Username", user.Username);
 
     return Ok(new { user.Username, user.Role });
 }`}
-                      </code>
+                      </SyntaxHighlighter>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Protected endpoint:</p>
-                      <code className="block bg-gray-900 text-green-400 p-3 rounded text-xs overflow-x-auto">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 font-semibold">Protected endpoint:</p>
+                      <SyntaxHighlighter
+                        language="csharp"
+                        style={github}
+                        customStyle={{
+                          fontSize: '0.75rem',
+                          borderRadius: '0.5rem',
+                          padding: '1rem',
+                          margin: 0,
+                        }}
+                      >
 {`[HttpGet("protected")]
 public IActionResult GetProtected() {
     var userId = HttpContext.Session
@@ -408,17 +510,21 @@ public IActionResult GetProtected() {
 
     return Ok(new { Data = "Protected data" });
 }`}
-                      </code>
+                      </SyntaxHighlighter>
                     </div>
                   </div>
                 </div>
               </div>
-            </section>
+              </CardContent>
+            </Card>
 
             {/* Resources */}
-            <section className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Further Reading</h2>
-              <ul className="space-y-2 text-sm">
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-2xl">Further Reading</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
                 <li>
                   <a href="https://datatracker.ietf.org/doc/html/rfc6265" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
                     RFC 6265 - HTTP State Management Mechanism
@@ -435,14 +541,15 @@ public IActionResult GetProtected() {
                   </a>
                 </li>
               </ul>
-            </section>
+              </CardContent>
+            </Card>
           </aside>
 
           {/* RIGHT MAIN - Interactive Demo */}
           <main className="flex-1 space-y-6">
             {/* Security Features Grid */}
             <div className="grid sm:grid-cols-2 gap-4">
-              <Card className="shadow-xl hover:shadow-2xl transition-shadow">
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <Lock className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
                   <h4 className="font-semibold text-gray-800 dark:text-white mb-1">HttpOnly</h4>
@@ -451,7 +558,7 @@ public IActionResult GetProtected() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-xl hover:shadow-2xl transition-shadow">
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
                   <h4 className="font-semibold text-gray-800 dark:text-white mb-1">Secure</h4>
@@ -460,7 +567,7 @@ public IActionResult GetProtected() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-xl hover:shadow-2xl transition-shadow">
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <CheckCircle2 className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
                   <h4 className="font-semibold text-gray-800 dark:text-white mb-1">SameSite</h4>
@@ -469,7 +576,7 @@ public IActionResult GetProtected() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-xl hover:shadow-2xl transition-shadow">
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
                   <h4 className="font-semibold text-gray-800 dark:text-white mb-1">24h Expiration</h4>
@@ -480,7 +587,7 @@ public IActionResult GetProtected() {
             </div>
 
             {/* Interactive Demo Section */}
-            <Card className="bg-white dark:bg-gray-800 shadow-2xl">
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
                   <Shield className="w-7 h-7 text-blue-600 dark:text-blue-400" />
