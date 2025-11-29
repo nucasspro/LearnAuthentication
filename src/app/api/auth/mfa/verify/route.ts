@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { mockDB } from '@/lib/mock-db';
 import { verifyTOTPCode, verifyBackupCode } from '@/lib/mfa';
+import { comparePassword } from '@/lib/crypto';
 
 /**
  * POST /api/auth/mfa/verify
@@ -102,12 +103,33 @@ export async function POST(request: Request) {
 
     // Handle Backup Code Verification
     if (useBackupCode) {
-      // Verify backup code
-      const isValidBackupCode = verifyBackupCode(
-        mfaSecret.backupCodes,
-        mfaSecret.usedCodes,
-        code
-      );
+      // Verify backup code against hashed versions
+      // Backup codes are stored as hashes for security
+      const normalizedCode = code.trim().toUpperCase();
+
+      // Check if code was already used
+      if (mfaSecret.usedCodes.includes(normalizedCode)) {
+        return NextResponse.json(
+          {
+            error: 'Invalid backup code',
+            message: 'Backup code has already been used',
+          },
+          { status: 401 }
+        );
+      }
+
+      // Compare against all hashed backup codes
+      let isValidBackupCode = false;
+      let matchedHash = '';
+
+      for (const hashedCode of mfaSecret.backupCodes) {
+        const matches = await comparePassword(normalizedCode, hashedCode);
+        if (matches) {
+          isValidBackupCode = true;
+          matchedHash = hashedCode;
+          break;
+        }
+      }
 
       if (!isValidBackupCode) {
         return NextResponse.json(
@@ -119,8 +141,8 @@ export async function POST(request: Request) {
         );
       }
 
-      // Mark backup code as used
-      mfaSecret.usedCodes.push(code.trim().toUpperCase());
+      // Mark backup code as used (store the original code, not the hash)
+      mfaSecret.usedCodes.push(normalizedCode);
 
       // Enable MFA if this is initial setup verification
       if (!mfaSecret.enabled) {

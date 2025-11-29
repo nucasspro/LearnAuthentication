@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { mockDB } from '@/lib/mock-db';
 import { generateTOTPSecret, generateBackupCodes } from '@/lib/mfa';
+import { hashPassword } from '@/lib/crypto';
 
 /**
  * POST /api/auth/mfa/setup
@@ -78,6 +79,12 @@ export async function POST(request: Request) {
     // Generate backup codes (10 codes)
     const backupCodes = generateBackupCodes(10);
 
+    // Hash backup codes before storing (security best practice)
+    // Store hashed versions to protect against database leaks
+    const hashedBackupCodes = await Promise.all(
+      backupCodes.map(code => hashPassword(code))
+    );
+
     // Store MFA configuration in database
     // NOTE: enabled=false until user verifies they can generate codes
     const now = new Date();
@@ -86,7 +93,7 @@ export async function POST(request: Request) {
       userId: userId,
       secret: totpData.secret, // Base32 encoded secret
       enabled: false, // NOT enabled until verified
-      backupCodes: backupCodes, // All 10 codes
+      backupCodes: hashedBackupCodes, // Hashed backup codes (security!)
       usedCodes: [], // No codes used yet
       createdAt: now,
     };

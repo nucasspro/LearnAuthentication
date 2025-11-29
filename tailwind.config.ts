@@ -10,6 +10,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        neon: {
+          50: '#f0ffe4',
+          100: '#dcffc9',
+          200: '#bbff99',
+          300: '#8fff5e',
+          400: '#6dff2d',
+          500: '#4aff00',
+          600: '#3dd600',
+          700: '#2fa300',
+          800: '#288105',
+          900: '#236b0a',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
