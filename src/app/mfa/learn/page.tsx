@@ -1,715 +1,932 @@
-/**
- * MFA/2FA Learning Page
- * Comprehensive guide to Multi-Factor Authentication
- * Reference: SPECIFICATION Section 4.4, RFC 6238
- */
-
 'use client';
 
-import { Button } from '@/components/shared';
-import { ArrowLeft } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { CodeBlock } from '@/components/learning/CodeBlock';
+import { ProgressSidebar } from '@/components/learning/ProgressSidebar';
+import { SectionCard } from '@/components/learning/SectionCard';
+import { SecurityScenario } from '@/components/learning/SecurityScenario';
+import { AchievementTracker } from '@/components/learning/AchievementTracker';
+import { ChallengeCard } from '@/components/learning/ChallengeCard';
+import { codeExamples, securityScenarios, challenges, mfaAuthContent } from '@/lib/content/mfa-auth';
+import { Section, ProgressData } from '@/lib/types';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Clock, Lock, Shield, ShieldAlert, Smartphone, Key, Zap, Brain, GitBranch, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 
-export default function LearnMFAPage() {
+export default function MFALearnPage() {
   const router = useRouter();
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('admin123');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showMfaSetup, setShowMfaSetup] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [totpCode, setTotpCode] = useState('');
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [progress, setProgress] = useState<ProgressData>({
+    completedSections: [],
+    percentage: 0,
+    level: 'Protocol Initiate',
+    achievements: [],
+  });
+
+  // Load progress from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('mfa-auth-progress');
+    if (saved) {
+      try {
+        setProgress(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load progress:', e);
+      }
+    }
+  }, []);
+
+  // Save progress to localStorage
+  useEffect(() => {
+    localStorage.setItem('mfa-auth-progress', JSON.stringify(progress));
+  }, [progress]);
+
+  const sections: Section[] = [
+    { id: 'section-1', title: 'The Three Factors: Beyond Passwords', icon: 'Lock', category: 'essential', estimatedTime: 3 },
+    { id: 'section-2', title: 'TOTP: Time-Based One-Time Passwords', icon: 'Clock', category: 'essential', estimatedTime: 3 },
+    { id: 'section-3', title: 'Backup Codes: The Emergency Exit', icon: 'Shield', category: 'essential', estimatedTime: 4 },
+    { id: 'section-4', title: 'FIDO2/WebAuthn: Passwordless Authentication', icon: 'Zap', category: 'important', estimatedTime: 5 },
+    { id: 'section-5', title: 'MFA Deployment Strategies', icon: 'GitBranch', category: 'important', estimatedTime: 5 },
+    { id: 'section-6', title: 'Recovery & Account Lockout Scenarios', icon: 'AlertTriangle', category: 'important', estimatedTime: 5 },
+    { id: 'section-7', title: 'Adaptive MFA & Risk-Based Authentication', icon: 'Brain', category: 'advanced', estimatedTime: 7 },
+    { id: 'section-8', title: 'MFA Attack Vectors & Defenses', icon: 'Shield', category: 'advanced', estimatedTime: 7 },
+    { id: 'section-9', title: 'MFA Best Practices & Production Checklist', icon: 'CheckCircle2', category: 'advanced', estimatedTime: 6 },
+  ];
+
+  const handleSectionComplete = (sectionId: string) => {
+    setProgress(prev => {
+      const isCompleted = prev.completedSections.includes(sectionId);
+      const newCompleted = isCompleted
+        ? prev.completedSections.filter(id => id !== sectionId)
+        : [...prev.completedSections, sectionId];
+
+      const percentage = Math.floor((newCompleted.length / sections.length) * 100);
+
+      let level: ProgressData['level'] = 'Protocol Initiate';
+      if (percentage >= 91) level = 'Master Architect';
+      else if (percentage >= 61) level = 'Elite Guardian';
+      else if (percentage >= 31) level = 'Security Operative';
+
+      return {
+        ...prev,
+        completedSections: newCompleted,
+        percentage,
+        level,
+      };
+    });
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsLoggedIn(true);
+        setShowMfaSetup(true);
+
+        // Generate QR code for demo
+        const secret = 'JBSWY3DPEHPK3PXP'; // Demo secret
+        const otpauthUrl = `otpauth://totp/LearnAuth:${username}?secret=${secret}&issuer=LearnAuth`;
+        const qrUrl = await QRCode.toDataURL(otpauthUrl);
+        setQrCodeUrl(qrUrl);
+
+        // Generate demo backup codes
+        const codes = Array.from({ length: 10 }, (_, i) =>
+          `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+        );
+        setBackupCodes(codes);
+      } else {
+        setError(data.error || 'Invalid credentials');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Network error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyTotp = () => {
+    // Demo verification - accept any 6-digit code
+    if (totpCode.length === 6 && /^\d+$/.test(totpCode)) {
+      setMfaEnabled(true);
+      setShowMfaSetup(false);
+      setError('');
+    } else {
+      setError('Please enter a valid 6-digit code');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setMfaEnabled(false);
+    setShowMfaSetup(false);
+    setQrCodeUrl('');
+    setTotpCode('');
+    setError('');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-green-950 to-gray-950">
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-12">
+      {/* Story Header */}
+      <div className="bg-gray-900/80 backdrop-blur-sm border-b-2 border-neon-500/30 sticky top-0 z-50 py-6">
+        <div className="container mx-auto px-4">
           <Button
             variant="ghost"
             size="sm"
-            className="mb-6 text-gray-200 hover:text-neon-400 hover:bg-gray-800/50"
-            onClick={() => window.history.back()}
+            onClick={() => router.push('/')}
+            className="mb-3 text-gray-200 hover:text-neon-400 hover:bg-gray-800/50"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            Back to Home
           </Button>
-          <h1 className="text-5xl font-bold text-white mb-4">
-            Multi-Factor Authentication (MFA/2FA)
-          </h1>
-          <p className="text-xl text-gray-200">
-            Learn how TOTP-based two-factor authentication adds an extra layer of security
-          </p>
-          <div className="mt-4 flex gap-3">
-            <span className="px-3 py-1 bg-neon-500/20 text-neon-300 border border-neon-500/50 rounded-full text-sm font-semibold">
-              RFC 6238
-            </span>
-            <span className="px-3 py-1 bg-neon-500/20 text-neon-300 border border-neon-500/50 rounded-full text-sm font-semibold">
-              TOTP
-            </span>
-            <span className="px-3 py-1 bg-neon-500/20 text-neon-300 border border-neon-500/50 rounded-full text-sm font-semibold">
-              Security
-            </span>
+
+          <div className="flex items-center gap-4">
+            <ShieldAlert className="w-12 h-12 text-neon-400 drop-shadow-[0_0_15px_rgba(74,255,0,0.6)]" />
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black uppercase tracking-wider text-white">
+                {mfaAuthContent.storyHook.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-3 mt-2">
+                <Badge className="bg-neon-500/20 text-neon-300 border border-neon-500/50 font-mono">
+                  Clearance Level: {mfaAuthContent.storyHook.clearanceLevel}
+                </Badge>
+                <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 font-mono">
+                  Status: {mfaAuthContent.storyHook.status}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 p-4 rounded-lg bg-gray-950/50 border-l-4 border-neon-500">
+            <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+              {mfaAuthContent.storyHook.narrative}
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="space-y-8">
-          {/* What is MFA */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">What is MFA/2FA?</h2>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-[320px_1fr] gap-8">
+          {/* Sticky Sidebar */}
+          <aside className="lg:sticky lg:top-32 lg:self-start">
+            <ProgressSidebar
+              sections={sections}
+              progress={progress}
+              onSectionClick={scrollToSection}
+            />
+          </aside>
 
-            <div className="space-y-4 text-gray-100">
-              <p className="text-lg leading-relaxed">
-                Multi-Factor Authentication (MFA) requires users to provide <strong className="text-neon-300">two or more verification factors</strong> to gain access. Two-Factor Authentication (2FA) is a subset of MFA that specifically uses two factors.
-              </p>
-
-              <div className="bg-neon-950/50 border-l-4 border-neon-500 p-6 my-6">
-                <h3 className="font-bold text-neon-200 mb-3 text-lg">The Three Factor Categories</h3>
-                <div className="space-y-3 text-gray-200">
-                  <div className="flex gap-3">
-                    <span className="text-2xl">🧠</span>
-                    <div>
-                      <strong className="text-neon-200">Something You Know</strong>
-                      <p className="text-sm text-gray-200">Password, PIN, security question answer</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <span className="text-2xl">📱</span>
-                    <div>
-                      <strong className="text-neon-200">Something You Have</strong>
-                      <p className="text-sm text-gray-200">Phone, hardware key (YubiKey), authenticator app</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <span className="text-2xl">👤</span>
-                    <div>
-                      <strong className="text-neon-200">Something You Are</strong>
-                      <p className="text-sm text-gray-200">Fingerprint, face recognition, iris scan</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-cyan-950/50 border-l-4 border-cyan-400 p-6 my-6">
-                <h3 className="font-bold text-cyan-200 mb-3 text-lg">Why MFA Matters</h3>
-                <p className="text-gray-200 mb-2">
-                  Even if an attacker steals your password (phishing, data breach, keylogger), they still can&apos;t access your account without the second factor.
-                </p>
-                <div className="text-sm text-gray-200 mt-3">
-                  <p><strong className="text-cyan-300">Statistics:</strong> MFA blocks 99.9% of automated attacks (Microsoft, 2019)</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* MFA vs 2FA */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">MFA vs 2FA</h2>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="border-l-4 border-purple-400 bg-purple-950/50 p-6">
-                <h3 className="text-xl font-bold text-white mb-2">Multi-Factor Authentication (MFA)</h3>
-                <ul className="text-gray-200 space-y-2 text-sm">
-                  <li>✓ <strong>Factors:</strong> 2 or more</li>
-                  <li>✓ <strong>Examples:</strong> Password + phone + fingerprint</li>
-                  <li>✓ <strong>Use:</strong> High-security environments</li>
-                  <li>✓ <strong>Flexibility:</strong> Can add more factors as needed</li>
-                </ul>
-              </div>
-
-              <div className="border-l-4 border-cyan-400 bg-cyan-950/50 p-6">
-                <h3 className="text-xl font-bold text-white mb-2">Two-Factor Authentication (2FA)</h3>
-                <ul className="text-gray-200 space-y-2 text-sm">
-                  <li>✓ <strong>Factors:</strong> Exactly 2</li>
-                  <li>✓ <strong>Examples:</strong> Password + TOTP code</li>
-                  <li>✓ <strong>Use:</strong> Standard web applications</li>
-                  <li>✓ <strong>Balance:</strong> Security + convenience</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="mt-6 bg-gray-800/50 border-2 border-gray-700 rounded-lg p-4">
-              <p className="text-gray-200 text-sm">
-                <strong className="text-neon-300">Note:</strong> The terms MFA and 2FA are often used interchangeably in common usage. Most web applications implement 2FA (password + TOTP), which is a form of MFA.
-              </p>
-            </div>
-          </section>
-
-          {/* TOTP */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">TOTP (Time-based One-Time Password)</h2>
-
-            <p className="text-gray-100 mb-6">
-              TOTP (RFC 6238) is the industry-standard algorithm for generating time-based codes. It&apos;s what powers Google Authenticator, Authy, and most authenticator apps.
-            </p>
-
-            <div className="bg-neon-950/50 border-l-4 border-neon-500 p-6 mb-6">
-              <h3 className="font-bold text-neon-200 mb-3 text-lg">How TOTP Works</h3>
-              <ol className="space-y-3 text-gray-200">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">1</span>
-                  <div>
-                    <strong>Shared Secret:</strong> Server and app share a random secret during setup
-                    <code className="block mt-1 text-xs bg-gray-950 text-neon-200 border border-neon-500/30 p-2 rounded font-semibold">
-                      secret = &quot;JBSWY3DPEHPK3PXP&quot; (Base32 encoded)
-                    </code>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">2</span>
-                  <div>
-                    <strong>Time-Based Counter:</strong> Current Unix time divided by 30 seconds
-                    <code className="block mt-1 text-xs bg-gray-950 text-neon-200 border border-neon-500/30 p-2 rounded font-semibold">
-                      counter = Math.floor(Date.now() / 1000 / 30)
-                    </code>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">3</span>
-                  <div>
-                    <strong>Generate Code:</strong> HMAC-SHA1 hash of secret + counter
-                    <code className="block mt-1 text-xs bg-gray-950 text-neon-200 border border-neon-500/30 p-2 rounded font-semibold">
-                      hash = HMAC-SHA1(secret, counter)
-                    </code>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">4</span>
-                  <div>
-                    <strong>Extract 6 Digits:</strong> Take last 4 bits to select offset, extract 6-digit code
-                    <code className="block mt-1 text-xs bg-gray-950 text-neon-200 border border-neon-500/30 p-2 rounded font-semibold">
-                      code = extractDigits(hash) → &quot;123456&quot;
-                    </code>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">5</span>
-                  <div>
-                    <strong>Code Changes:</strong> New code generated every 30 seconds
-                  </div>
-                </li>
-              </ol>
-            </div>
-
-            <div className="bg-green-950/50 border-l-4 border-green-400 p-6">
-              <h3 className="font-bold text-green-200 mb-3">Why TOTP?</h3>
-              <ul className="text-gray-200 space-y-2 text-sm">
-                <li>✓ <strong>Works Offline:</strong> No internet or SMS required</li>
-                <li>✓ <strong>More Secure than SMS:</strong> Not vulnerable to SIM swap attacks</li>
-                <li>✓ <strong>Industry Standard:</strong> Supported by all major services</li>
-                <li>✓ <strong>Free:</strong> Many free authenticator apps available</li>
-                <li>✓ <strong>Fast:</strong> No network latency</li>
-              </ul>
-            </div>
-          </section>
-
-          {/* MFA Setup Flow */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">MFA Setup Flow</h2>
-
-            <div className="bg-neon-950/50 border-l-4 border-neon-500 p-6">
-              <h3 className="font-bold text-neon-200 mb-3 text-lg">Step-by-Step Enrollment</h3>
-              <ol className="space-y-4 text-gray-200">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">1</span>
-                  <div>
-                    <strong>User Enables MFA:</strong> Clicks &quot;Enable 2FA&quot; in account settings
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">2</span>
-                  <div>
-                    <strong>Server Generates Secret:</strong> Creates random 160-bit (20-byte) secret
-                    <code className="block mt-1 text-xs bg-gray-950 text-neon-200 border border-neon-500/30 p-2 rounded font-semibold">
-                      secret = crypto.randomBytes(20).toString(&apos;base32&apos;)
-                    </code>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">3</span>
-                  <div>
-                    <strong>Secret Encoded as QR Code:</strong> User scans with authenticator app
-                    <p className="text-sm mt-1">QR contains: <code className="bg-gray-950 px-1">otpauth://totp/YourApp:user@email.com?secret=SECRET&issuer=YourApp</code></p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">4</span>
-                  <div>
-                    <strong>User Scans QR:</strong> App stores secret locally on phone
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">5</span>
-                  <div>
-                    <strong>App Shows 6-Digit Code:</strong> Updates every 30 seconds
-                    <div className="mt-2 text-center">
-                      <span className="text-3xl font-mono font-bold text-neon-200 bg-gray-950 px-4 py-2 rounded">123 456</span>
-                      <p className="text-xs mt-1">Updates in 25s</p>
-                    </div>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">6</span>
-                  <div>
-                    <strong>User Enters Code to Verify:</strong> Confirms app works correctly
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">7</span>
-                  <div>
-                    <strong>Server Validates Code:</strong> Compares with server-generated code
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">8</span>
-                  <div>
-                    <strong>MFA Enabled:</strong> Server marks user.mfaEnabled = true
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">9</span>
-                  <div>
-                    <strong>Backup Codes Generated:</strong> 10 one-time recovery codes shown
-                    <div className="mt-2 grid grid-cols-2 gap-1 text-xs font-mono bg-gray-950 p-2 rounded">
-                      <div>ABCD-1234</div>
-                      <div>EFGH-5678</div>
-                      <div>IJKL-9012</div>
-                      <div>MNOP-3456</div>
-                      <div>...</div>
-                    </div>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold">10</span>
-                  <div>
-                    <strong>User Saves Backup Codes:</strong> Downloads/copies to safe location
-                  </div>
-                </li>
-              </ol>
-            </div>
-          </section>
-
-          {/* Backup Codes */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">Backup Codes</h2>
-
-            <div className="space-y-6">
-              <div className="border-l-4 border-cyan-400 bg-cyan-950/50 p-6">
-                <h3 className="text-xl font-bold text-white mb-2">What Are Backup Codes?</h3>
-                <p className="text-gray-200 text-sm mb-3">
-                  Backup codes are one-time use recovery codes (typically 10) generated during MFA setup. They allow account access if:
-                </p>
-                <ul className="text-blue-700 text-sm space-y-1">
-                  <li>• Phone is lost or broken</li>
-                  <li>• Authenticator app uninstalled or data lost</li>
-                  <li>• New phone without backup</li>
-                  <li>• Device factory reset</li>
-                </ul>
-              </div>
-
-              <div className="border-l-4 border-neon-500 bg-neon-950/50 p-6">
-                <h3 className="text-xl font-bold text-white mb-2">Security Properties</h3>
-                <ul className="text-gray-200 space-y-2 text-sm">
-                  <li>✓ <strong>Single-use:</strong> Each code valid only once</li>
-                  <li>✓ <strong>Format:</strong> Typically 8-10 characters (XXXX-XXXX)</li>
-                  <li>✓ <strong>Quantity:</strong> Usually 10 codes provided</li>
-                  <li>✓ <strong>Tracking:</strong> Server tracks which codes have been used</li>
-                  <li>✓ <strong>Regeneration:</strong> User can generate new set (invalidates old)</li>
-                </ul>
-              </div>
-
-              <div className="border-l-4 border-red-500 bg-red-50 p-6">
-                <h3 className="text-xl font-bold text-red-200 mb-2">⚠️ Storage Best Practices</h3>
-                <div className="text-red-100 space-y-2 text-sm">
-                  <p><strong>✓ Good:</strong> Password manager, printed in safe, encrypted file</p>
-                  <p><strong>✗ Bad:</strong> Email, cloud notes, unencrypted text file</p>
-                  <p><strong>Critical:</strong> Codes shown only ONCE during setup. Save immediately!</p>
-                </div>
-              </div>
-
-              <div className="bg-green-950/50 border-l-4 border-green-400 p-6">
-                <h3 className="font-bold text-green-200 mb-3">Recovery Flow with Backup Code</h3>
-                <ol className="text-gray-200 space-y-2 text-sm">
-                  <li>1. User tries to login but lost phone/app</li>
-                  <li>2. Clicks &quot;Use backup code&quot; option</li>
-                  <li>3. Enters one of the 10 backup codes</li>
-                  <li>4. Server validates code and marks it as used</li>
-                  <li>5. User logged in successfully</li>
-                  <li>6. User should regenerate MFA secret (new QR code + new backup codes)</li>
-                </ol>
-              </div>
-            </div>
-          </section>
-
-          {/* Compatible Apps */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">Compatible Authenticator Apps</h2>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">📱 Google Authenticator</h3>
-                <p className="text-gray-100 text-sm mb-2">
-                  <strong>Platform:</strong> iOS, Android
-                </p>
-                <p className="text-gray-200 text-sm">
-                  Free, simple, no cloud sync. Best for single device users.
-                </p>
-              </div>
-
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">🔵 Microsoft Authenticator</h3>
-                <p className="text-gray-100 text-sm mb-2">
-                  <strong>Platform:</strong> iOS, Android, Windows
-                </p>
-                <p className="text-gray-200 text-sm">
-                  Free, cloud backup, push notifications. Feature-rich.
-                </p>
-              </div>
-
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">🔴 Authy</h3>
-                <p className="text-gray-100 text-sm mb-2">
-                  <strong>Platform:</strong> iOS, Android, Desktop
-                </p>
-                <p className="text-gray-200 text-sm">
-                  Free, multi-device sync, encrypted backups. Popular choice.
-                </p>
-              </div>
-
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">🔑 1Password</h3>
-                <p className="text-gray-100 text-sm mb-2">
-                  <strong>Platform:</strong> All platforms
-                </p>
-                <p className="text-gray-200 text-sm">
-                  Paid, integrated with password manager. Convenient.
-                </p>
-              </div>
-
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">🔓 LastPass Authenticator</h3>
-                <p className="text-gray-100 text-sm mb-2">
-                  <strong>Platform:</strong> iOS, Android
-                </p>
-                <p className="text-gray-200 text-sm">
-                  Free, cloud backup, one-tap verification.
-                </p>
-              </div>
-
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">🆓 FreeOTP</h3>
-                <p className="text-gray-100 text-sm mb-2">
-                  <strong>Platform:</strong> iOS, Android
-                </p>
-                <p className="text-gray-200 text-sm">
-                  Open source, no cloud, privacy-focused.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* MFA Flows */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">MFA Login Flows</h2>
-
-            <div className="space-y-6">
-              <div className="bg-blue-50 border-l-4 border-blue-500 p-6">
-                <h3 className="font-bold text-cyan-200 mb-3 text-lg">Flow 1: Login with TOTP Code</h3>
-                <ol className="space-y-2 text-gray-200">
-                  <li>1. User enters username and password</li>
-                  <li>2. Server validates credentials</li>
-                  <li>3. If valid AND user.mfaEnabled, ask for TOTP code</li>
-                  <li>4. User opens authenticator app, gets 6-digit code</li>
-                  <li>5. User enters code in login form</li>
-                  <li>6. Server verifies code matches (±1 time window for clock drift)</li>
-                  <li>7. If valid, user is fully authenticated</li>
-                  <li>8. Create session/JWT and log user in</li>
-                </ol>
-              </div>
-
-              <div className="bg-purple-50 border-l-4 border-purple-500 p-6">
-                <h3 className="font-bold text-gray-200 mb-3 text-lg">Flow 2: Recovery with Backup Code</h3>
-                <ol className="space-y-2 text-gray-200">
-                  <li>1. User enters username and password</li>
-                  <li>2. Server validates credentials</li>
-                  <li>3. Server asks for TOTP code</li>
-                  <li>4. User clicks &quot;I don&apos;t have my phone / Use backup code&quot;</li>
-                  <li>5. User enters one of their saved backup codes</li>
-                  <li>6. Server validates backup code hasn&apos;t been used</li>
-                  <li>7. Server marks code as used in database</li>
-                  <li>8. User is fully authenticated</li>
-                  <li>9. Server shows warning: &quot;X backup codes remaining. Consider re-enabling MFA.&quot;</li>
-                </ol>
-              </div>
-            </div>
-          </section>
-
-          {/* Security Features */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">Security Features</h2>
-
-            <div className="space-y-6">
-              <div className="border-l-4 border-green-400 bg-green-950/50 p-6">
-                <h3 className="text-xl font-bold text-white mb-2">Time Window Tolerance</h3>
-                <p className="text-gray-200 text-sm mb-2">
-                  Allow ±1 time window (30s before/after) to account for clock drift
-                </p>
-                <code className="block bg-gray-950 text-neon-200 border-2 border-gray-800 p-3 rounded text-sm">
-                  {`// Check current, previous, and next time windows\nconst isValid = \n  verifyCode(code, currentTime) ||\n  verifyCode(code, currentTime - 30) ||\n  verifyCode(code, currentTime + 30);`}
-                </code>
-              </div>
-
-              <div className="border-l-4 border-cyan-400 bg-cyan-950/50 p-6">
-                <h3 className="text-xl font-bold text-white mb-2">Code Reuse Prevention</h3>
-                <p className="text-gray-200 text-sm">
-                  Track recently used codes (within time window) to prevent replay attacks. Store last used code timestamp per user.
-                </p>
-              </div>
-
-              <div className="border-l-4 border-purple-400 bg-purple-950/50 p-6">
-                <h3 className="text-xl font-bold text-white mb-2">Rate Limiting</h3>
-                <p className="text-gray-200 text-sm mb-2">
-                  Prevent brute force attacks on 6-digit codes:
-                </p>
-                <ul className="text-gray-200 text-sm space-y-1">
-                  <li>• Limit to 5 attempts per 10 minutes</li>
-                  <li>• Lock account after 10 failed attempts</li>
-                  <li>• Add exponential backoff delays</li>
-                </ul>
-              </div>
-
-              <div className="border-l-4 border-neon-500 bg-neon-950/50 p-6">
-                <h3 className="text-xl font-bold text-white mb-2">Recovery Options</h3>
-                <p className="text-gray-200 text-sm">
-                  Always provide multiple recovery methods: backup codes, email verification, support ticket, SMS (less secure but better than locked out).
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Vulnerabilities */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">Common Vulnerabilities & Solutions</h2>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-800/80">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-bold text-gray-900">Vulnerability</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-900">Issue</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-900">Solution</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700">
-                  <tr className="hover:bg-gray-800/50">
-                    <td className="px-4 py-4 font-semibold text-red-400">Time Drift</td>
-                    <td className="px-4 py-4 text-gray-100">
-                      Server and phone clocks not synchronized
-                    </td>
-                    <td className="px-4 py-4 text-gray-200">
-                      Allow ±2 time windows (60s tolerance)
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-800/50">
-                    <td className="px-4 py-4 font-semibold text-red-400">Code Reuse</td>
-                    <td className="px-4 py-4 text-gray-100">
-                      Same code used multiple times in 30s window
-                    </td>
-                    <td className="px-4 py-4 text-gray-200">
-                      Track used codes per user, reject duplicates
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-800/50">
-                    <td className="px-4 py-4 font-semibold text-red-400">Phone Loss</td>
-                    <td className="px-4 py-4 text-gray-100">
-                      User loses phone/app with MFA
-                    </td>
-                    <td className="px-4 py-4 text-gray-200">
-                      Provide backup codes during setup
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-800/50">
-                    <td className="px-4 py-4 font-semibold text-red-400">TOTP Phishing</td>
-                    <td className="px-4 py-4 text-gray-100">
-                      User enters code on fake login page
-                    </td>
-                    <td className="px-4 py-4 text-gray-200">
-                      Hardware keys (FIDO2), user education, short validity
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-800/50">
-                    <td className="px-4 py-4 font-semibold text-red-400">Social Engineering</td>
-                    <td className="px-4 py-4 text-gray-100">
-                      Attacker convinces user to share code
-                    </td>
-                    <td className="px-4 py-4 text-gray-200">
-                      User education, warnings in app
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* Advanced MFA Methods */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">Advanced MFA Methods</h2>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">🔑 Hardware Security Keys (FIDO2/WebAuthn)</h3>
-                <p className="text-gray-100 text-sm mb-3">
-                  Physical USB/NFC keys (YubiKey, Titan, etc.)
-                </p>
-                <div className="text-xs text-gray-200 space-y-1">
-                  <p><strong>Security:</strong> Most secure, phishing-resistant</p>
-                  <p><strong>Cost:</strong> $20-50 per key</p>
-                  <p><strong>UX:</strong> Tap/insert key to authenticate</p>
-                </div>
-              </div>
-
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">👆 Biometrics</h3>
-                <p className="text-gray-100 text-sm mb-3">
-                  Fingerprint, Face ID, iris scan
-                </p>
-                <div className="text-xs text-gray-200 space-y-1">
-                  <p><strong>Security:</strong> High (can&apos;t be stolen easily)</p>
-                  <p><strong>Cost:</strong> Built into device</p>
-                  <p><strong>UX:</strong> Very convenient</p>
-                </div>
-              </div>
-
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">📲 Push Notifications</h3>
-                <p className="text-gray-100 text-sm mb-3">
-                  Approve/deny on phone (Duo, Okta)
-                </p>
-                <div className="text-xs text-gray-200 space-y-1">
-                  <p><strong>Security:</strong> Medium (vulnerable to push fatigue)</p>
-                  <p><strong>Cost:</strong> Free (with service)</p>
-                  <p><strong>UX:</strong> Very convenient</p>
-                </div>
-              </div>
-
-              <div className="border-2 border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-bold text-white mb-3">📧 SMS-based 2FA</h3>
-                <p className="text-gray-100 text-sm mb-3">
-                  Code sent via text message
-                </p>
-                <div className="text-xs text-gray-200 space-y-1">
-                  <p><strong>Security:</strong> Low (SIM swap attacks)</p>
-                  <p><strong>Cost:</strong> SMS fees</p>
-                  <p><strong>UX:</strong> Requires cell signal</p>
-                  <p className="text-red-400"><strong>⚠️ Not recommended as primary MFA</strong></p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Best Practices */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">Best Practices</h2>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="flex gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <div>
-                    <strong>Require MFA for sensitive operations</strong>
-                    <p className="text-sm text-gray-200">Password changes, financial transactions</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <div>
-                    <strong>Enforce MFA for admin accounts</strong>
-                    <p className="text-sm text-gray-200">Higher privileges = higher security</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <div>
-                    <strong>Provide multiple MFA methods</strong>
-                    <p className="text-sm text-gray-200">TOTP + backup codes minimum</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <div>
-                    <strong>Support hardware keys for power users</strong>
-                    <p className="text-sm text-gray-200">Most secure option available</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <div>
-                    <strong>Implement recovery options</strong>
-                    <p className="text-sm text-gray-200">Backup codes, email, support</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <div>
-                    <strong>Log all MFA events</strong>
-                    <p className="text-sm text-gray-200">Setup, verification, failures</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <div>
-                    <strong>Let users test before enabling</strong>
-                    <p className="text-sm text-gray-200">Verify code works before activation</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <div>
-                    <strong>Show backup codes only once</strong>
-                    <p className="text-sm text-gray-200">Force user to save immediately</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Try It Out */}
-          <section className="bg-gradient-to-r from-neon-700 to-neon-500 rounded-xl shadow-lg p-8 text-white">
-            <h2 className="text-3xl font-bold mb-4">Try It Out</h2>
-            <p className="text-lg mb-6 text-gray-100">
-              Experience TOTP-based MFA with our interactive demo
-            </p>
-            <button
-              onClick={() => router.push('/mfa/demo')}
-              className="px-8 py-4 bg-gray-950 text-neon-400 border-2 border-neon-500 rounded-lg font-bold text-lg hover:bg-gray-900 transition-colors shadow-lg"
+          {/* Main Content */}
+          <main className="space-y-8">
+            {/* Section 1: The Three Factors */}
+            <SectionCard
+              {...sections[0]}
+              isCompleted={progress.completedSections.includes(sections[0].id)}
+              onComplete={handleSectionComplete}
             >
-              Go to MFA Demo →
-            </button>
-          </section>
+              <p className="text-lg">
+                Multi-Factor Authentication (MFA) requires proof of identity across <span className="text-neon-400 font-semibold">multiple independent categories</span>. Think of it as a fortress with multiple gates - breaching one doesn&apos;t grant access.
+              </p>
 
-          {/* Resources */}
-          <section className="bg-gray-900/50 border-2 border-neon-500/30 rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-white mb-6">Further Reading</h2>
-            <ul className="space-y-3">
-              <li>
-                <a href="https://datatracker.ietf.org/doc/html/rfc6238" target="_blank" rel="noopener noreferrer" className="text-neon-400 hover:text-neon-300 hover:underline font-semibold">
-                  RFC 6238 - TOTP: Time-Based One-Time Password Algorithm
-                </a>
-              </li>
-              <li>
-                <a href="https://datatracker.ietf.org/doc/html/rfc4226" target="_blank" rel="noopener noreferrer" className="text-neon-400 hover:text-neon-300 hover:underline font-semibold">
-                  RFC 4226 - HOTP: HMAC-Based One-Time Password
-                </a>
-              </li>
-              <li>
-                <a href="https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer" className="text-neon-400 hover:text-neon-300 hover:underline font-semibold">
-                  OWASP - Multi-Factor Authentication Cheat Sheet
-                </a>
-              </li>
-              <li>
-                <a href="https://fidoalliance.org/specifications/" target="_blank" rel="noopener noreferrer" className="text-neon-400 hover:text-neon-300 hover:underline font-semibold">
-                  FIDO Alliance - WebAuthn Specifications
-                </a>
-              </li>
-            </ul>
-          </section>
+              <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5 my-4">
+                <h4 className="text-neon-300 font-bold mb-3 flex items-center gap-2">
+                  <Lock className="w-5 h-5" />
+                  The Three Authentication Factors
+                </h4>
+                <ul className="space-y-3 text-gray-300">
+                  <li className="flex gap-3">
+                    <span className="text-neon-400 font-bold">1.</span>
+                    <div>
+                      <strong className="text-neon-300">Knowledge Factor (Something You Know)</strong>
+                      <p className="text-sm text-gray-400 mt-1">Password, PIN, security questions</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-neon-400 font-bold">2.</span>
+                    <div>
+                      <strong className="text-cyan-300">Possession Factor (Something You Have)</strong>
+                      <p className="text-sm text-gray-400 mt-1">Physical device, security key, mobile phone, authenticator app</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-neon-400 font-bold">3.</span>
+                    <div>
+                      <strong className="text-purple-300">Inherence Factor (Something You Are)</strong>
+                      <p className="text-sm text-gray-400 mt-1">Fingerprint, facial recognition, iris scan, voice</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-gray-950/50 border border-cyan-500/30 rounded-lg p-4">
+                  <h5 className="text-cyan-400 font-bold mb-2">Two-Factor (2FA)</h5>
+                  <p className="text-sm text-gray-400">
+                    Exactly 2 factors - typically password + TOTP code
+                  </p>
+                </div>
+                <div className="bg-gray-950/50 border border-purple-500/30 rounded-lg p-4">
+                  <h5 className="text-purple-400 font-bold mb-2">Multi-Factor (MFA)</h5>
+                  <p className="text-sm text-gray-400">
+                    2 or more factors - maximum security for high-value systems
+                  </p>
+                </div>
+              </div>
+
+              <Alert className="mt-4 bg-neon-950/20 border-neon-500/50">
+                <AlertCircle className="w-5 h-5 text-neon-400" />
+                <AlertDescription className="ml-2 text-gray-300">
+                  <strong className="text-neon-300">Critical Rule:</strong> Factors must be independent. Password + security question is NOT multi-factor (both are knowledge).
+                </AlertDescription>
+              </Alert>
+            </SectionCard>
+
+            {/* Section 2: TOTP */}
+            <SectionCard
+              {...sections[1]}
+              isCompleted={progress.completedSections.includes(sections[1].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                <span className="text-neon-400 font-bold">TOTP</span> (Time-Based One-Time Password, RFC 6238) is the most popular possession-factor implementation. It generates new codes every 30 seconds using only TIME and a SECRET.
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  { num: 1, label: 'Server generates SECRET', desc: '256-bit random value', code: 'crypto.randomBytes(32)' },
+                  { num: 2, label: 'Display QR code', desc: 'User scans with authenticator app', code: 'otpauth://totp/App:user@email.com?secret=...' },
+                  { num: 3, label: 'Current time counter', desc: 'Unix timestamp / 30 seconds', code: 'counter = Math.floor(Date.now() / 1000 / 30)' },
+                  { num: 4, label: 'Generate code', desc: 'HMAC-SHA1(secret, counter)', code: 'hash = HMAC-SHA1(secret, counter)' },
+                  { num: 5, label: 'Extract 6 digits', desc: 'Display on authenticator app', code: 'code = "482917"' },
+                  { num: 6, label: 'User enters code', desc: 'Server verifies match', code: 'verify(userCode, serverCode)' },
+                  { num: 7, label: 'Allow time skew', desc: 'Accept ±1 time window (60s drift)', code: 'window: 2' },
+                ].map(step => (
+                  <div key={step.num} className="flex gap-4 p-3 rounded-lg bg-gray-950/50 border border-neon-500/20 hover:border-neon-500/40 transition-all">
+                    <div className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-black">
+                      {step.num}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-neon-300 font-bold text-sm">{step.label}</div>
+                      <div className="text-gray-400 text-xs mt-0.5">{step.desc}</div>
+                      <code className="text-xs text-cyan-300 font-mono mt-1 block">{step.code}</code>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <CodeBlock examples={codeExamples.totpGeneration?.javascript || []} title="totp-implementation.js" />
+            </SectionCard>
+
+            {/* Section 3: Backup Codes */}
+            <SectionCard
+              {...sections[2]}
+              isCompleted={progress.completedSections.includes(sections[2].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                <span className="text-neon-400 font-bold">Backup Codes</span> are single-use recovery codes that bypass MFA when the primary factor is unavailable (lost phone, app crash, battery dead).
+              </p>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-2 border-neon-500/30 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-900 border-b-2 border-neon-500/30">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Property</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Requirement</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Why It Matters</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800">
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-neon-400">Single-Use</td>
+                      <td className="px-4 py-3 text-gray-300">Each code valid only once</td>
+                      <td className="px-4 py-3 text-gray-400">Prevents replay attacks</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-cyan-400">Hashed Storage</td>
+                      <td className="px-4 py-3 text-gray-300">Never store in plaintext</td>
+                      <td className="px-4 py-3 text-gray-400">DB breach doesn&apos;t expose codes</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-purple-400">Rate Limited</td>
+                      <td className="px-4 py-3 text-gray-300">Max 3 attempts per hour</td>
+                      <td className="px-4 py-3 text-gray-400">Prevents brute-force guessing</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-green-400">User Downloads</td>
+                      <td className="px-4 py-3 text-gray-300">Shown only once during setup</td>
+                      <td className="px-4 py-3 text-gray-400">Forces immediate backup</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <Alert className="mt-4 bg-red-950/20 border-red-500/50">
+                <AlertCircle className="w-5 h-5 text-red-400" />
+                <AlertDescription className="ml-2 text-gray-300">
+                  <strong className="text-red-300">Critical:</strong> Backup codes are shown only ONCE during MFA setup. Users must download and save them securely (password manager, printed in safe).
+                </AlertDescription>
+              </Alert>
+            </SectionCard>
+
+            {/* Section 4: FIDO2/WebAuthn */}
+            <SectionCard
+              {...sections[3]}
+              isCompleted={progress.completedSections.includes(sections[3].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                <span className="text-neon-400 font-bold">FIDO2/WebAuthn</span> represents the next evolution - authentication WITHOUT passwords using cryptographic keys stored on physical devices.
+              </p>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500/30 rounded-lg p-4">
+                  <Key className="w-8 h-8 text-purple-400 mb-3" />
+                  <h4 className="text-purple-300 font-black mb-2">Platform Authenticator</h4>
+                  <p className="text-xs text-gray-400 mb-3">Built-in fingerprint/face scanner</p>
+                  <div className="space-y-1 text-xs">
+                    <div className="text-green-400">+ Free (built into device)</div>
+                    <div className="text-green-400">+ Convenient UX</div>
+                    <div className="text-yellow-400">~ Device-specific</div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/30 rounded-lg p-4">
+                  <Shield className="w-8 h-8 text-cyan-400 mb-3" />
+                  <h4 className="text-cyan-300 font-black mb-2">Cross-Platform</h4>
+                  <p className="text-xs text-gray-400 mb-3">USB security key (YubiKey)</p>
+                  <div className="space-y-1 text-xs">
+                    <div className="text-green-400">+ Most secure</div>
+                    <div className="text-green-400">+ Phishing-resistant</div>
+                    <div className="text-yellow-400">~ $20-50 cost</div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-neon-500/30 rounded-lg p-4">
+                  <Smartphone className="w-8 h-8 text-neon-400 mb-3" />
+                  <h4 className="text-neon-300 font-black mb-2">Hybrid Transport</h4>
+                  <p className="text-xs text-gray-400 mb-3">Phone as security key</p>
+                  <div className="space-y-1 text-xs">
+                    <div className="text-green-400">+ Free (app-based)</div>
+                    <div className="text-green-400">+ Multi-device</div>
+                    <div className="text-yellow-400">~ Requires Bluetooth</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5">
+                <h4 className="text-neon-300 font-black mb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5" />
+                  Why FIDO2 is Superior
+                </h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Phishing-resistant: Private key only signs for correct domain</li>
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> No shared secrets: Public key on server, private key never leaves device</li>
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Instant revocation: Lost key simply removed from server</li>
+                  <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Quantum-resistant: Public key cryptography</li>
+                </ul>
+              </div>
+            </SectionCard>
+
+            {/* Section 5: MFA Deployment Strategies */}
+            <SectionCard
+              {...sections[4]}
+              isCompleted={progress.completedSections.includes(sections[4].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                How you deploy MFA dramatically affects <span className="text-neon-400 font-bold">adoption rates</span> and user experience.
+              </p>
+
+              <div className="space-y-4">
+                <div className="border-l-4 border-red-500 bg-red-950/30 p-4 rounded-r-lg">
+                  <h4 className="text-red-300 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-red-500 text-black rounded-full flex items-center justify-center text-sm">1</span>
+                    Mandatory MFA (Maximum Security)
+                  </h4>
+                  <p className="text-sm text-gray-300 mb-2">ALL users MUST enable 2FA. No workarounds or exemptions.</p>
+                  <div className="text-xs text-gray-400">
+                    <strong className="text-red-300">Best for:</strong> Banking, healthcare, government
+                  </div>
+                </div>
+
+                <div className="border-l-4 border-cyan-500 bg-cyan-950/30 p-4 rounded-r-lg">
+                  <h4 className="text-cyan-300 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-cyan-500 text-black rounded-full flex items-center justify-center text-sm">2</span>
+                    Strongly Recommended (User Choice)
+                  </h4>
+                  <p className="text-sm text-gray-300 mb-2">Encourage users but allow skip. Show prominent prompts.</p>
+                  <div className="text-xs text-gray-400">
+                    <strong className="text-cyan-300">Best for:</strong> SaaS platforms, general users (~30% adoption)
+                  </div>
+                </div>
+
+                <div className="border-l-4 border-purple-500 bg-purple-950/30 p-4 rounded-r-lg">
+                  <h4 className="text-purple-300 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-purple-500 text-black rounded-full flex items-center justify-center text-sm">3</span>
+                    Risk-Based MFA (Context-Aware)
+                  </h4>
+                  <p className="text-sm text-gray-300 mb-2">Require MFA only for suspicious logins. Normal logins skip.</p>
+                  <div className="text-xs text-gray-400">
+                    <strong className="text-purple-300">Best for:</strong> Balancing security and usability
+                  </div>
+                </div>
+
+                <div className="border-l-4 border-neon-500 bg-neon-950/30 p-4 rounded-r-lg">
+                  <h4 className="text-neon-300 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-neon-500 text-black rounded-full flex items-center justify-center text-sm">4</span>
+                    Graduated Rollout (Progressive)
+                  </h4>
+                  <p className="text-sm text-gray-300 mb-2">Start opt-in → recommended → mandatory over time.</p>
+                  <div className="text-xs text-gray-400">
+                    <strong className="text-neon-300">Best for:</strong> Large user bases, phased adoption
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* Section 6: Recovery & Account Lockout */}
+            <SectionCard
+              {...sections[5]}
+              isCompleted={progress.completedSections.includes(sections[5].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                MFA creates new challenges: What happens when users <span className="text-neon-400 font-bold">lose their authenticator</span>? How do they recover?
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-neon-500/30 rounded-lg p-4">
+                  <h4 className="text-neon-300 font-black mb-3">Common Lockout Scenarios</h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li className="flex gap-2"><AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" /> Phone lost/stolen/factory-reset</li>
+                    <li className="flex gap-2"><AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" /> Authenticator app crashes</li>
+                    <li className="flex gap-2"><AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" /> Device clock drift (wrong time zone)</li>
+                    <li className="flex gap-2"><AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" /> Lost backup codes</li>
+                  </ul>
+                </div>
+
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/30 rounded-lg p-4">
+                  <h4 className="text-cyan-300 font-black mb-3">Recovery Methods</h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" /> Primary: Backup codes</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" /> Secondary: Email verification</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" /> Tertiary: Security questions</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" /> Final: Support ticket</li>
+                  </ul>
+                </div>
+              </div>
+
+              <Alert className="mt-4 bg-yellow-950/20 border-yellow-500/50">
+                <AlertCircle className="w-5 h-5 text-yellow-400" />
+                <AlertDescription className="ml-2 text-gray-300">
+                  <strong className="text-yellow-300">Best Practice:</strong> Combine multiple recovery methods. Email alone is insufficient (email = single point of failure). Use email + security questions + support ticket.
+                </AlertDescription>
+              </Alert>
+            </SectionCard>
+
+            {/* Section 7: Adaptive MFA */}
+            <SectionCard
+              {...sections[6]}
+              isCompleted={progress.completedSections.includes(sections[6].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Modern authentication systems don&apos;t demand MFA for every login - they <span className="text-neon-400 font-bold">intelligently adapt</span> based on risk.
+              </p>
+
+              <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5 mb-4">
+                <h4 className="text-neon-300 font-black mb-3">Risk Scoring Model</h4>
+                <pre className="text-sm text-gray-300 font-mono bg-gray-950 p-3 rounded border border-gray-800">
+{`Risk Score = (Device Risk × 0.4) +
+             (Location Risk × 0.3) +
+             (Time Risk × 0.2) +
+             (Behavior Risk × 0.1)
+
+Risk Threshold = 0.5 (MFA required if > 0.5)`}
+                </pre>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-2 border-neon-500/30 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-900 border-b-2 border-neon-500/30">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Risk Score</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Action</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">User Experience</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800">
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-green-400">&lt; 0.2</td>
+                      <td className="px-4 py-3 text-gray-300">Allow login</td>
+                      <td className="px-4 py-3 text-gray-400">No friction</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-cyan-400">0.2 - 0.4</td>
+                      <td className="px-4 py-3 text-gray-300">Soft prompt</td>
+                      <td className="px-4 py-3 text-gray-400">Would you like to enable 2FA?</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-yellow-400">0.4 - 0.6</td>
+                      <td className="px-4 py-3 text-gray-300">Require MFA</td>
+                      <td className="px-4 py-3 text-gray-400">Please verify with 2FA code</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-orange-400">0.6 - 0.8</td>
+                      <td className="px-4 py-3 text-gray-300">Step-up auth</td>
+                      <td className="px-4 py-3 text-gray-400">Multiple MFA factors required</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-red-400">&gt; 0.8</td>
+                      <td className="px-4 py-3 text-gray-300">Block + alert</td>
+                      <td className="px-4 py-3 text-gray-400">Login blocked. Check email.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </SectionCard>
+
+            {/* Section 8: Security Scenarios */}
+            <SectionCard
+              {...sections[7]}
+              isCompleted={progress.completedSections.includes(sections[7].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Even with MFA enabled, attackers have <span className="text-red-400 font-bold">sophisticated techniques</span>. Here are the most common attack vectors and defenses.
+              </p>
+
+              <div className="space-y-4">
+                {securityScenarios.map(scenario => (
+                  <SecurityScenario key={scenario.id} {...scenario} />
+                ))}
+              </div>
+            </SectionCard>
+
+            {/* Section 9: Best Practices */}
+            <SectionCard
+              {...sections[8]}
+              isCompleted={progress.completedSections.includes(sections[8].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Production-grade <span className="text-neon-400 font-bold">MFA implementation checklist</span> - essential security practices every production system must follow.
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    icon: Clock,
+                    title: 'Rate Limit Setup & Verification',
+                    desc: 'Max 5 setup attempts per hour | Max 5 verification attempts per 15 min',
+                    detail: 'Prevents brute-force attacks on TOTP codes and backup codes',
+                    color: 'neon',
+                  },
+                  {
+                    icon: Shield,
+                    title: 'Hash/Encrypt Secrets',
+                    desc: 'Never store TOTP secrets or backup codes in plaintext',
+                    detail: 'Use AES-256 GCM encryption with different keys per user',
+                    color: 'cyan',
+                  },
+                  {
+                    icon: CheckCircle2,
+                    title: 'Single-Use Backup Codes',
+                    desc: 'Mark codes as consumed after use',
+                    detail: 'Prevents replay attacks if codes are intercepted',
+                    color: 'purple',
+                  },
+                  {
+                    icon: AlertTriangle,
+                    title: 'Multi-Step Recovery',
+                    desc: 'Email + security questions + device verification',
+                    detail: 'Prevents account takeover even if email is compromised',
+                    color: 'yellow',
+                  },
+                  {
+                    icon: Lock,
+                    title: 'Monitor & Alert',
+                    desc: 'Log all MFA events and alert on suspicious activity',
+                    detail: 'Track setup, verification failures, backup code usage, recovery attempts',
+                    color: 'pink',
+                  },
+                ].map((item, index) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={index} className={`border-l-4 border-${item.color}-500 bg-${item.color}-950/20 p-4 rounded-r-lg`}>
+                      <div className="flex items-start gap-3">
+                        <Icon className={`w-6 h-6 text-${item.color}-400 flex-shrink-0 mt-0.5`} />
+                        <div className="flex-1">
+                          <h4 className={`text-${item.color}-300 font-black mb-1`}>{item.title}</h4>
+                          <p className="text-sm text-gray-300 mb-1">{item.desc}</p>
+                          <p className="text-xs text-gray-500">{item.detail}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 bg-gradient-to-r from-neon-950/50 to-cyan-950/50 border-2 border-neon-500 rounded-lg p-5">
+                <h4 className="text-neon-300 font-black text-lg mb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-6 h-6" />
+                  Production Checklist
+                </h4>
+                <div className="grid md:grid-cols-2 gap-3 text-sm">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                      Rate limiting on setup & verification
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                      Hash/encrypt secrets (never plaintext)
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                      Single-use backup codes enforcement
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Time window tolerance (±1-2 steps)
+                    </label>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Multi-step account recovery
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Log all MFA events
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Alert user on suspicious activity
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Support multiple MFA methods
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* Live Demo Section */}
+            <Card className="bg-gray-900/80 backdrop-blur border-2 border-cyan-500/30 shadow-[0_0_40px_rgba(34,211,238,0.3)]">
+              <CardHeader>
+                <CardTitle className="text-2xl font-black uppercase tracking-wider text-white flex items-center gap-2">
+                  <Shield className="w-7 h-7 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
+                  Live Demo: TOTP MFA Setup & Verification
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!isLoggedIn ? (
+                  <div className="space-y-5">
+                    <div className="bg-cyan-950/30 border-2 border-cyan-500/50 rounded-xl p-4">
+                      <p className="text-sm text-cyan-200 font-bold mb-2">
+                        Demo Credentials:
+                      </p>
+                      <div className="space-y-1 text-sm text-cyan-100">
+                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin123</code></p>
+                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user123</code></p>
+                      </div>
+                    </div>
+
+                    {error && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="w-5 h-5" />
+                        <AlertDescription className="ml-2">{error}</AlertDescription>
+                      </Alert>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-200 mb-2">
+                        Username
+                      </label>
+                      <Input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="admin"
+                        className="bg-gray-950 border-2 border-gray-700 text-white placeholder:text-gray-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-200 mb-2">
+                        Password
+                      </label>
+                      <Input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                        placeholder="admin123"
+                        className="bg-gray-950 border-2 border-gray-700 text-white placeholder:text-gray-400"
+                      />
+                    </div>
+
+                    <Button
+                      onClick={handleLogin}
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 text-black font-semibold py-6"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                          Authenticating...
+                        </>
+                      ) : (
+                        <>
+                          Login to Setup MFA
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ) : showMfaSetup ? (
+                  <div className="space-y-5">
+                    <div className="bg-gradient-to-br from-neon-950/50 to-emerald-950/50 border-2 border-neon-500 rounded-xl p-6">
+                      <h3 className="text-xl font-bold text-neon-200 mb-3">Step 1: Scan QR Code</h3>
+                      <p className="text-gray-300 mb-4">
+                        Open your authenticator app (Google Authenticator, Authy, etc.) and scan this QR code:
+                      </p>
+                      {qrCodeUrl && (
+                        <div className="flex justify-center p-4 bg-white rounded-lg">
+                          <img src={qrCodeUrl} alt="TOTP QR Code" className="w-48 h-48" />
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-400 mt-3 text-center">
+                        Can&apos;t scan? Manual entry: <code className="bg-gray-950 text-neon-300 px-2 py-1 rounded">JBSWY3DPEHPK3PXP</code>
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-cyan-950/50 to-blue-950/50 border-2 border-cyan-500 rounded-xl p-6">
+                      <h3 className="text-xl font-bold text-cyan-200 mb-3">Step 2: Save Backup Codes</h3>
+                      <p className="text-gray-300 mb-3 text-sm">
+                        Download these codes and store them securely. Each code can only be used once.
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 bg-gray-950 p-4 rounded-lg border-2 border-gray-800">
+                        {backupCodes.map((code, idx) => (
+                          <div key={idx} className="font-mono text-sm text-neon-300">
+                            {code}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {error && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="w-5 h-5" />
+                        <AlertDescription className="ml-2">{error}</AlertDescription>
+                      </Alert>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-200 mb-2">
+                        Step 3: Enter 6-Digit Code from App
+                      </label>
+                      <Input
+                        type="text"
+                        value={totpCode}
+                        onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder="123456"
+                        className="bg-gray-950 border-2 border-gray-700 text-white placeholder:text-gray-400 text-center text-2xl font-mono tracking-widest"
+                        maxLength={6}
+                      />
+                    </div>
+
+                    <Button
+                      onClick={handleVerifyTotp}
+                      className="w-full bg-gradient-to-r from-neon-600 to-neon-500 hover:from-neon-700 hover:to-neon-600 text-black font-semibold py-6"
+                    >
+                      Verify & Enable MFA
+                      <CheckCircle2 className="w-5 h-5 ml-2" />
+                    </Button>
+
+                    <Button
+                      onClick={handleLogout}
+                      variant="secondary"
+                      className="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white border-2 border-gray-700"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : mfaEnabled ? (
+                  <div className="space-y-5">
+                    <div className="bg-gradient-to-br from-neon-950/50 to-emerald-950/50 border-2 border-neon-500 rounded-xl p-6">
+                      <div className="flex items-center gap-3 mb-2">
+                        <CheckCircle2 className="w-8 h-8 text-neon-400" />
+                        <h3 className="text-2xl font-bold text-neon-200">MFA Enabled Successfully!</h3>
+                      </div>
+                      <p className="text-neon-100 text-lg">
+                        Your account is now protected with multi-factor authentication
+                      </p>
+                    </div>
+
+                    <Card className="bg-gray-900/50 border-2 border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-white">
+                          <ShieldAlert className="w-6 h-6 text-neon-400" />
+                          MFA Configuration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                          <span className="text-gray-200 font-medium text-sm">Username:</span>
+                          <span className="text-white font-semibold">{username}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                          <span className="text-gray-200 font-medium text-sm">MFA Method:</span>
+                          <Badge className="bg-neon-500/20 text-neon-300 border border-neon-500/50">
+                            TOTP (Time-Based)
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                          <span className="text-gray-200 font-medium text-sm">Status:</span>
+                          <Badge className="bg-green-500/20 text-green-300 border border-green-500/50">
+                            Active
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-gray-200 font-medium text-sm">Backup Codes:</span>
+                          <span className="text-white text-sm">10 codes generated</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Alert className="bg-cyan-950/20 border-cyan-500/50">
+                      <AlertCircle className="w-5 h-5 text-cyan-400" />
+                      <AlertDescription className="ml-2 text-gray-300">
+                        <strong className="text-cyan-300">Next Login:</strong> You&apos;ll be asked for your password AND a 6-digit code from your authenticator app. Make sure you saved your backup codes!
+                      </AlertDescription>
+                    </Alert>
+
+                    <Button
+                      onClick={handleLogout}
+                      variant="secondary"
+                      className="w-full py-6 bg-gray-800 hover:bg-gray-700 text-white border-2 border-gray-700"
+                    >
+                      Logout
+                    </Button>
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+
+            {/* Challenges Section */}
+            <div className="space-y-4">
+              <h2 className="text-3xl font-black uppercase tracking-wider text-white flex items-center gap-3">
+                <Zap className="w-8 h-8 text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
+                Interactive Challenges
+              </h2>
+              <p className="text-gray-300 leading-relaxed">
+                Test your MFA knowledge with real-world scenarios.
+                Complete challenges to earn XP and level up your security skills.
+              </p>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                {challenges.map(challenge => (
+                  <ChallengeCard key={challenge.id} {...challenge} />
+                ))}
+              </div>
+            </div>
+
+            {/* Achievement Tracker */}
+            <AchievementTracker progress={progress} />
+          </main>
         </div>
       </div>
     </div>
