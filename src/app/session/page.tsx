@@ -1,8 +1,3 @@
-/**
- * Session-Based Authentication - Learn & Demo (Merged)
- * Sticky sidebar with full learning content + interactive demo
- */
-
 'use client';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,21 +5,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Clock, Cookie, Lock, Shield } from 'lucide-react';
+import { CodeBlock } from '@/components/learning/CodeBlock';
+import { ProgressSidebar } from '@/components/learning/ProgressSidebar';
+import { SectionCard } from '@/components/learning/SectionCard';
+import { SecurityScenario } from '@/components/learning/SecurityScenario';
+import { AchievementTracker } from '@/components/learning/AchievementTracker';
+import { ChallengeCard } from '@/components/learning/ChallengeCard';
+import { codeExamples, securityScenarios, challenges } from '@/lib/content/session-auth';
+import { Section, ProgressData } from '@/lib/types';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Clock, Cookie, Database, Key, Lock, RefreshCw, Shield, Users, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import csharp from 'react-syntax-highlighter/dist/cjs/languages/hljs/csharp';
-import js from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
-import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
-import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
-import SyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/light';
-import { github } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
-
-// Register languages
-SyntaxHighlighter.registerLanguage('javascript', js);
-SyntaxHighlighter.registerLanguage('csharp', csharp);
-SyntaxHighlighter.registerLanguage('python', python);
-SyntaxHighlighter.registerLanguage('ruby', ruby);
+import { useState, useEffect } from 'react';
 
 export default function SessionPage() {
   const router = useRouter();
@@ -34,6 +25,71 @@ export default function SessionPage() {
   const [sessionData, setSessionData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [progress, setProgress] = useState<ProgressData>({
+    completedSections: [],
+    percentage: 0,
+    level: 'Protocol Initiate',
+    achievements: [],
+  });
+
+  // Load progress from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('session-auth-progress');
+    if (saved) {
+      try {
+        setProgress(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load progress:', e);
+      }
+    }
+  }, []);
+
+  // Save progress to localStorage
+  useEffect(() => {
+    localStorage.setItem('session-auth-progress', JSON.stringify(progress));
+  }, [progress]);
+
+  const sections: Section[] = [
+    { id: 'section-1', title: 'Access Granted: What is Session Auth?', icon: 'Key', category: 'essential', estimatedTime: 3 },
+    { id: 'section-2', title: 'The Authentication Sequence', icon: 'Zap', category: 'essential', estimatedTime: 4 },
+    { id: 'section-3', title: 'Cookie Security Protocols', icon: 'Shield', category: 'essential', estimatedTime: 3 },
+    { id: 'section-4', title: 'Session Storage: Where to Keep State', icon: 'Database', category: 'important', estimatedTime: 5 },
+    { id: 'section-5', title: 'Session Lifecycle: Birth to Termination', icon: 'RefreshCw', category: 'important', estimatedTime: 5 },
+    { id: 'section-6', title: 'Session vs JWT: Choosing Your Protocol', icon: 'Users', category: 'important', estimatedTime: 5 },
+    { id: 'section-7', title: 'Security Breach Scenarios', icon: 'AlertCircle', category: 'advanced', estimatedTime: 8 },
+    { id: 'section-8', title: 'Scaling to Millions: Enterprise Patterns', icon: 'Zap', category: 'advanced', estimatedTime: 6 },
+    { id: 'section-9', title: 'The Guardian\'s Checklist: Best Practices', icon: 'CheckCircle2', category: 'advanced', estimatedTime: 6 },
+  ];
+
+  const handleSectionComplete = (sectionId: string) => {
+    setProgress(prev => {
+      const isCompleted = prev.completedSections.includes(sectionId);
+      const newCompleted = isCompleted
+        ? prev.completedSections.filter(id => id !== sectionId)
+        : [...prev.completedSections, sectionId];
+
+      const percentage = Math.floor((newCompleted.length / sections.length) * 100);
+
+      let level: ProgressData['level'] = 'Protocol Initiate';
+      if (percentage >= 91) level = 'Master Architect';
+      else if (percentage >= 61) level = 'Elite Guardian';
+      else if (percentage >= 31) level = 'Security Operative';
+
+      return {
+        ...prev,
+        completedSections: newCompleted,
+        percentage,
+        level,
+      };
+    });
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -90,8 +146,8 @@ export default function SessionPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-green-950 to-gray-950">
-      {/* Header */}
-      <div className="bg-gray-900/80 backdrop-blur-sm border-b-2 border-neon-500/30 sticky top-0 z-50 py-4">
+      {/* Story Header */}
+      <div className="bg-gray-900/80 backdrop-blur-sm border-b-2 border-neon-500/30 sticky top-0 z-50 py-6">
         <div className="container mx-auto px-4">
           <Button
             variant="ghost"
@@ -102,509 +158,627 @@ export default function SessionPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
-          <div className="flex items-center gap-3">
-            <Cookie className="w-10 h-10 text-neon-400" />
+
+          <div className="flex items-center gap-4">
+            <Cookie className="w-12 h-12 text-neon-400 drop-shadow-[0_0_15px_rgba(74,255,0,0.6)]" />
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">
-                Session-Based Authentication
+              <h1 className="text-3xl md:text-4xl font-black uppercase tracking-wider text-white">
+                KEYCARD PROTOCOL
               </h1>
-              <p className="text-sm text-gray-200">
-                Server-side sessions with HTTP cookies • RFC 6265 • Stateful • Server-Side
-              </p>
+              <div className="flex flex-wrap items-center gap-3 mt-2">
+                <Badge className="bg-neon-500/20 text-neon-300 border border-neon-500/50 font-mono">
+                  Clearance Level: Basic Access
+                </Badge>
+                <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 font-mono">
+                  Status: ACTIVE
+                </Badge>
+              </div>
             </div>
+          </div>
+
+          <div className="mt-4 p-4 rounded-lg bg-gray-950/50 border-l-4 border-neon-500">
+            <p className="text-gray-300 leading-relaxed">
+              <span className="text-neon-400 font-bold">CYBERPUNK 2084:</span> You&apos;re entering NeoTech Tower,
+              the most secure facility in Neo-Tokyo. Your physical keycard grants access to restricted floors -
+              but how does it work in the digital realm? Learn how servers remember you through
+              <span className="text-neon-300 font-semibold"> session-based authentication</span>,
+              the stateful protocol that powers millions of secure applications.
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* LEFT SIDEBAR - Learning Content (Sticky & Scrollable) */}
-          <aside className="lg:w-[600px] xl:w-[680px] lg:sticky lg:top-32 lg:self-start lg:h-[calc(100vh-9rem)] lg:overflow-y-auto space-y-6">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-[320px_1fr] gap-8">
+          {/* Sticky Sidebar */}
+          <aside className="lg:sticky lg:top-32 lg:self-start">
+            <ProgressSidebar
+              sections={sections}
+              progress={progress}
+              onSectionClick={scrollToSection}
+            />
+          </aside>
 
-            {/* How It Works */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">How It Works</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-gray-100">
-                <p className="text-base leading-relaxed">
-                  Session-based authentication stores user state on the <strong className="text-neon-300">server</strong>.
-                  When a user logs in, the server creates a session object in memory or database,
-                  assigns a unique session ID, and sends it to the client via a cookie.
-                </p>
+          {/* Main Content */}
+          <main className="space-y-8">
+            {/* Section 1: What is Session Auth */}
+            <SectionCard
+              {...sections[0]}
+              isCompleted={progress.completedSections.includes(sections[0].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg">
+                Session-based authentication works like a <span className="text-neon-400 font-semibold">physical keycard</span> at
+                NeoTech Tower. When you swipe your card, the building&apos;s central computer <span className="text-cyan-400">remembers</span> you&apos;re
+                inside and grants access to authorized floors.
+              </p>
 
-                <div className="bg-neon-950/50 border-l-4 border-neon-500 p-4 my-4">
-                  <h3 className="font-bold text-neon-200 mb-3 text-base">Authentication Flow</h3>
-                  <ol className="space-y-3 text-neon-100 text-sm">
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold text-xs">1</span>
-                      <div>
-                        <strong className="text-neon-200">Client → Server:</strong> User submits username and password
-                        <code className="block mt-1 text-xs bg-gray-950 text-neon-200 p-2 rounded border border-neon-500/30 font-semibold">
-                          POST /api/auth/login {`{ username: "user", password: "pass" }`}
-                        </code>
-                      </div>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold text-xs">2</span>
-                      <div>
-                        <strong className="text-neon-200">Server validates:</strong> Verifies credentials against database (bcrypt hash comparison)
-                      </div>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold text-xs">3</span>
-                      <div>
-                        <strong className="text-neon-200">Server creates session:</strong> Generates random session ID (256 bits entropy)
-                        <code className="block mt-1 text-xs bg-gray-950 text-neon-200 p-2 rounded border border-neon-500/30 font-semibold">
-                          sessionId = crypto.randomBytes(32).toString(&apos;hex&apos;)
-                        </code>
-                      </div>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold text-xs">4</span>
-                      <div>
-                        <strong className="text-neon-200">Server stores session:</strong> Saves {`{ userId, createdAt, expiresAt }`} in database/memory
-                      </div>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold text-xs">5</span>
-                      <div>
-                        <strong className="text-neon-200">Server → Client:</strong> Sends session ID via Set-Cookie header
-                        <code className="block mt-1 text-xs bg-gray-950 text-neon-200 p-2 rounded border border-neon-500/30 font-semibold">
-                          Set-Cookie: SessionID=abc123; HttpOnly; Secure; SameSite=Strict
-                        </code>
-                      </div>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold text-xs">6</span>
-                      <div>
-                        <strong className="text-neon-200">Browser stores cookie:</strong> Cookie automatically sent with subsequent requests
-                      </div>
-                    </li>
-                    <li className="flex gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 bg-neon-500 text-black rounded-full flex items-center justify-center font-bold text-xs">7</span>
-                      <div>
-                        <strong className="text-neon-200">Server validates:</strong> Looks up session ID in database on each request
-                      </div>
-                    </li>
-                  </ol>
-                </div>
-              </CardContent>
-            </Card>
+              <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5 my-4">
+                <h4 className="text-neon-300 font-bold mb-3 flex items-center gap-2">
+                  <Key className="w-5 h-5" />
+                  The Digital Keycard
+                </h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li className="flex gap-3">
+                    <span className="text-neon-400 font-bold">1.</span>
+                    You prove your identity (username + password)
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-neon-400 font-bold">2.</span>
+                    Server generates a unique <span className="text-cyan-300 font-mono">session ID</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-neon-400 font-bold">3.</span>
+                    Server stores your data in its <span className="text-purple-300">memory/database</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-neon-400 font-bold">4.</span>
+                    Browser receives session ID via <span className="text-yellow-300">HTTP cookie</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-neon-400 font-bold">5.</span>
+                    Every request auto-sends cookie - server recognizes you
+                  </li>
+                </ul>
+              </div>
 
-            {/* Cookie Security Attributes */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">Cookie Security Attributes</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border-l-4 border-neon-500 bg-neon-950/50 p-4">
-                  <h3 className="text-lg font-bold text-neon-200 mb-2">HttpOnly</h3>
-                  <p className="text-neon-100 mb-2 text-sm">
-                    <strong className="text-neon-300">Purpose:</strong> Prevents JavaScript access to cookie (XSS protection)
-                  </p>
-                  <p className="text-xs text-gray-200">
-                    JavaScript cannot read cookie via <code className="text-neon-300">document.cookie</code>. Only the browser
-                    and server can access it. Protects against Cross-Site Scripting (XSS) attacks.
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-gray-950/50 border border-cyan-500/30 rounded-lg p-4">
+                  <h5 className="text-cyan-400 font-bold mb-2">Stateful</h5>
+                  <p className="text-sm text-gray-400">
+                    Server stores session data. Cookie is just an ID reference.
                   </p>
                 </div>
-
-                <div className="border-l-4 border-cyan-400 bg-cyan-950/50 p-4">
-                  <h3 className="text-lg font-bold text-cyan-200 mb-2">Secure</h3>
-                  <p className="text-cyan-100 mb-2 text-sm">
-                    <strong className="text-cyan-300">Purpose:</strong> Cookie only sent over HTTPS connections
-                  </p>
-                  <p className="text-xs text-gray-200">
-                    Prevents man-in-the-middle (MITM) attacks. Cookie won&apos;t be sent over
-                    insecure HTTP. Exception: localhost (development).
+                <div className="bg-gray-950/50 border border-purple-500/30 rounded-lg p-4">
+                  <h5 className="text-purple-400 font-bold mb-2">Server-Side</h5>
+                  <p className="text-sm text-gray-400">
+                    All authentication logic lives on the server, not in the cookie.
                   </p>
                 </div>
+              </div>
+            </SectionCard>
 
-                <div className="border-l-4 border-purple-400 bg-purple-950/50 p-4">
-                  <h3 className="text-lg font-bold text-purple-200 mb-2">SameSite</h3>
-                  <p className="text-purple-100 mb-2 text-sm">
-                    <strong className="text-purple-300">Purpose:</strong> Prevents Cross-Site Request Forgery (CSRF)
-                  </p>
-                  <div className="text-xs text-gray-200 space-y-1">
-                    <p><strong className="text-purple-300">Strict:</strong> Never sent in cross-site requests (most secure)</p>
-                    <p><strong className="text-purple-300">Lax:</strong> Sent in top-level navigation (default in modern browsers)</p>
-                    <p><strong className="text-purple-300">None:</strong> Always sent (requires Secure flag)</p>
+            {/* Section 2: Authentication Sequence */}
+            <SectionCard
+              {...sections[1]}
+              isCompleted={progress.completedSections.includes(sections[1].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                The authentication sequence is a <span className="text-neon-400 font-bold">7-step handshake</span> between
+                client and server, establishing a secure communication channel.
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  { num: 1, label: 'Client → Server', desc: 'POST /login with credentials', code: '{ username, password }' },
+                  { num: 2, label: 'Server validates', desc: 'Compares bcrypt hash against database', code: 'bcrypt.compare(password, hash)' },
+                  { num: 3, label: 'Generate session ID', desc: '256 bits of cryptographic entropy', code: 'crypto.randomBytes(32)' },
+                  { num: 4, label: 'Store in database', desc: 'Session object with expiration', code: '{ userId, expiresAt }' },
+                  { num: 5, label: 'Set cookie header', desc: 'HttpOnly, Secure, SameSite flags', code: 'Set-Cookie: sessionId=...' },
+                  { num: 6, label: 'Browser stores', desc: 'Cookie auto-sent on future requests', code: 'Cookie: sessionId=...' },
+                  { num: 7, label: 'Validate each request', desc: 'Look up session ID in database', code: 'SELECT * FROM sessions WHERE id=?' },
+                ].map(step => (
+                  <div key={step.num} className="flex gap-4 p-3 rounded-lg bg-gray-950/50 border border-neon-500/20 hover:border-neon-500/40 transition-all">
+                    <div className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-black">
+                      {step.num}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-neon-300 font-bold text-sm">{step.label}</div>
+                      <div className="text-gray-400 text-xs mt-0.5">{step.desc}</div>
+                      <code className="text-xs text-cyan-300 font-mono mt-1 block">{step.code}</code>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                ))}
+              </div>
+            </SectionCard>
 
-            {/* Vulnerabilities */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">Security Vulnerabilities & Mitigations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-800/80 border-b-2 border-neon-500/30">
+            {/* Section 3: Cookie Security */}
+            <SectionCard
+              {...sections[2]}
+              isCompleted={progress.completedSections.includes(sections[2].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Cookie security attributes are your <span className="text-neon-400 font-bold">first line of defense</span> against
+                common web attacks. Each attribute protects against specific threats.
+              </p>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-2 border-neon-500/30 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-900 border-b-2 border-neon-500/30">
                     <tr>
-                      <th className="px-3 py-2 text-left font-bold text-white">Vulnerability</th>
-                      <th className="px-3 py-2 text-left font-bold text-white">Attack Vector</th>
-                      <th className="px-3 py-2 text-left font-bold text-white">Mitigation</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Attribute</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Protection</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Attack Prevented</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700">
-                    <tr className="hover:bg-gray-800/50">
-                      <td className="px-3 py-3 font-semibold text-red-400">Session Fixation</td>
-                      <td className="px-3 py-3 text-gray-200">
-                        Attacker sets session ID before login, then hijacks after authentication
-                      </td>
-                      <td className="px-3 py-3 text-neon-300">
-                        <strong>Regenerate session ID</strong> after successful login
-                      </td>
+                  <tbody className="divide-y divide-gray-800">
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-neon-400">HttpOnly</td>
+                      <td className="px-4 py-3 text-gray-300">JavaScript cannot read cookie</td>
+                      <td className="px-4 py-3"><Badge className="bg-red-500/20 text-red-300 border border-red-500/50">XSS Theft</Badge></td>
                     </tr>
-                    <tr className="hover:bg-gray-800/50">
-                      <td className="px-3 py-3 font-semibold text-red-400">CSRF</td>
-                      <td className="px-3 py-3 text-gray-200">
-                        Malicious site makes authenticated requests on behalf of user
-                      </td>
-                      <td className="px-3 py-3 text-neon-300">
-                        <strong>SameSite=Strict</strong> cookie attribute + CSRF tokens
-                      </td>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-cyan-400">Secure</td>
+                      <td className="px-4 py-3 text-gray-300">Only sent over HTTPS</td>
+                      <td className="px-4 py-3"><Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/50">MITM Sniffing</Badge></td>
                     </tr>
-                    <tr className="hover:bg-gray-800/50">
-                      <td className="px-3 py-3 font-semibold text-red-400">XSS Cookie Theft</td>
-                      <td className="px-3 py-3 text-gray-200">
-                        Injected JavaScript reads cookie and sends to attacker
-                      </td>
-                      <td className="px-3 py-3 text-neon-300">
-                        <strong>HttpOnly</strong> flag prevents JavaScript access
-                      </td>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-purple-400">SameSite=Strict</td>
+                      <td className="px-4 py-3 text-gray-300">Blocks cross-site requests</td>
+                      <td className="px-4 py-3"><Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/50">CSRF</Badge></td>
                     </tr>
-                    <tr className="hover:bg-gray-800/50">
-                      <td className="px-3 py-3 font-semibold text-red-400">Session Hijacking</td>
-                      <td className="px-3 py-3 text-gray-200">
-                        Attacker steals session ID via network sniffing
-                      </td>
-                      <td className="px-3 py-3 text-neon-300">
-                        <strong>Secure</strong> flag + HTTPS only + short expiration
-                      </td>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-mono text-green-400">Max-Age</td>
+                      <td className="px-4 py-3 text-gray-300">Auto-expiration timer</td>
+                      <td className="px-4 py-3"><Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/50">Session Hijacking</Badge></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              </CardContent>
-            </Card>
 
-            {/* Real-World Usage */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">Real-World Usage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4">
-                <div className="border-2 border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow hover:border-neon-500/50">
-                  <h3 className="text-base font-bold text-white mb-2">Django (Python)</h3>
-                  <p className="text-gray-200 text-xs mb-2">
-                    Uses session middleware with database-backed sessions
-                  </p>
-                  <SyntaxHighlighter
-                    language="python"
-                    style={github}
-                    customStyle={{
-                      fontSize: '0.75rem',
-                      borderRadius: '0.5rem',
-                      padding: '0.75rem',
-                      margin: 0,
-                    }}
-                  >
-{`SESSION_ENGINE = 'django.contrib.sessions.backends.db'`}
-                  </SyntaxHighlighter>
+              <CodeBlock examples={codeExamples.settingCookie} title="secure-cookie.js" />
+            </SectionCard>
+
+            {/* Section 4: Session Storage */}
+            <SectionCard
+              {...sections[3]}
+              isCompleted={progress.completedSections.includes(sections[3].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Where you <span className="text-neon-400 font-bold">store sessions</span> affects performance, scalability,
+                and security. Choose based on your application&apos;s needs.
+              </p>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500/30 rounded-lg p-4">
+                  <Database className="w-8 h-8 text-purple-400 mb-3" />
+                  <h4 className="text-purple-300 font-black mb-2">In-Memory</h4>
+                  <p className="text-xs text-gray-400 mb-3">Node.js process memory (express-session default)</p>
+                  <div className="space-y-1 text-xs">
+                    <div className="text-green-400">+ Ultra-fast access</div>
+                    <div className="text-green-400">+ Simple setup</div>
+                    <div className="text-red-400">- Lost on restart</div>
+                    <div className="text-red-400">- Single server only</div>
+                  </div>
+                  <Badge className="mt-3 bg-purple-500/20 text-purple-300 border border-purple-500/50 text-xs">
+                    Best for: Development
+                  </Badge>
                 </div>
 
-                <div className="border-2 border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow hover:border-neon-500/50">
-                  <h3 className="text-base font-bold text-white mb-2">Express (Node.js)</h3>
-                  <p className="text-gray-200 text-xs mb-2">
-                    Uses express-session with various stores (Redis, Memory, MongoDB)
-                  </p>
-                  <SyntaxHighlighter
-                    language="javascript"
-                    style={github}
-                    customStyle={{
-                      fontSize: '0.75rem',
-                      borderRadius: '0.5rem',
-                      padding: '0.75rem',
-                      margin: 0,
-                    }}
-                  >
-{`app.use(session({ store: new RedisStore() }))`}
-                  </SyntaxHighlighter>
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/30 rounded-lg p-4">
+                  <Database className="w-8 h-8 text-cyan-400 mb-3" />
+                  <h4 className="text-cyan-300 font-black mb-2">Database</h4>
+                  <p className="text-xs text-gray-400 mb-3">PostgreSQL, MySQL, MongoDB</p>
+                  <div className="space-y-1 text-xs">
+                    <div className="text-green-400">+ Persistent storage</div>
+                    <div className="text-green-400">+ Works with load balancers</div>
+                    <div className="text-yellow-400">~ Slower than memory</div>
+                    <div className="text-yellow-400">~ Query optimization needed</div>
+                  </div>
+                  <Badge className="mt-3 bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 text-xs">
+                    Best for: Small-Medium apps
+                  </Badge>
                 </div>
 
-                <div className="border-2 border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow hover:border-neon-500/50">
-                  <h3 className="text-base font-bold text-white mb-2">Rails (Ruby)</h3>
-                  <p className="text-gray-200 text-xs mb-2">
-                    Cookie-based sessions encrypted with secret key base
-                  </p>
-                  <SyntaxHighlighter
-                    language="ruby"
-                    style={github}
-                    customStyle={{
-                      fontSize: '0.75rem',
-                      borderRadius: '0.5rem',
-                      padding: '0.75rem',
-                      margin: 0,
-                    }}
-                  >
-{`config.session_store :cookie_store`}
-                  </SyntaxHighlighter>
-                </div>
-
-                <div className="border-2 border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow hover:border-neon-500/50">
-                  <h3 className="text-base font-bold text-white mb-2">ASP.NET Core</h3>
-                  <p className="text-gray-200 text-xs mb-2">
-                    Session state with distributed cache support
-                  </p>
-                  <SyntaxHighlighter
-                    language="csharp"
-                    style={github}
-                    customStyle={{
-                      fontSize: '0.75rem',
-                      borderRadius: '0.5rem',
-                      padding: '0.75rem',
-                      margin: 0,
-                    }}
-                  >
-{`services.AddSession(options => ...)`}
-                  </SyntaxHighlighter>
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-neon-500/30 rounded-lg p-4">
+                  <Zap className="w-8 h-8 text-neon-400 mb-3" />
+                  <h4 className="text-neon-300 font-black mb-2">Redis</h4>
+                  <p className="text-xs text-gray-400 mb-3">In-memory data store with persistence</p>
+                  <div className="space-y-1 text-xs">
+                    <div className="text-green-400">+ Blazing fast (sub-ms)</div>
+                    <div className="text-green-400">+ Built-in expiration</div>
+                    <div className="text-green-400">+ Scales horizontally</div>
+                    <div className="text-yellow-400">~ Requires Redis server</div>
+                  </div>
+                  <Badge className="mt-3 bg-neon-500/20 text-neon-300 border border-neon-500/50 text-xs">
+                    Best for: Production/Enterprise
+                  </Badge>
                 </div>
               </div>
-              </CardContent>
-            </Card>
+            </SectionCard>
 
-            {/* Implementation Code */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">Implementation Code</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                {/* React/Next.js Frontend */}
-                <div>
-                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <span className="text-neon-400">⚛️</span> React/Next.js (Frontend)
-                  </h3>
-                  <div className="space-y-3">
+            {/* Section 5: Session Lifecycle */}
+            <SectionCard
+              {...sections[4]}
+              isCompleted={progress.completedSections.includes(sections[4].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Sessions have a <span className="text-neon-400 font-bold">complete lifecycle</span> from
+                creation to destruction. Understanding each phase is critical for security.
+              </p>
+
+              <div className="space-y-4">
+                <div className="border-l-4 border-neon-500 bg-neon-950/30 p-4 rounded-r-lg">
+                  <h4 className="text-neon-300 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-neon-500 text-black rounded-full flex items-center justify-center text-sm">1</span>
+                    Creation (Login)
+                  </h4>
+                  <p className="text-sm text-gray-300 mb-2">Generate cryptographically secure session ID, store user data, set cookie</p>
+                  <CodeBlock examples={codeExamples.settingCookie.slice(0, 1)} showLineNumbers={false} />
+                </div>
+
+                <div className="border-l-4 border-cyan-500 bg-cyan-950/30 p-4 rounded-r-lg">
+                  <h4 className="text-cyan-300 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-cyan-500 text-black rounded-full flex items-center justify-center text-sm">2</span>
+                    Validation (Each Request)
+                  </h4>
+                  <p className="text-sm text-gray-300 mb-2">Look up session in store, check expiration, update last activity</p>
+                  <CodeBlock examples={codeExamples.validatingSession.slice(0, 1)} showLineNumbers={false} />
+                </div>
+
+                <div className="border-l-4 border-purple-500 bg-purple-950/30 p-4 rounded-r-lg">
+                  <h4 className="text-purple-300 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-purple-500 text-black rounded-full flex items-center justify-center text-sm">3</span>
+                    Regeneration (Security Event)
+                  </h4>
+                  <p className="text-sm text-gray-300 mb-2">Generate new session ID after privilege escalation to prevent session fixation</p>
+                  <CodeBlock examples={codeExamples.sessionRegeneration} showLineNumbers={false} />
+                </div>
+
+                <div className="border-l-4 border-red-500 bg-red-950/30 p-4 rounded-r-lg">
+                  <h4 className="text-red-300 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-red-500 text-black rounded-full flex items-center justify-center text-sm">4</span>
+                    Destruction (Logout)
+                  </h4>
+                  <p className="text-sm text-gray-300 mb-2">Delete session from store, clear cookie, invalidate all references</p>
+                  <CodeBlock examples={codeExamples.logout} showLineNumbers={false} />
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* Section 6: Session vs JWT */}
+            <SectionCard
+              {...sections[5]}
+              isCompleted={progress.completedSections.includes(sections[5].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Choosing between Session and JWT is like choosing between a <span className="text-neon-400 font-bold">keycard</span> (Session)
+                and a <span className="text-cyan-400 font-bold">self-contained badge</span> (JWT). Each has trade-offs.
+              </p>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-2 border-neon-500/30 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-900 border-b-2 border-neon-500/30">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Factor</th>
+                      <th className="px-4 py-3 text-left text-neon-400 font-black">Session (Keycard)</th>
+                      <th className="px-4 py-3 text-left text-cyan-400 font-black">JWT (Badge)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800">
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-bold text-gray-300">State</td>
+                      <td className="px-4 py-3 text-neon-300">Stateful (server stores data)</td>
+                      <td className="px-4 py-3 text-cyan-300">Stateless (token has all data)</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-bold text-gray-300">Server Load</td>
+                      <td className="px-4 py-3 text-neon-300">Database lookup per request</td>
+                      <td className="px-4 py-3 text-cyan-300">No database needed</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-bold text-gray-300">Scalability</td>
+                      <td className="px-4 py-3 text-neon-300">Requires shared session store (Redis)</td>
+                      <td className="px-4 py-3 text-cyan-300">Easy horizontal scaling</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-bold text-gray-300">Revocation</td>
+                      <td className="px-4 py-3 text-green-400">Instant (delete from DB)</td>
+                      <td className="px-4 py-3 text-red-400">Hard (need blacklist)</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-bold text-gray-300">Mobile Apps</td>
+                      <td className="px-4 py-3 text-yellow-400">Cookie handling tricky</td>
+                      <td className="px-4 py-3 text-green-400">Simple Authorization header</td>
+                    </tr>
+                    <tr className="hover:bg-neon-500/5">
+                      <td className="px-4 py-3 font-bold text-gray-300">Security</td>
+                      <td className="px-4 py-3 text-green-400">Server controls everything</td>
+                      <td className="px-4 py-3 text-yellow-400">Token lives in client storage</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-6 grid md:grid-cols-2 gap-4">
+                <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-4">
+                  <h4 className="text-neon-300 font-black mb-3">Use Session When:</h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Traditional web apps with server-side rendering</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Need instant logout/revocation</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Security is top priority</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Single domain application</li>
+                  </ul>
+                </div>
+
+                <div className="bg-cyan-950/30 border-2 border-cyan-500/30 rounded-lg p-4">
+                  <h4 className="text-cyan-300 font-black mb-3">Use JWT When:</h4>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Building mobile/SPA apps</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Microservices architecture</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Cross-domain authentication</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Scalability matters more than instant revocation</li>
+                  </ul>
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* Section 7: Security Scenarios */}
+            <SectionCard
+              {...sections[6]}
+              isCompleted={progress.completedSections.includes(sections[6].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Learn from real-world <span className="text-red-400 font-bold">security breaches</span>.
+                Each scenario shows the attack, exploitation, and defense strategies.
+              </p>
+
+              <div className="space-y-4">
+                {securityScenarios.map(scenario => (
+                  <SecurityScenario key={scenario.id} {...scenario} />
+                ))}
+              </div>
+            </SectionCard>
+
+            {/* Section 8: Scaling Patterns */}
+            <SectionCard
+              {...sections[7]}
+              isCompleted={progress.completedSections.includes(sections[7].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                Scaling session authentication to <span className="text-neon-400 font-bold">millions of users</span> requires
+                specialized patterns and infrastructure.
+              </p>
+
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-purple-950/30 to-pink-950/30 border-2 border-purple-500/30 rounded-lg p-5">
+                  <h4 className="text-purple-300 font-black text-lg mb-3 flex items-center gap-2">
+                    <Users className="w-6 h-6" />
+                    Pattern 1: Sticky Sessions (Session Affinity)
+                  </h4>
+                  <p className="text-gray-300 mb-3">
+                    Load balancer routes user to the <span className="text-purple-400">same server</span> for all requests.
+                    Session lives in server memory - no shared storage needed.
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-xs text-gray-200 mb-1 font-semibold">Login API call:</p>
-                      <SyntaxHighlighter
-                        language="javascript"
-                        style={github}
-                        customStyle={{
-                          fontSize: '0.75rem',
-                          borderRadius: '0.5rem',
-                          padding: '1rem',
-                          margin: 0,
-                        }}
-                      >
-{`const res = await fetch('/api/auth/login', {
-  method: 'POST',
-  credentials: 'include', // Important!
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ username, password })
-});`}
-                      </SyntaxHighlighter>
+                      <span className="text-green-400 font-semibold">Pros:</span>
+                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
+                        <li>- Simple implementation</li>
+                        <li>- Ultra-fast (in-memory)</li>
+                        <li>- No shared storage cost</li>
+                      </ul>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-200 mb-1 font-semibold">Protected request:</p>
-                      <SyntaxHighlighter
-                        language="javascript"
-                        style={github}
-                        customStyle={{
-                          fontSize: '0.75rem',
-                          borderRadius: '0.5rem',
-                          padding: '1rem',
-                          margin: 0,
-                        }}
-                      >
-{`const res = await fetch('/api/protected', {
-  credentials: 'include' // Auto-sends cookie
-});`}
-                      </SyntaxHighlighter>
+                      <span className="text-red-400 font-semibold">Cons:</span>
+                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
+                        <li>- Lost if server crashes</li>
+                        <li>- Uneven load distribution</li>
+                        <li>- Rolling deploys tricky</li>
+                      </ul>
                     </div>
                   </div>
                 </div>
 
-                {/* .NET Core Backend */}
-                <div>
-                  <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <span className="text-purple-400">🔷</span> .NET Core (Backend)
-                  </h3>
-                  <div className="space-y-3">
+                <div className="bg-gradient-to-r from-cyan-950/30 to-blue-950/30 border-2 border-cyan-500/30 rounded-lg p-5">
+                  <h4 className="text-cyan-300 font-black text-lg mb-3 flex items-center gap-2">
+                    <Database className="w-6 h-6" />
+                    Pattern 2: Centralized Session Store (Redis/Memcached)
+                  </h4>
+                  <p className="text-gray-300 mb-3">
+                    All servers connect to a <span className="text-cyan-400">shared Redis cluster</span>.
+                    Session lookups happen in distributed memory - requests can hit any server.
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-xs text-gray-200 mb-1 font-semibold">Program.cs - Configure session:</p>
-                      <SyntaxHighlighter
-                        language="csharp"
-                        style={github}
-                        customStyle={{
-                          fontSize: '0.75rem',
-                          borderRadius: '0.5rem',
-                          padding: '1rem',
-                          margin: 0,
-                        }}
-                      >
-{`builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options => {
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy =
-        CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.Strict;
-    options.IdleTimeout = TimeSpan.FromHours(24);
-});
-app.UseSession();`}
-                      </SyntaxHighlighter>
+                      <span className="text-green-400 font-semibold">Pros:</span>
+                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
+                        <li>- True load balancing</li>
+                        <li>- Survives server crashes</li>
+                        <li>- Sub-millisecond lookups</li>
+                      </ul>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-200 mb-1 font-semibold">Login endpoint:</p>
-                      <SyntaxHighlighter
-                        language="csharp"
-                        style={github}
-                        customStyle={{
-                          fontSize: '0.75rem',
-                          borderRadius: '0.5rem',
-                          padding: '1rem',
-                          margin: 0,
-                        }}
-                      >
-{`[HttpPost("login")]
-public IActionResult Login(LoginDto dto) {
-    var user = _db.Users
-        .FirstOrDefault(u => u.Username == dto.Username);
+                      <span className="text-yellow-400 font-semibold">Considerations:</span>
+                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
+                        <li>- Redis infrastructure needed</li>
+                        <li>- Network latency (minor)</li>
+                        <li>- Redis cluster management</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <Badge className="mt-3 bg-cyan-500/20 text-cyan-300 border border-cyan-500/50">
+                    Industry Standard for Production
+                  </Badge>
+                </div>
 
-    if (user == null || !BCrypt.Verify(
-        dto.Password, user.PasswordHash))
-        return Unauthorized();
-
-    HttpContext.Session.SetInt32("UserId", user.Id);
-    HttpContext.Session.SetString("Username", user.Username);
-
-    return Ok(new { user.Username, user.Role });
-}`}
-                      </SyntaxHighlighter>
+                <div className="bg-gradient-to-r from-neon-950/30 to-green-950/30 border-2 border-neon-500/30 rounded-lg p-5">
+                  <h4 className="text-neon-300 font-black text-lg mb-3 flex items-center gap-2">
+                    <Zap className="w-6 h-6" />
+                    Pattern 3: Session Replication
+                  </h4>
+                  <p className="text-gray-300 mb-3">
+                    Each server stores sessions locally but <span className="text-neon-400">replicates</span> changes
+                    to other servers in real-time. Hybrid of sticky sessions + shared state.
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-green-400 font-semibold">Pros:</span>
+                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
+                        <li>- Fast local reads</li>
+                        <li>- Failover support</li>
+                        <li>- No single point of failure</li>
+                      </ul>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-200 mb-1 font-semibold">Protected endpoint:</p>
-                      <SyntaxHighlighter
-                        language="csharp"
-                        style={github}
-                        customStyle={{
-                          fontSize: '0.75rem',
-                          borderRadius: '0.5rem',
-                          padding: '1rem',
-                          margin: 0,
-                        }}
-                      >
-{`[HttpGet("protected")]
-public IActionResult GetProtected() {
-    var userId = HttpContext.Session
-        .GetInt32("UserId");
-
-    if (userId == null)
-        return Unauthorized();
-
-    return Ok(new { Data = "Protected data" });
-}`}
-                      </SyntaxHighlighter>
+                      <span className="text-red-400 font-semibold">Cons:</span>
+                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
+                        <li>- Complex implementation</li>
+                        <li>- Replication lag</li>
+                        <li>- High memory usage</li>
+                      </ul>
                     </div>
                   </div>
                 </div>
               </div>
-              </CardContent>
-            </Card>
+            </SectionCard>
 
-            {/* Resources */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
+            {/* Section 9: Best Practices */}
+            <SectionCard
+              {...sections[8]}
+              isCompleted={progress.completedSections.includes(sections[8].id)}
+              onComplete={handleSectionComplete}
+            >
+              <p className="text-lg mb-4">
+                The <span className="text-neon-400 font-bold">Guardian&apos;s Checklist</span> - essential security
+                practices every production session system must follow.
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    icon: Clock,
+                    title: 'Short Session Timeouts',
+                    desc: 'Idle: 15-30 min | Absolute: 8 hours max',
+                    detail: 'Reduces window of opportunity for session hijacking on shared computers',
+                    color: 'neon',
+                  },
+                  {
+                    icon: RefreshCw,
+                    title: 'Regenerate Session ID on Login',
+                    desc: 'Create new ID after authentication',
+                    detail: 'Prevents session fixation attacks where attacker pre-sets session ID',
+                    color: 'cyan',
+                  },
+                  {
+                    icon: Shield,
+                    title: 'All Security Flags',
+                    desc: 'HttpOnly + Secure + SameSite=Strict',
+                    detail: 'Protects against XSS, MITM, and CSRF attacks simultaneously',
+                    color: 'purple',
+                  },
+                  {
+                    icon: Database,
+                    title: 'Monitor Active Sessions',
+                    desc: 'Show users list of active sessions',
+                    detail: 'Let users revoke sessions from unfamiliar locations/devices',
+                    color: 'yellow',
+                  },
+                  {
+                    icon: Lock,
+                    title: 'Remember Me (Optional)',
+                    desc: 'Separate long-lived token for convenience',
+                    detail: 'Use separate "remember me" token with lower privileges than active session',
+                    color: 'pink',
+                  },
+                ].map((item, index) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={index} className={`border-l-4 border-${item.color}-500 bg-${item.color}-950/20 p-4 rounded-r-lg`}>
+                      <div className="flex items-start gap-3">
+                        <Icon className={`w-6 h-6 text-${item.color}-400 flex-shrink-0 mt-0.5`} />
+                        <div className="flex-1">
+                          <h4 className={`text-${item.color}-300 font-black mb-1`}>{item.title}</h4>
+                          <p className="text-sm text-gray-300 mb-1">{item.desc}</p>
+                          <p className="text-xs text-gray-500">{item.detail}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 bg-gradient-to-r from-neon-950/50 to-cyan-950/50 border-2 border-neon-500 rounded-lg p-5">
+                <h4 className="text-neon-300 font-black text-lg mb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-6 h-6" />
+                  Production Checklist
+                </h4>
+                <div className="grid md:grid-cols-2 gap-3 text-sm">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                      Cookie flags: HttpOnly, Secure, SameSite
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                      Session regeneration on login
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                      Timeout configuration (idle + absolute)
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Redis/centralized session store
+                    </label>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Session monitoring/analytics
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Logout all devices feature
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      HTTPS enforcement
+                    </label>
+                    <label className="flex items-center gap-2 text-gray-300">
+                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                      Audit logging for auth events
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* Live Demo Section */}
+            <Card className="bg-gray-900/80 backdrop-blur border-2 border-cyan-500/30 shadow-[0_0_40px_rgba(34,211,238,0.3)]">
               <CardHeader>
-                <CardTitle className="text-2xl text-white">Further Reading</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="https://datatracker.ietf.org/doc/html/rfc6265" target="_blank" rel="noopener noreferrer" className="text-neon-400 hover:text-neon-300 hover:underline font-semibold">
-                    RFC 6265 - HTTP State Management Mechanism
-                  </a>
-                </li>
-                <li>
-                  <a href="https://owasp.org/www-community/attacks/Session_fixation" target="_blank" rel="noopener noreferrer" className="text-neon-400 hover:text-neon-300 hover:underline font-semibold">
-                    OWASP - Session Fixation
-                  </a>
-                </li>
-                <li>
-                  <a href="https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer" className="text-neon-400 hover:text-neon-300 hover:underline font-semibold">
-                    OWASP - Session Management Cheat Sheet
-                  </a>
-                </li>
-              </ul>
-              </CardContent>
-            </Card>
-          </aside>
-
-          {/* RIGHT MAIN - Interactive Demo */}
-          <main className="flex-1 space-y-6">
-            {/* Security Features Grid */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-                <CardContent className="pt-6">
-                  <Lock className="w-6 h-6 text-neon-400 mb-2" />
-                  <h4 className="font-semibold text-white mb-1">HttpOnly</h4>
-                  <p className="text-sm text-gray-200">JavaScript cannot access cookie</p>
-                  <p className="text-xs text-gray-300 mt-1">Protects against XSS attacks</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-                <CardContent className="pt-6">
-                  <Shield className="w-6 h-6 text-neon-400 mb-2" />
-                  <h4 className="font-semibold text-white mb-1">Secure</h4>
-                  <p className="text-sm text-gray-200">Cookie only sent over HTTPS</p>
-                  <p className="text-xs text-gray-300 mt-1">Prevents interception</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-                <CardContent className="pt-6">
-                  <CheckCircle2 className="w-6 h-6 text-neon-400 mb-2" />
-                  <h4 className="font-semibold text-white mb-1">SameSite</h4>
-                  <p className="text-sm text-gray-200">Prevents CSRF attacks</p>
-                  <p className="text-xs text-gray-300 mt-1">Blocks cross-site requests</p>
-                </CardContent>
-              </Card>
-
-              <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-                <CardContent className="pt-6">
-                  <Clock className="w-6 h-6 text-neon-400 mb-2" />
-                  <h4 className="font-semibold text-white mb-1">24h Expiration</h4>
-                  <p className="text-sm text-gray-200">Sessions automatically expire</p>
-                  <p className="text-xs text-gray-300 mt-1">Reduces security window</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Interactive Demo Section */}
-            <Card className="shadow-md hover:shadow-lg transition-shadow bg-gray-900/50 border-2 border-neon-500/30">
-              <CardHeader>
-                <CardTitle className="text-2xl flex items-center gap-2 text-white">
-                  <Shield className="w-7 h-7 text-neon-400" />
-                  Try It Out - Interactive Demo
+                <CardTitle className="text-2xl font-black uppercase tracking-wider text-white flex items-center gap-2">
+                  <Shield className="w-7 h-7 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
+                  Live Demo: Try Session Authentication
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {!isLoggedIn ? (
                   <div className="space-y-5">
-                    {/* Demo Credentials Info - Top */}
-                    <div className="bg-neon-950/50 border-2 border-neon-500/50 rounded-xl p-4">
-                      <p className="text-sm text-neon-200 font-bold mb-2">
-                        📋 Demo Credentials:
+                    <div className="bg-cyan-950/30 border-2 border-cyan-500/50 rounded-xl p-4">
+                      <p className="text-sm text-cyan-200 font-bold mb-2">
+                        Demo Credentials:
                       </p>
-                      <div className="space-y-1 text-sm text-neon-100">
-                        <p>• Username: <code className="bg-gray-950 text-neon-300 px-2 py-0.5 rounded border border-neon-500/30">admin</code> / Password: <code className="bg-gray-950 text-neon-300 px-2 py-0.5 rounded border border-neon-500/30">admin123</code></p>
-                        <p>• Username: <code className="bg-gray-950 text-neon-300 px-2 py-0.5 rounded border border-neon-500/30">user</code> / Password: <code className="bg-gray-950 text-neon-300 px-2 py-0.5 rounded border border-neon-500/30">user123</code></p>
+                      <div className="space-y-1 text-sm text-cyan-100">
+                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin123</code></p>
+                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user123</code></p>
                       </div>
                     </div>
 
@@ -633,7 +807,7 @@ public IActionResult GetProtected() {
                         Password
                       </label>
                       <Input
-                        type="text"
+                        type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
@@ -645,12 +819,12 @@ public IActionResult GetProtected() {
                     <Button
                       onClick={handleLogin}
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-neon-600 to-neon-500 hover:from-neon-700 hover:to-neon-600 text-black font-semibold py-6"
+                      className="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 text-black font-semibold py-6"
                     >
                       {isLoading ? (
                         <>
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Logging in...
+                          Authenticating...
                         </>
                       ) : (
                         <>
@@ -665,7 +839,7 @@ public IActionResult GetProtected() {
                     <div className="bg-gradient-to-br from-neon-950/50 to-emerald-950/50 border-2 border-neon-500 rounded-xl p-6">
                       <div className="flex items-center gap-3 mb-2">
                         <CheckCircle2 className="w-8 h-8 text-neon-400" />
-                        <h3 className="text-2xl font-bold text-neon-200">Login Successful!</h3>
+                        <h3 className="text-2xl font-bold text-neon-200">Access Granted!</h3>
                       </div>
                       <p className="text-neon-100 text-lg">
                         Logged in as <strong className="text-neon-300">{username}</strong>
@@ -748,6 +922,27 @@ public IActionResult GetProtected() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Challenges Section */}
+            <div className="space-y-4">
+              <h2 className="text-3xl font-black uppercase tracking-wider text-white flex items-center gap-3">
+                <Zap className="w-8 h-8 text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
+                Interactive Challenges
+              </h2>
+              <p className="text-gray-300 leading-relaxed">
+                Test your session authentication knowledge with real-world scenarios.
+                Complete challenges to earn XP and level up your security skills.
+              </p>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                {challenges.map(challenge => (
+                  <ChallengeCard key={challenge.id} {...challenge} />
+                ))}
+              </div>
+            </div>
+
+            {/* Achievement Tracker */}
+            <AchievementTracker progress={progress} />
           </main>
         </div>
       </div>
