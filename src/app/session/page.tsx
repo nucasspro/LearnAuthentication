@@ -12,14 +12,12 @@ import { SecurityScenario } from '@/components/learning/SecurityScenario';
 import { AchievementTracker } from '@/components/learning/AchievementTracker';
 import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { StoryHeader } from '@/components/learning/StoryHeader';
-import { codeExamples, securityScenarios, challenges, sessionAuthContent } from '@/lib/content/session-auth';
+import { codeExamples, securityScenarios, challenges } from '@/lib/content/session-auth';
 import { Section, ProgressData } from '@/lib/types';
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Clock, Cookie, Database, Key, Lock, RefreshCw, Shield, Users, Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { AlertCircle, ArrowRight, CheckCircle2, Clock, Cookie, Database, Key, Lock, RefreshCw, Shield, Users, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function SessionPage() {
-  const router = useRouter();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [isLoggedIn, setIsLoggedIn] = useState(false);

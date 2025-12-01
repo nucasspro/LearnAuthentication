@@ -6,7 +6,6 @@
  * Tone: Third-party trust, authorization delegation, secure handoff
  */
 
-import type { CodeExample, Section, SecurityScenario, Challenge } from '@/lib/types';
 
 export const oauthAuthContent = {
   storyHook: {

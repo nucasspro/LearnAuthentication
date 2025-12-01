@@ -1,6 +1,5 @@
 'use client';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,13 +12,11 @@ import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { StoryHeader } from '@/components/learning/StoryHeader';
 import { codeExamples, securityScenarios, challenges, oauthAuthContent } from '@/lib/content/oauth-auth';
 import { Section, ProgressData } from '@/lib/types';
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Database, GitBranch, Key, Lock, Search, Shield, ShieldCheck, Smartphone, UserPlus, Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { AlertCircle, ArrowRight, CheckCircle2, Database, Key, Lock, Search, Shield, ShieldCheck, UserPlus, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function OAuthLearnPage() {
-  const router = useRouter();
-  const [clientId, setClientId] = useState('demo_client_123');
+  const [clientId, _setClientId] = useState('demo_client_123');
   const [authorizationCode, setAuthorizationCode] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [refreshToken, setRefreshToken] = useState('');

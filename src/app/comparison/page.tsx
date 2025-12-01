@@ -10,8 +10,6 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/shared';
 import {
   Check,
-  X,
-  AlertTriangle,
   Server,
   Smartphone,
   Globe,

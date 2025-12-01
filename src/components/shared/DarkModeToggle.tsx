@@ -5,9 +5,9 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 
-export const DarkModeToggle: React.FC = () => {
+export const DarkModeToggle: FC = () => {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 

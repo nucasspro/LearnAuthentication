@@ -14,7 +14,7 @@ import { mockDB } from '@/lib/mock-db';
  *
  * Reference: SPECIFICATION Section 5.1.2
  */
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     // Get sessionId from HTTP-Only cookie
     const cookieStore = await cookies();

@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { CodeBlock } from '@/components/learning/CodeBlock';
 import { ProgressSidebar } from '@/components/learning/ProgressSidebar';
 import { SectionCard } from '@/components/learning/SectionCard';
 import { SecurityScenario } from '@/components/learning/SecurityScenario';
@@ -20,12 +19,10 @@ import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { StoryHeader } from '@/components/learning/StoryHeader';
 import { jwtAuthContent } from '@/lib/content/jwt-auth';
 import { Section, ProgressData } from '@/lib/types';
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Clock, Cookie, Database, FileText, Key, Lock, Package, RefreshCw, Rocket, RotateCw, Shield, ShieldAlert, Swords, Users, Workflow, Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { AlertCircle, ArrowRight, CheckCircle2, Clock, Database, FileText, Key, Lock, RefreshCw, Shield, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function JWTLearnPage() {
-  const router = useRouter();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -145,7 +142,6 @@ export default function JWTLearnPage() {
   };
 
   // Get content sections
-  const contentSections = jwtAuthContent.sections;
   const securityScenarios = jwtAuthContent.securityScenarios;
   const challenges = jwtAuthContent.challenges;
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { mockDB } from '@/lib/mock-db';
-import { verifyTOTPCode, verifyBackupCode } from '@/lib/mfa';
+import { verifyTOTPCode } from '@/lib/mfa';
 import { comparePassword } from '@/lib/crypto';
 
 /**
@@ -120,13 +120,11 @@ export async function POST(request: Request) {
 
       // Compare against all hashed backup codes
       let isValidBackupCode = false;
-      let matchedHash = '';
 
       for (const hashedCode of mfaSecret.backupCodes) {
         const matches = await comparePassword(normalizedCode, hashedCode);
         if (matches) {
           isValidBackupCode = true;
-          matchedHash = hashedCode;
           break;
         }
       }

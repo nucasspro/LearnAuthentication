@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     const {
       grant_type,
       code,
-      redirect_uri,
+      // redirect_uri, // TODO: Validate redirect_uri in production
       client_id,
       client_secret,
       refresh_token,
@@ -153,6 +153,15 @@ export async function POST(request: Request) {
         );
       }
     }
+
+    // Fallback - should not reach here due to validation above
+    return NextResponse.json(
+      {
+        error: 'invalid_request',
+        error_description: 'Invalid grant_type',
+      },
+      { status: 400 }
+    );
 
   } catch (error) {
     console.error('Token endpoint error:', error);

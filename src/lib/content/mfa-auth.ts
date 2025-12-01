@@ -6,7 +6,6 @@
  * Tone: Layered defense, redundancy, threat mitigation
  */
 
-import type { CodeExample, Section, SecurityScenario, Challenge } from '@/lib/types';
 
 export const mfaAuthContent = {
   storyHook: {

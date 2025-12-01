@@ -14,7 +14,7 @@
 
 'use client';
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface ProtectedRouteProps {

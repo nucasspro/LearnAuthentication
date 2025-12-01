@@ -106,7 +106,6 @@ export default function MFADemoPage() {
   };
 
   const progressPercentage = (timeRemaining / 30) * 100;
-  const progressVariant = timeRemaining > 20 ? 'success' : timeRemaining > 10 ? 'warning' : 'danger';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-green-950 to-gray-950">

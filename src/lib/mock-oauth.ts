@@ -17,7 +17,6 @@
  */
 
 import { mockDB } from './mock-db';
-import type { User } from './types';
 
 /**
  * Mock OAuth Authorization Codes
@@ -108,7 +107,7 @@ export const mockOAuthProvider = {
    *
    * RFC 6749 Section 4.1.3 - Access Token Request
    */
-  exchangeCode(authCode: string, clientId: string, clientSecret?: string) {
+  exchangeCode(authCode: string, clientId: string, _clientSecret?: string) {
     // Validate parameters
     if (!authCode || !clientId) {
       throw new Error('Invalid auth code or client_id');

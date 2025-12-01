@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 export default function Home() {
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [_hoveredCard, setHoveredCard] = useState<number | null>(null);
 
   const specialOffers = [
     {

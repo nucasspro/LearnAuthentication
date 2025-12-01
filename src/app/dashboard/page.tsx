@@ -30,7 +30,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -73,7 +72,7 @@ export default function DashboardPage() {
     data?: any;
   } | null>(null);
   const [apiTestLoading, setApiTestLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, _setError] = useState<string | null>(null);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {

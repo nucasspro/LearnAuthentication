@@ -14,13 +14,11 @@ import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { StoryHeader } from '@/components/learning/StoryHeader';
 import { codeExamples, securityScenarios, challenges, mfaAuthContent } from '@/lib/content/mfa-auth';
 import { Section, ProgressData } from '@/lib/types';
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Clock, Lock, Shield, ShieldAlert, Smartphone, Key, Zap, Brain, GitBranch, AlertTriangle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { AlertCircle, ArrowRight, AlertTriangle, CheckCircle2, Clock, Lock, Shield, ShieldAlert, Smartphone, Key, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 
 export default function MFALearnPage() {
-  const router = useRouter();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -121,7 +119,7 @@ export default function MFALearnPage() {
         setQrCodeUrl(qrUrl);
 
         // Generate demo backup codes
-        const codes = Array.from({ length: 10 }, (_, i) =>
+        const codes = Array.from({ length: 10 }, () =>
           `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
         );
         setBackupCodes(codes);
