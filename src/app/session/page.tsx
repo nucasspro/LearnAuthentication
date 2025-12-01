@@ -11,7 +11,8 @@ import { SectionCard } from '@/components/learning/SectionCard';
 import { SecurityScenario } from '@/components/learning/SecurityScenario';
 import { AchievementTracker } from '@/components/learning/AchievementTracker';
 import { ChallengeCard } from '@/components/learning/ChallengeCard';
-import { codeExamples, securityScenarios, challenges } from '@/lib/content/session-auth';
+import { StoryHeader } from '@/components/learning/StoryHeader';
+import { codeExamples, securityScenarios, challenges, sessionAuthContent } from '@/lib/content/session-auth';
 import { Section, ProgressData } from '@/lib/types';
 import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Clock, Cookie, Database, Key, Lock, RefreshCw, Shield, Users, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -146,47 +147,21 @@ export default function SessionPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-green-950 to-gray-950">
-      {/* Story Header */}
-      <div className="bg-gray-900/80 backdrop-blur-sm border-b-2 border-neon-500/30 sticky top-0 z-50 py-6">
-        <div className="container mx-auto px-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/')}
-            className="mb-3 text-gray-200 hover:text-neon-400 hover:bg-gray-800/50"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <Cookie className="w-12 h-12 text-neon-400 drop-shadow-[0_0_15px_rgba(74,255,0,0.6)]" />
-            <div>
-              <h1 className="text-3xl md:text-4xl font-black uppercase tracking-wider text-white">
-                KEYCARD PROTOCOL
-              </h1>
-              <div className="flex flex-wrap items-center gap-3 mt-2">
-                <Badge className="bg-neon-500/20 text-neon-300 border border-neon-500/50 font-mono">
-                  Clearance Level: Basic Access
-                </Badge>
-                <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 font-mono">
-                  Status: ACTIVE
-                </Badge>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 p-4 rounded-lg bg-gray-950/50 border-l-4 border-neon-500">
-            <p className="text-gray-300 leading-relaxed">
-              <span className="text-neon-400 font-bold">CYBERPUNK 2084:</span> You&apos;re entering NeoTech Tower,
-              the most secure facility in Neo-Tokyo. Your physical keycard grants access to restricted floors -
-              but how does it work in the digital realm? Learn how servers remember you through
-              <span className="text-neon-300 font-semibold"> session-based authentication</span>,
-              the stateful protocol that powers millions of secure applications.
-            </p>
-          </div>
-        </div>
-      </div>
+      <StoryHeader
+        title="KEYCARD PROTOCOL"
+        narrative={
+          <>
+            <span className="text-neon-400 font-bold">CYBERPUNK 2084:</span> You&apos;re entering NeoTech Tower,
+            the most secure facility in Neo-Tokyo. Your physical keycard grants access to restricted floors -
+            but how does it work in the digital realm? Learn how servers remember you through
+            <span className="text-neon-300 font-semibold"> session-based authentication</span>,
+            the stateful protocol that powers millions of secure applications.
+          </>
+        }
+        icon={Cookie}
+        clearanceLevel="Basic Access"
+        status="ACTIVE"
+      />
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-[320px_1fr] gap-8">

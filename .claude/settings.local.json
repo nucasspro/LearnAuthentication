@@ -17,7 +17,8 @@
       "Bash(npm install @radix-ui/react-icons)",
       "Bash(cat package.json)",
       "Bash(npm install)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

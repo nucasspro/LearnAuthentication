@@ -10,6 +10,7 @@ import { SectionCard } from '@/components/learning/SectionCard';
 import { SecurityScenario } from '@/components/learning/SecurityScenario';
 import { AchievementTracker } from '@/components/learning/AchievementTracker';
 import { ChallengeCard } from '@/components/learning/ChallengeCard';
+import { StoryHeader } from '@/components/learning/StoryHeader';
 import { codeExamples, securityScenarios, challenges, oauthAuthContent } from '@/lib/content/oauth-auth';
 import { Section, ProgressData } from '@/lib/types';
 import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Database, GitBranch, Key, Lock, Search, Shield, ShieldCheck, Smartphone, UserPlus, Zap } from 'lucide-react';
@@ -129,44 +130,18 @@ export default function OAuthLearnPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950">
-      {/* Story Header */}
-      <div className="bg-gray-900/80 backdrop-blur-sm border-b-2 border-neon-500/30 sticky top-0 z-50 py-6">
-        <div className="container mx-auto px-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/')}
-            className="mb-3 text-gray-200 hover:text-neon-400 hover:bg-gray-800/50"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <Shield className="w-12 h-12 text-neon-400 drop-shadow-[0_0_15px_rgba(74,255,0,0.6)]" />
-            <div>
-              <h1 className="text-3xl md:text-4xl font-black uppercase tracking-wider text-white">
-                {oauthAuthContent.storyHook.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-3 mt-2">
-                <Badge className="bg-neon-500/20 text-neon-300 border border-neon-500/50 font-mono">
-                  Clearance Level: {oauthAuthContent.storyHook.clearanceLevel}
-                </Badge>
-                <Badge className="bg-purple-500/20 text-purple-300 border border-purple-500/50 font-mono">
-                  Status: {oauthAuthContent.storyHook.status}
-                </Badge>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 p-4 rounded-lg bg-gray-950/50 border-l-4 border-neon-500">
-            <p className="text-gray-300 leading-relaxed">
-              <span className="text-neon-400 font-bold">CYBERPUNK 2084:</span> You&apos;re a corporate security consultant in a world where megacorporations guard their data jealously. Enter the
-              <span className="text-neon-300 font-semibold"> DELEGATION PROTOCOL</span> - a sophisticated system where one entity can grant LIMITED, TEMPORARY access to another without revealing their master credentials. Think of it as issuing a visitor badge instead of handing over your master keycard. Master the art of secure delegation in a world where trust is scarce and data breaches cost billions.
-            </p>
-          </div>
-        </div>
-      </div>
+      <StoryHeader
+        title={oauthAuthContent.storyHook.title}
+        narrative={
+          <>
+            <span className="text-neon-400 font-bold">CYBERPUNK 2084:</span> You&apos;re a corporate security consultant in a world where megacorporations guard their data jealously. Enter the
+            <span className="text-neon-300 font-semibold"> DELEGATION PROTOCOL</span> - a sophisticated system where one entity can grant LIMITED, TEMPORARY access to another without revealing their master credentials. Think of it as issuing a visitor badge instead of handing over your master keycard. Master the art of secure delegation in a world where trust is scarce and data breaches cost billions.
+          </>
+        }
+        icon={Shield}
+        clearanceLevel={oauthAuthContent.storyHook.clearanceLevel}
+        status={oauthAuthContent.storyHook.status}
+      />
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-[320px_1fr] gap-8">

@@ -93,13 +93,27 @@
 
   /* Selection */
   ::selection {
-    background-color: var(--color-primary-200);
-    color: var(--color-primary-900);
+    background-color: #4aff00 !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
+  ::-moz-selection {
+    background-color: #4aff00 !important;
+    color: #000000 !important;
+    text-shadow: none !important;
   }
 
   [data-theme="dark"] ::selection {
-    background-color: var(--color-primary-700);
-    color: var(--color-primary-100);
+    background-color: #4aff00 !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
+  [data-theme="dark"] ::-moz-selection {
+    background-color: #4aff00 !important;
+    color: #000000 !important;
+    text-shadow: none !important;
   }
 }
 

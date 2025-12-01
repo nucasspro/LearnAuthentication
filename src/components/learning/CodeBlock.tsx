@@ -72,11 +72,11 @@ export function CodeBlock({ examples, title, showLineNumbers = true, collapsed =
   return (
     <div className="my-4 rounded-lg border-2 border-neon-500/30 bg-gray-950 overflow-hidden shadow-[0_0_30px_rgba(74,255,0,0.2)]">
       {/* Terminal Header - Clickable to Expand/Collapse */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full bg-gray-900 border-b-2 border-neon-500/30 px-4 py-2 flex items-center justify-between hover:bg-gray-800/50 transition-colors"
-      >
-        <div className="flex items-center gap-2 flex-1 text-left">
+      <div className="bg-gray-900 border-b-2 border-neon-500/30 px-4 py-2 flex items-center justify-between hover:bg-gray-800/50 transition-colors">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-2 flex-1 text-left cursor-pointer hover:opacity-80 transition-opacity"
+        >
           {isExpanded ? (
             <ChevronDown className="w-4 h-4 text-neon-400 flex-shrink-0" />
           ) : (
@@ -90,15 +90,12 @@ export function CodeBlock({ examples, title, showLineNumbers = true, collapsed =
           {title && (
             <span className="text-xs font-mono text-neon-200 ml-3">{title}</span>
           )}
-        </div>
+        </button>
         {isExpanded && (
           <Button
             variant="ghost"
             size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCopy();
-            }}
+            onClick={handleCopy}
             className="h-7 px-2 text-neon-400 hover:text-neon-300 hover:bg-neon-500/10 flex-shrink-0"
           >
             {copied ? (
@@ -114,7 +111,7 @@ export function CodeBlock({ examples, title, showLineNumbers = true, collapsed =
             )}
           </Button>
         )}
-      </button>
+      </div>
 
       {/* Expanded Content */}
       {isExpanded && (
@@ -139,7 +136,7 @@ export function CodeBlock({ examples, title, showLineNumbers = true, collapsed =
           )}
 
           {/* Code Display */}
-          <div className="relative">
+          <div className="relative select-text">
             <SyntaxHighlighter
               language={examples[activeTab].language}
               style={cyberpunkTheme}
@@ -149,6 +146,7 @@ export function CodeBlock({ examples, title, showLineNumbers = true, collapsed =
                 margin: 0,
                 fontSize: '0.875rem',
                 background: '#0a0a0a',
+                userSelect: 'text' as any,
               }}
             >
               {examples[activeTab].code}
