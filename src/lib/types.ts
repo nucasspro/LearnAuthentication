@@ -248,7 +248,7 @@ export interface Section {
   id: string;
   title: string;
   icon: string;
-  category: 'essential' | 'important' | 'advanced';
+  category: 'concepts' | 'success' | 'security' | 'advanced' | 'best_practices' | 'system';
   estimatedTime: number;
   content?: React.ReactNode;
 }

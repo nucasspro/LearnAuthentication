@@ -1,22 +1,24 @@
 'use client';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { AchievementTracker } from '@/components/learning/AchievementTracker';
+import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { CodeBlock } from '@/components/learning/CodeBlock';
 import { ProgressSidebar } from '@/components/learning/ProgressSidebar';
 import { SectionCard } from '@/components/learning/SectionCard';
 import { SecurityScenario } from '@/components/learning/SecurityScenario';
-import { AchievementTracker } from '@/components/learning/AchievementTracker';
-import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { StoryHeader } from '@/components/learning/StoryHeader';
-import { codeExamples, securityScenarios, challenges, mfaAuthContent } from '@/lib/content/mfa-auth';
-import { Section, ProgressData } from '@/lib/types';
-import { AlertCircle, ArrowRight, AlertTriangle, CheckCircle2, Clock, Lock, Shield, ShieldAlert, Smartphone, Key, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { challenges, codeExamples, mfaAuthContent, securityScenarios } from '@/lib/content/mfa-auth';
+import { ProgressData, Section } from '@/lib/types';
+import { AlertCircle, AlertTriangle, ArrowRight, CheckCircle2, Clock, Key, Lock, Shield, ShieldAlert, Smartphone, Zap } from 'lucide-react';
+import Image from 'next/image';
 import QRCode from 'qrcode';
+import { useEffect, useState } from 'react';
 
 export default function MFALearnPage() {
   const [username, setUsername] = useState('admin');
@@ -54,15 +56,15 @@ export default function MFALearnPage() {
   }, [progress]);
 
   const sections: Section[] = [
-    { id: 'section-1', title: 'The Three Factors: Beyond Passwords', icon: 'Lock', category: 'essential', estimatedTime: 3 },
-    { id: 'section-2', title: 'TOTP: Time-Based One-Time Passwords', icon: 'Clock', category: 'essential', estimatedTime: 3 },
-    { id: 'section-3', title: 'Backup Codes: The Emergency Exit', icon: 'Shield', category: 'essential', estimatedTime: 4 },
-    { id: 'section-4', title: 'FIDO2/WebAuthn: Passwordless Authentication', icon: 'Zap', category: 'important', estimatedTime: 5 },
-    { id: 'section-5', title: 'MFA Deployment Strategies', icon: 'GitBranch', category: 'important', estimatedTime: 5 },
-    { id: 'section-6', title: 'Recovery & Account Lockout Scenarios', icon: 'AlertTriangle', category: 'important', estimatedTime: 5 },
+    { id: 'section-1', title: 'The Three Factors: Beyond Passwords', icon: 'Lock', category: 'concepts', estimatedTime: 3 },
+    { id: 'section-2', title: 'TOTP: Time-Based One-Time Passwords', icon: 'Clock', category: 'concepts', estimatedTime: 3 },
+    { id: 'section-3', title: 'Backup Codes: The Emergency Exit', icon: 'Shield', category: 'system', estimatedTime: 4 },
+    { id: 'section-4', title: 'FIDO2/WebAuthn: Passwordless Authentication', icon: 'Zap', category: 'security', estimatedTime: 5 },
+    { id: 'section-5', title: 'MFA Deployment Strategies', icon: 'GitBranch', category: 'best_practices', estimatedTime: 5 },
+    { id: 'section-6', title: 'Recovery & Account Lockout Scenarios', icon: 'AlertTriangle', category: 'security', estimatedTime: 5 },
     { id: 'section-7', title: 'Adaptive MFA & Risk-Based Authentication', icon: 'Brain', category: 'advanced', estimatedTime: 7 },
-    { id: 'section-8', title: 'MFA Attack Vectors & Defenses', icon: 'Shield', category: 'advanced', estimatedTime: 7 },
-    { id: 'section-9', title: 'MFA Best Practices & Production Checklist', icon: 'CheckCircle2', category: 'advanced', estimatedTime: 6 },
+    { id: 'section-8', title: 'MFA Attack Vectors & Defenses', icon: 'Shield', category: 'security', estimatedTime: 7 },
+    { id: 'section-9', title: 'MFA Best Practices & Production Checklist', icon: 'CheckCircle2', category: 'best_practices', estimatedTime: 6 },
   ];
 
   const handleSectionComplete = (sectionId: string) => {
@@ -154,7 +156,7 @@ export default function MFALearnPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-green-950 to-gray-950">
+    <div className="min-h-screen bg-transparent">
       <StoryHeader
         title={mfaAuthContent.storyHook.title}
         narrative={mfaAuthContent.storyHook.narrative}
@@ -182,35 +184,62 @@ export default function MFALearnPage() {
               isCompleted={progress.completedSections.includes(sections[0].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg">
-                Multi-Factor Authentication (MFA) requires proof of identity across <span className="text-neon-400 font-semibold">multiple independent categories</span>. Think of it as a fortress with multiple gates - breaching one doesn&apos;t grant access.
+              <p className="text-lg mb-4">
+                MFA (Xác thực đa lớp) yêu cầu bằng chứng danh tính từ <span className="text-neon-400 font-semibold">nhiều nhóm độc lập</span>. Hãy tưởng tượng như một pháo đài với nhiều lớp cửa - phá được một cửa chưa chắc đã vào được kho báu.
               </p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/mfa/shield.png"
+                      alt="Anime Style MFA Shield"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.01_Lá_Chắn_Đa_Lớp</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/mfa/shield.png"
+                      alt="Anime Style MFA Shield"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5 my-4">
                 <h4 className="text-neon-300 font-bold mb-3 flex items-center gap-2">
                   <Lock className="w-5 h-5" />
-                  The Three Authentication Factors
+                  3 Nhân Tố Xác Thực (Security Factors)
                 </h4>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex gap-3">
                     <span className="text-neon-400 font-bold">1.</span>
                     <div>
-                      <strong className="text-neon-300">Knowledge Factor (Something You Know)</strong>
-                      <p className="text-sm text-gray-400 mt-1">Password, PIN, security questions</p>
+                      <strong className="text-neon-300">Knowledge (Thứ Bạn Biết)</strong>
+                      <p className="text-sm text-gray-400 mt-1">Mật khẩu, PIN, Câu hỏi bảo mật</p>
                     </div>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-neon-400 font-bold">2.</span>
                     <div>
-                      <strong className="text-cyan-300">Possession Factor (Something You Have)</strong>
-                      <p className="text-sm text-gray-400 mt-1">Physical device, security key, mobile phone, authenticator app</p>
+                      <strong className="text-cyan-300">Possession (Thứ Bạn Có)</strong>
+                      <p className="text-sm text-gray-400 mt-1">Điện thoại, Security Key (YubiKey), Thẻ từ</p>
                     </div>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-neon-400 font-bold">3.</span>
                     <div>
-                      <strong className="text-purple-300">Inherence Factor (Something You Are)</strong>
-                      <p className="text-sm text-gray-400 mt-1">Fingerprint, facial recognition, iris scan, voice</p>
+                      <strong className="text-purple-300">Inherence (Chính Là Bạn)</strong>
+                      <p className="text-sm text-gray-400 mt-1">Vân tay, Khuôn mặt (FaceID), Mống mắt, Giọng nói</p>
                     </div>
                   </li>
                 </ul>
@@ -220,13 +249,13 @@ export default function MFALearnPage() {
                 <div className="bg-gray-950/50 border border-cyan-500/30 rounded-lg p-4">
                   <h5 className="text-cyan-400 font-bold mb-2">Two-Factor (2FA)</h5>
                   <p className="text-sm text-gray-400">
-                    Exactly 2 factors - typically password + TOTP code
+                    Chính xác 2 nhân tố - thường là Password + Mã TOTP
                   </p>
                 </div>
                 <div className="bg-gray-950/50 border border-purple-500/30 rounded-lg p-4">
                   <h5 className="text-purple-400 font-bold mb-2">Multi-Factor (MFA)</h5>
                   <p className="text-sm text-gray-400">
-                    2 or more factors - maximum security for high-value systems
+                    2 nhân tố trở lên - bảo mật tối đa cho hệ thống quan trọng
                   </p>
                 </div>
               </div>
@@ -234,7 +263,7 @@ export default function MFALearnPage() {
               <Alert className="mt-4 bg-neon-950/20 border-neon-500/50">
                 <AlertCircle className="w-5 h-5 text-neon-400" />
                 <AlertDescription className="ml-2 text-gray-300">
-                  <strong className="text-neon-300">Critical Rule:</strong> Factors must be independent. Password + security question is NOT multi-factor (both are knowledge).
+                  <strong className="text-neon-300">Quy tắc Cốt Tử:</strong> Các nhân tố phải ĐỘC LẬP. Password + Câu hỏi bí mật KHÔNG PHẢI là MFA (vì cả 2 đều là "Thứ Bạn Biết").
                 </AlertDescription>
               </Alert>
             </SectionCard>
@@ -246,18 +275,46 @@ export default function MFALearnPage() {
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                <span className="text-neon-400 font-bold">TOTP</span> (Time-Based One-Time Password, RFC 6238) is the most popular possession-factor implementation. It generates new codes every 30 seconds using only TIME and a SECRET.
+                <span className="text-neon-400 font-bold">TOTP</span> (Time-Based One-Time Password) là phương thức xác thực phổ biến nhất (Thứ Bạn Có). Nó tạo ra mã mới mỗi 30 giây dựa trên THỜI GIAN thực và một BÍ MẬT (Secret) được chia sẻ.
               </p>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/mfa/totp.png"
+                      alt="Anime Style TOTP Concept"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.02_Mã_Xác_Thực_Thời_Gian</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/mfa/totp.png"
+                      alt="Anime Style TOTP Concept"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="space-y-3">
                 {[
-                  { num: 1, label: 'Server generates SECRET', desc: '256-bit random value', code: 'crypto.randomBytes(32)' },
-                  { num: 2, label: 'Display QR code', desc: 'User scans with authenticator app', code: 'otpauth://totp/App:user@email.com?secret=...' },
-                  { num: 3, label: 'Current time counter', desc: 'Unix timestamp / 30 seconds', code: 'counter = Math.floor(Date.now() / 1000 / 30)' },
-                  { num: 4, label: 'Generate code', desc: 'HMAC-SHA1(secret, counter)', code: 'hash = HMAC-SHA1(secret, counter)' },
-                  { num: 5, label: 'Extract 6 digits', desc: 'Display on authenticator app', code: 'code = "482917"' },
-                  { num: 6, label: 'User enters code', desc: 'Server verifies match', code: 'verify(userCode, serverCode)' },
-                  { num: 7, label: 'Allow time skew', desc: 'Accept ±1 time window (60s drift)', code: 'window: 2' },
+                  { num: 1, label: 'Server tạo SECRET', desc: 'Chuỗi ngẫu nhiên 256-bit', code: 'crypto.randomBytes(32)' },
+                  { num: 2, label: 'Hiển thị mã QR', desc: 'User quét bằng Authenticator App', code: 'otpauth://totp/App:user@email.com?secret=...' },
+                  { num: 3, label: 'Bộ đếm thời gian', desc: 'Unix timestamp / 30 giây', code: 'counter = Math.floor(Date.now() / 1000 / 30)' },
+                  { num: 4, label: 'Tạo mã Code', desc: 'HMAC-SHA1(secret, counter)', code: 'hash = HMAC-SHA1(secret, counter)' },
+                  { num: 5, label: 'Lấy 6 chữ số', desc: 'Hiển thị trên App người dùng', code: 'code = "482917"' },
+                  { num: 6, label: 'User nhập mã', desc: 'Server kiểm tra khớp hay không', code: 'verify(userCode, serverCode)' },
+                  { num: 7, label: 'Độ lệch thời gian', desc: 'Chấp nhận trễ ±1 chu kỳ (60s)', code: 'window: 2' },
                 ].map(step => (
                   <div key={step.num} className="flex gap-4 p-3 rounded-lg bg-gray-950/50 border border-neon-500/20 hover:border-neon-500/40 transition-all">
                     <div className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-black">
@@ -341,11 +398,11 @@ export default function MFALearnPage() {
                 <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500/30 rounded-lg p-4">
                   <Key className="w-8 h-8 text-purple-400 mb-3" />
                   <h4 className="text-purple-300 font-black mb-2">Platform Authenticator</h4>
-                  <p className="text-xs text-gray-400 mb-3">Built-in fingerprint/face scanner</p>
+                  <p className="text-xs text-gray-400 mb-3">Vân tay/FaceID có sẵn trên máy</p>
                   <div className="space-y-1 text-xs">
-                    <div className="text-green-400">+ Free (built into device)</div>
-                    <div className="text-green-400">+ Convenient UX</div>
-                    <div className="text-yellow-400">~ Device-specific</div>
+                    <div className="text-green-400">+ Miễn phí (tích hợp sẵn)</div>
+                    <div className="text-green-400">+ Trải nghiệm mượt (1 chạm)</div>
+                    <div className="text-yellow-400">~ Chỉ dùng được trên máy đó</div>
                   </div>
                 </div>
 
@@ -354,20 +411,20 @@ export default function MFALearnPage() {
                   <h4 className="text-cyan-300 font-black mb-2">Cross-Platform</h4>
                   <p className="text-xs text-gray-400 mb-3">USB security key (YubiKey)</p>
                   <div className="space-y-1 text-xs">
-                    <div className="text-green-400">+ Most secure</div>
-                    <div className="text-green-400">+ Phishing-resistant</div>
-                    <div className="text-yellow-400">~ $20-50 cost</div>
+                    <div className="text-green-400">+ Bảo mật nhất thế giới</div>
+                    <div className="text-green-400">+ Chống Phishing tuyệt đối</div>
+                    <div className="text-yellow-400">~ Tốn tiền mua ($20-$50)</div>
                   </div>
                 </div>
 
                 <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-neon-500/30 rounded-lg p-4">
                   <Smartphone className="w-8 h-8 text-neon-400 mb-3" />
                   <h4 className="text-neon-300 font-black mb-2">Hybrid Transport</h4>
-                  <p className="text-xs text-gray-400 mb-3">Phone as security key</p>
+                  <p className="text-xs text-gray-400 mb-3">Dùng điện thoại làm khóa</p>
                   <div className="space-y-1 text-xs">
-                    <div className="text-green-400">+ Free (app-based)</div>
-                    <div className="text-green-400">+ Multi-device</div>
-                    <div className="text-yellow-400">~ Requires Bluetooth</div>
+                    <div className="text-green-400">+ Miễn phí (dùng app)</div>
+                    <div className="text-green-400">+ Đa thiết bị (Bluetooth)</div>
+                    <div className="text-yellow-400">~ Cần bật Bluetooth/Gần</div>
                   </div>
                 </div>
               </div>
@@ -400,44 +457,44 @@ export default function MFALearnPage() {
                 <div className="border-l-4 border-red-500 bg-red-950/30 p-4 rounded-r-lg">
                   <h4 className="text-red-300 font-black mb-2 flex items-center gap-2">
                     <span className="w-6 h-6 bg-red-500 text-black rounded-full flex items-center justify-center text-sm">1</span>
-                    Mandatory MFA (Maximum Security)
+                    Mandatory MFA (Bắt Buộc)
                   </h4>
-                  <p className="text-sm text-gray-300 mb-2">ALL users MUST enable 2FA. No workarounds or exemptions.</p>
+                  <p className="text-sm text-gray-300 mb-2">TẤT CẢ user phải bật 2FA. Không có ngoại lệ.</p>
                   <div className="text-xs text-gray-400">
-                    <strong className="text-red-300">Best for:</strong> Banking, healthcare, government
+                    <strong className="text-red-300">Phù hợp:</strong> Ngân hàng, Y tế, Chính phủ
                   </div>
                 </div>
 
                 <div className="border-l-4 border-cyan-500 bg-cyan-950/30 p-4 rounded-r-lg">
                   <h4 className="text-cyan-300 font-black mb-2 flex items-center gap-2">
                     <span className="w-6 h-6 bg-cyan-500 text-black rounded-full flex items-center justify-center text-sm">2</span>
-                    Strongly Recommended (User Choice)
+                    Strongly Recommended (Khuyến Nghị)
                   </h4>
-                  <p className="text-sm text-gray-300 mb-2">Encourage users but allow skip. Show prominent prompts.</p>
+                  <p className="text-sm text-gray-300 mb-2">Khuyến khích user bật nhưng cho phép bỏ qua. Hiện thông báo nhắc nhở.</p>
                   <div className="text-xs text-gray-400">
-                    <strong className="text-cyan-300">Best for:</strong> SaaS platforms, general users (~30% adoption)
+                    <strong className="text-cyan-300">Phù hợp:</strong> SaaS, Web thông thường (~30% chấp nhận)
                   </div>
                 </div>
 
                 <div className="border-l-4 border-purple-500 bg-purple-950/30 p-4 rounded-r-lg">
                   <h4 className="text-purple-300 font-black mb-2 flex items-center gap-2">
                     <span className="w-6 h-6 bg-purple-500 text-black rounded-full flex items-center justify-center text-sm">3</span>
-                    Risk-Based MFA (Context-Aware)
+                    Risk-Based MFA (Dựa Trên Rủi Ro)
                   </h4>
-                  <p className="text-sm text-gray-300 mb-2">Require MFA only for suspicious logins. Normal logins skip.</p>
+                  <p className="text-sm text-gray-300 mb-2">Chỉ đòi hỏi MFA khi đăng nhập lạ/nghi ngờ. Bình thường thì không hỏi.</p>
                   <div className="text-xs text-gray-400">
-                    <strong className="text-purple-300">Best for:</strong> Balancing security and usability
+                    <strong className="text-purple-300">Phù hợp:</strong> Cân bằng giữa bảo mật và trải nghiệm
                   </div>
                 </div>
 
                 <div className="border-l-4 border-neon-500 bg-neon-950/30 p-4 rounded-r-lg">
                   <h4 className="text-neon-300 font-black mb-2 flex items-center gap-2">
                     <span className="w-6 h-6 bg-neon-500 text-black rounded-full flex items-center justify-center text-sm">4</span>
-                    Graduated Rollout (Progressive)
+                    Graduated Rollout (Lộ Trình Dần Dần)
                   </h4>
-                  <p className="text-sm text-gray-300 mb-2">Start opt-in → recommended → mandatory over time.</p>
+                  <p className="text-sm text-gray-300 mb-2">Bắt đầu cho phép dùng thử → khuyến nghị → bắt buộc sau X ngày.</p>
                   <div className="text-xs text-gray-400">
-                    <strong className="text-neon-300">Best for:</strong> Large user bases, phased adoption
+                    <strong className="text-neon-300">Phù hợp:</strong> Hệ thống nhiều user, tránh sốc văn hóa
                   </div>
                 </div>
               </div>
@@ -494,9 +551,9 @@ export default function MFALearnPage() {
               </p>
 
               <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5 mb-4">
-                <h4 className="text-neon-300 font-black mb-3">Risk Scoring Model</h4>
+                <h4 className="text-neon-300 font-black mb-3">Mô Hình Tính Điểm Rủi Ro (Risk Scoring)</h4>
                 <pre className="text-sm text-gray-300 font-mono bg-gray-950 p-3 rounded border border-gray-800">
-{`Risk Score = (Device Risk × 0.4) +
+                  {`Risk Score = (Device Risk × 0.4) +
              (Location Risk × 0.3) +
              (Time Risk × 0.2) +
              (Behavior Risk × 0.1)
@@ -552,8 +609,39 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                Even with MFA enabled, attackers have <span className="text-red-400 font-bold">sophisticated techniques</span>. Here are the most common attack vectors and defenses.
+                Ngay cả khi đã bật MFA, hacker vẫn có <span className="text-red-400 font-bold">những kỹ thuật tinh vi</span>. Dưới đây là các phương thức tấn công phổ biến và cách phòng thủ.
               </p>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/mfa/attack_block.png"
+                      alt="Anime Style Access Denied"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <p className="text-sm font-mono text-red-500 font-bold uppercase tracking-wider">Cảnh_Báo: Truy_Cập_Bị_Chặn</p>
+                      </div>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/mfa/attack_block.png"
+                      alt="Anime Style Access Denied"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="space-y-4">
                 {securityScenarios.map(scenario => (
@@ -569,44 +657,44 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                Production-grade <span className="text-neon-400 font-bold">MFA implementation checklist</span> - essential security practices every production system must follow.
+                Checklist <span className="text-neon-400 font-bold">triển khai MFA chuẩn Production</span> - những nguyên tắc bảo mật cốt lõi mà mọi hệ thống thực tế phải tuân thủ.
               </p>
 
               <div className="space-y-3">
                 {[
                   {
                     icon: Clock,
-                    title: 'Rate Limit Setup & Verification',
-                    desc: 'Max 5 setup attempts per hour | Max 5 verification attempts per 15 min',
-                    detail: 'Prevents brute-force attacks on TOTP codes and backup codes',
+                    title: 'Rate Limit & Xác Thực',
+                    desc: 'Tối đa 5 lần cài đặt/giờ | Tối đa 5 lần xác thực/15 phút',
+                    detail: 'Chống tấn công Brute-force vào mã TOTP và Backup codes',
                     color: 'neon',
                   },
                   {
                     icon: Shield,
-                    title: 'Hash/Encrypt Secrets',
-                    desc: 'Never store TOTP secrets or backup codes in plaintext',
-                    detail: 'Use AES-256 GCM encryption with different keys per user',
+                    title: 'Mã Hóa Secrets',
+                    desc: 'Không bao giờ lưu TOTP secret hay backup code dạng thô',
+                    detail: 'Dùng AES-256 GCM với key riêng cho từng user',
                     color: 'cyan',
                   },
                   {
                     icon: CheckCircle2,
-                    title: 'Single-Use Backup Codes',
-                    desc: 'Mark codes as consumed after use',
-                    detail: 'Prevents replay attacks if codes are intercepted',
+                    title: 'Backup Codes Dùng 1 Lần',
+                    desc: 'Đánh dấu mã là "đã dùng" ngay sau khi nhập',
+                    detail: 'Chống tấn công Replay nếu mã bị lộ',
                     color: 'purple',
                   },
                   {
                     icon: AlertTriangle,
-                    title: 'Multi-Step Recovery',
-                    desc: 'Email + security questions + device verification',
-                    detail: 'Prevents account takeover even if email is compromised',
+                    title: 'Quy Trình Khôi Phục Đa Lớp',
+                    desc: 'Email + Câu hỏi bảo mật + Xác minh thiết bị',
+                    detail: 'Chống chiếm đoạt tài khoản kể cả khi lộ email',
                     color: 'yellow',
                   },
                   {
                     icon: Lock,
-                    title: 'Monitor & Alert',
-                    desc: 'Log all MFA events and alert on suspicious activity',
-                    detail: 'Track setup, verification failures, backup code usage, recovery attempts',
+                    title: 'Giám Sát & Cảnh Báo',
+                    desc: 'Log mọi sự kiện MFA và báo động hành vi lạ',
+                    detail: 'Theo dõi cài đặt mới, lỗi xác thực, dùng backup code, yêu cầu reset',
                     color: 'pink',
                   },
                 ].map((item, index) => {
@@ -629,43 +717,43 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
               <div className="mt-6 bg-gradient-to-r from-neon-950/50 to-cyan-950/50 border-2 border-neon-500 rounded-lg p-5">
                 <h4 className="text-neon-300 font-black text-lg mb-3 flex items-center gap-2">
                   <CheckCircle2 className="w-6 h-6" />
-                  Production Checklist
+                  Checklist Production
                 </h4>
                 <div className="grid md:grid-cols-2 gap-3 text-sm">
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-gray-300">
                       <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
-                      Rate limiting on setup & verification
+                      Giới hạn tốc độ (Rate limiting)
                     </label>
                     <label className="flex items-center gap-2 text-gray-300">
                       <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
-                      Hash/encrypt secrets (never plaintext)
+                      Mã hóa Secrets (Không lưu plain text)
                     </label>
                     <label className="flex items-center gap-2 text-gray-300">
                       <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
-                      Single-use backup codes enforcement
+                      Backup codes dùng 1 lần
                     </label>
                     <label className="flex items-center gap-2 text-gray-300">
                       <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      Time window tolerance (±1-2 steps)
+                      Chấp nhận lệch giờ (±1 bước)
                     </label>
                   </div>
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-gray-300">
                       <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      Multi-step account recovery
+                      Khôi phục tài khoản đa bước
                     </label>
                     <label className="flex items-center gap-2 text-gray-300">
                       <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      Log all MFA events
+                      Log mọi sự kiện MFA
                     </label>
                     <label className="flex items-center gap-2 text-gray-300">
                       <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      Alert user on suspicious activity
+                      Cảnh báo hoạt động khả nghi
                     </label>
                     <label className="flex items-center gap-2 text-gray-300">
                       <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      Support multiple MFA methods
+                      Hỗ trợ nhiều phương thức MFA &nbsp;
                     </label>
                   </div>
                 </div>
@@ -677,7 +765,7 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
               <CardHeader>
                 <CardTitle className="text-2xl font-black uppercase tracking-wider text-white flex items-center gap-2">
                   <Shield className="w-7 h-7 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
-                  Live Demo: TOTP MFA Setup & Verification
+                  Demo Trực Tiếp: Cài Đặt & Xác Thực MFA
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -685,11 +773,11 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
                   <div className="space-y-5">
                     <div className="bg-cyan-950/30 border-2 border-cyan-500/50 rounded-xl p-4">
                       <p className="text-sm text-cyan-200 font-bold mb-2">
-                        Demo Credentials:
+                        Thông Tin Đăng Nhập Demo:
                       </p>
                       <div className="space-y-1 text-sm text-cyan-100">
-                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin123</code></p>
-                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user123</code></p>
+                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin</code> / Pass: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin123</code></p>
+                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user</code> / Pass: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user123</code></p>
                       </div>
                     </div>
 
@@ -739,7 +827,7 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
                         </>
                       ) : (
                         <>
-                          Login to Setup MFA
+                          Đăng Nhập Để Cài Đặt MFA
                           <ArrowRight className="w-5 h-5 ml-2" />
                         </>
                       )}
@@ -748,9 +836,9 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
                 ) : showMfaSetup ? (
                   <div className="space-y-5">
                     <div className="bg-gradient-to-br from-neon-950/50 to-emerald-950/50 border-2 border-neon-500 rounded-xl p-6">
-                      <h3 className="text-xl font-bold text-neon-200 mb-3">Step 1: Scan QR Code</h3>
+                      <h3 className="text-xl font-bold text-neon-200 mb-3">Bước 1: Quét Mã QR</h3>
                       <p className="text-gray-300 mb-4">
-                        Open your authenticator app (Google Authenticator, Authy, etc.) and scan this QR code:
+                        Mở ứng dụng xác thực (Google Authenticator, Authy...) và quét mã này:
                       </p>
                       {qrCodeUrl && (
                         <div className="flex justify-center p-4 bg-white rounded-lg">
@@ -758,14 +846,14 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
                         </div>
                       )}
                       <p className="text-xs text-gray-400 mt-3 text-center">
-                        Can&apos;t scan? Manual entry: <code className="bg-gray-950 text-neon-300 px-2 py-1 rounded">JBSWY3DPEHPK3PXP</code>
+                        Không quét được? Nhập thủ công: <code className="bg-gray-950 text-neon-300 px-2 py-1 rounded">JBSWY3DPEHPK3PXP</code>
                       </p>
                     </div>
 
                     <div className="bg-gradient-to-br from-cyan-950/50 to-blue-950/50 border-2 border-cyan-500 rounded-xl p-6">
-                      <h3 className="text-xl font-bold text-cyan-200 mb-3">Step 2: Save Backup Codes</h3>
+                      <h3 className="text-xl font-bold text-cyan-200 mb-3">Bước 2: Lưu Mã Dự Phòng</h3>
                       <p className="text-gray-300 mb-3 text-sm">
-                        Download these codes and store them securely. Each code can only be used once.
+                        Tải về và lưu trữ an toàn. Mỗi mã chỉ dùng được một lần.
                       </p>
                       <div className="grid grid-cols-2 gap-2 bg-gray-950 p-4 rounded-lg border-2 border-gray-800">
                         {backupCodes.map((code, idx) => (
@@ -785,7 +873,7 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-200 mb-2">
-                        Step 3: Enter 6-Digit Code from App
+                        Bước 3: Nhập 6 Số Từ App
                       </label>
                       <Input
                         type="text"
@@ -801,7 +889,7 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
                       onClick={handleVerifyTotp}
                       className="w-full bg-gradient-to-r from-neon-600 to-neon-500 hover:from-neon-700 hover:to-neon-600 text-black font-semibold py-6"
                     >
-                      Verify & Enable MFA
+                      Xác Thực & Kích Hoạt MFA
                       <CheckCircle2 className="w-5 h-5 ml-2" />
                     </Button>
 
@@ -810,7 +898,7 @@ Risk Threshold = 0.5 (MFA required if > 0.5)`}
                       variant="secondary"
                       className="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white border-2 border-gray-700"
                     >
-                      Cancel
+                      Hủy Bỏ
                     </Button>
                   </div>
                 ) : mfaEnabled ? (

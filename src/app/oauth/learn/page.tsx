@@ -1,19 +1,21 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AchievementTracker } from '@/components/learning/AchievementTracker';
+import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { CodeBlock } from '@/components/learning/CodeBlock';
 import { ProgressSidebar } from '@/components/learning/ProgressSidebar';
 import { SectionCard } from '@/components/learning/SectionCard';
 import { SecurityScenario } from '@/components/learning/SecurityScenario';
-import { AchievementTracker } from '@/components/learning/AchievementTracker';
-import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { StoryHeader } from '@/components/learning/StoryHeader';
-import { codeExamples, securityScenarios, challenges, oauthAuthContent } from '@/lib/content/oauth-auth';
-import { Section, ProgressData } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { challenges, codeExamples, oauthAuthContent, securityScenarios } from '@/lib/content/oauth-auth';
+import { ProgressData, Section } from '@/lib/types';
 import { AlertCircle, ArrowRight, CheckCircle2, Database, Key, Lock, Search, Shield, ShieldCheck, UserPlus, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 export default function OAuthLearnPage() {
   const [clientId, _setClientId] = useState('demo_client_123');
@@ -47,15 +49,15 @@ export default function OAuthLearnPage() {
   }, [progress]);
 
   const sections: Section[] = [
-    { id: 'section-1', title: 'The Visitor Badge: What is OAuth 2.0?', icon: 'Shield', category: 'essential', estimatedTime: 3 },
-    { id: 'section-2', title: 'The Four Grant Types: Choosing Your Strategy', icon: 'GitBranch', category: 'essential', estimatedTime: 4 },
-    { id: 'section-3', title: 'Scopes & Permissions: Controlling Access', icon: 'Lock', category: 'essential', estimatedTime: 3 },
-    { id: 'section-4', title: 'Access Tokens vs Refresh Tokens', icon: 'Key', category: 'important', estimatedTime: 5 },
-    { id: 'section-5', title: 'State Parameter: CSRF Protection', icon: 'Shield', category: 'important', estimatedTime: 5 },
-    { id: 'section-6', title: 'PKCE: Securing Mobile & SPA Apps', icon: 'Smartphone', category: 'important', estimatedTime: 5 },
+    { id: 'section-1', title: 'The Visitor Badge: What is OAuth 2.0?', icon: 'Shield', category: 'concepts', estimatedTime: 3 },
+    { id: 'section-2', title: 'The Four Grant Types: Choosing Your Strategy', icon: 'GitBranch', category: 'concepts', estimatedTime: 4 },
+    { id: 'section-3', title: 'Scopes & Permissions: Controlling Access', icon: 'Lock', category: 'concepts', estimatedTime: 3 },
+    { id: 'section-4', title: 'Access Tokens vs Refresh Tokens', icon: 'Key', category: 'system', estimatedTime: 5 },
+    { id: 'section-5', title: 'State Parameter: CSRF Protection', icon: 'Shield', category: 'security', estimatedTime: 5 },
+    { id: 'section-6', title: 'PKCE: Securing Mobile & SPA Apps', icon: 'Smartphone', category: 'security', estimatedTime: 5 },
     { id: 'section-7', title: 'Token Introspection & Revocation', icon: 'Search', category: 'advanced', estimatedTime: 7 },
     { id: 'section-8', title: 'Dynamic Client Registration (DCR)', icon: 'UserPlus', category: 'advanced', estimatedTime: 6 },
-    { id: 'section-9', title: 'OAuth Security Best Practices', icon: 'ShieldCheck', category: 'advanced', estimatedTime: 7 },
+    { id: 'section-9', title: 'OAuth Security Best Practices', icon: 'ShieldCheck', category: 'best_practices', estimatedTime: 7 },
   ];
 
   const handleSectionComplete = (sectionId: string) => {
@@ -126,7 +128,7 @@ export default function OAuthLearnPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950">
+    <div className="min-h-screen bg-transparent">
       <StoryHeader
         title={oauthAuthContent.storyHook.title}
         narrative={
@@ -159,46 +161,74 @@ export default function OAuthLearnPage() {
               isCompleted={progress.completedSections.includes(sections[0].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg">
-                OAuth 2.0 is an <span className="text-neon-400 font-semibold">authorization framework</span> that allows third-party applications to obtain LIMITED access to user accounts WITHOUT exposing passwords. It&apos;s like issuing a <span className="text-cyan-400">temporary visitor badge</span> instead of handing over your master keycard.
+              <p className="text-lg mb-4">
+                OAuth 2.0 giống như việc bạn dùng <span className="text-neon-400 font-semibold">Chìa Khóa Valet</span> tại khách sạn. Bạn đưa cho nhân viên một chìa khóa đặc biệt chỉ để LÁI XE (giới hạn quyền) mà không thể mở cốp hay hộc đựng đồ cá nhân (bảo vệ bí mật).
               </p>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/oauth/valet-key.png"
+                      alt="Realistic 3D Valet Key Concept"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.01_Chìa_Khóa_Valet</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/oauth/valet-key.png"
+                      alt="Realistic 3D Valet Key Concept"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5 my-4">
                 <h4 className="text-neon-300 font-bold mb-3 flex items-center gap-2">
                   <Shield className="w-5 h-5" />
-                  The Four OAuth Players
+                  4 Nhân Vật Chính (The Players)
                 </h4>
                 <ul className="space-y-2 text-gray-300">
                   <li className="flex gap-3">
                     <span className="text-neon-400 font-bold">1.</span>
-                    <div><strong className="text-neon-300">Resource Owner:</strong> You (the user with the data)</div>
+                    <div><strong className="text-neon-300">Resource Owner:</strong> Là BẠN (Chủ xe).</div>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-neon-400 font-bold">2.</span>
-                    <div><strong className="text-cyan-300">Authorization Server:</strong> Issues access tokens (security desk)</div>
+                    <div><strong className="text-cyan-300">Authorization Server:</strong> Lễ tân khách sạn (Nơi cấp thẻ).</div>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-neon-400 font-bold">3.</span>
-                    <div><strong className="text-purple-300">Resource Server:</strong> Holds protected data (your office)</div>
+                    <div><strong className="text-purple-300">Resource Server:</strong> Bãi đỗ xe (Nơi chứa tài sản).</div>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-neon-400 font-bold">4.</span>
-                    <div><strong className="text-yellow-300">Client:</strong> Third-party app requesting access (the courier)</div>
+                    <div><strong className="text-yellow-300">Client:</strong> Nhân viên Valet (Người được ủy quyền).</div>
                   </li>
                 </ul>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="bg-gray-950/50 border border-neon-500/30 rounded-lg p-4">
-                  <h5 className="text-neon-400 font-bold mb-2">Authorization</h5>
+                  <h5 className="text-neon-400 font-bold mb-2">Authorization (Ủy Quyền)</h5>
                   <p className="text-sm text-gray-400">
-                    OAuth is for AUTHORIZATION (granting access), not authentication (proving identity).
+                    OAuth là để CẤP QUYỀN (cho phép làm gì), không phải xác thực (hỏi bạn là ai).
                   </p>
                 </div>
                 <div className="bg-gray-950/50 border border-purple-500/30 rounded-lg p-4">
                   <h5 className="text-purple-400 font-bold mb-2">No Password Sharing</h5>
                   <p className="text-sm text-gray-400">
-                    Users never share passwords with third-party apps - only grant limited permissions.
+                    Bạn KHÔNG BAO GIỜ phải đưa mật khẩu Facebook của bạn cho app bên thứ 3.
                   </p>
                 </div>
               </div>
@@ -211,15 +241,43 @@ export default function OAuthLearnPage() {
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                OAuth 2.0 provides <span className="text-neon-400 font-bold">four grant types</span> (flows) for different scenarios. Think of these as different types of visitor badges for different situations.
+                OAuth 2.0 cung cấp <span className="text-neon-400 font-bold">4 loại giấy phép</span> (Grant Types) cho các tình huống khác nhau. Giống như các loại thẻ khách khác nhau.
               </p>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/oauth/flow.png"
+                      alt="Realistic 3D Authorization Flow"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.02_Luồng_Ủy_Quyền</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/oauth/flow.png"
+                      alt="Realistic 3D Authorization Flow"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="space-y-3">
                 {[
-                  { num: 1, label: 'Authorization Code', desc: 'Most secure - for server-side web apps', code: 'User approves → Get code → Exchange for token', color: 'neon' },
-                  { num: 2, label: 'Implicit Flow', desc: 'DEPRECATED - tokens in URL (insecure)', code: 'Use Auth Code + PKCE instead', color: 'red' },
-                  { num: 3, label: 'Client Credentials', desc: 'Machine-to-machine (no user)', code: 'Client auth → Get token → Access API', color: 'cyan' },
-                  { num: 4, label: 'Password Grant', desc: 'Legacy - user gives password to client', code: 'Avoid unless you control everything', color: 'yellow' },
+                  { num: 1, label: 'Authorization Code', desc: 'An toàn nhất - Dành cho Web Server', code: 'User đồng ý → Lấy Code → Đổi lấy Token', color: 'neon' },
+                  { num: 2, label: 'Implicit Flow', desc: 'ĐÃ KHAI TỬ - Token lộ trên URL', code: 'Dùng Auth Code + PKCE thay thế ngay', color: 'red' },
+                  { num: 3, label: 'Client Credentials', desc: 'Máy với Máy (Backend-to-Backend)', code: 'Client Auth → Lấy Token → Gọi API', color: 'cyan' },
+                  { num: 4, label: 'Password Grant', desc: 'Cấm kỵ - User đưa pass cho Client', code: 'Chỉ dùng cho app "nhà làm" tin tưởng tuyệt đối', color: 'yellow' },
                 ].map(step => (
                   <div key={step.num} className={`flex gap-4 p-3 rounded-lg bg-gray-950/50 border border-${step.color}-500/20 hover:border-${step.color}-500/40 transition-all`}>
                     <div className={`flex-shrink-0 w-8 h-8 bg-${step.color}-500 text-black rounded-full flex items-center justify-center font-black`}>
@@ -235,9 +293,9 @@ export default function OAuthLearnPage() {
               </div>
 
               <div className="mt-4 bg-purple-950/30 border-2 border-purple-500/30 rounded-lg p-4">
-                <h5 className="text-purple-300 font-bold mb-2">Modern Best Practice: Authorization Code + PKCE</h5>
+                <h5 className="text-purple-300 font-bold mb-2">Chuẩn Hiện Đại: Authorization Code + PKCE</h5>
                 <p className="text-sm text-gray-300">
-                  PKCE (Proof Key for Code Exchange) adds security even without client_secret. <strong>Required for mobile/SPA apps, recommended for ALL OAuth flows.</strong>
+                  PKCE (Proof Key for Code Exchange) giúp bảo mật ngay cả khi không có client_secret. <strong>Bắt buộc cho Mobile App & SPA, khuyến khích cho TẤT CẢ.</strong>
                 </p>
               </div>
             </SectionCard>
@@ -249,38 +307,66 @@ export default function OAuthLearnPage() {
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                <span className="text-neon-400 font-bold">Scopes</span> define WHAT the access token can do. Think of them as specific permissions on your visitor badge.
+                <span className="text-neon-400 font-bold">Scopes (Phạm Vi)</span> định nghĩa Access Token ĐƯỢC PHÉP làm gì. Giống như các dòng chữ ghi trên thẻ khách: "Chỉ được vào khu A", "Không được chụp ảnh".
               </p>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/oauth/scopes.png"
+                      alt="Realistic 3D Scopes Checklist"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.03_Phạm_Vi_Truy_Cập</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/oauth/scopes.png"
+                      alt="Realistic 3D Scopes Checklist"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-2 border-neon-500/30 rounded-lg overflow-hidden">
                   <thead className="bg-gray-900 border-b-2 border-neon-500/30">
                     <tr>
                       <th className="px-4 py-3 text-left text-neon-300 font-black">Scope</th>
-                      <th className="px-4 py-3 text-left text-neon-300 font-black">Permission</th>
-                      <th className="px-4 py-3 text-left text-neon-300 font-black">Risk Level</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Quyền Hạn</th>
+                      <th className="px-4 py-3 text-left text-neon-300 font-black">Mức Rủi Ro</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800">
                     <tr className="hover:bg-neon-500/5">
                       <td className="px-4 py-3 font-mono text-neon-400">read:profile</td>
-                      <td className="px-4 py-3 text-gray-300">View basic profile info</td>
-                      <td className="px-4 py-3"><Badge className="bg-green-500/20 text-green-300 border border-green-500/50">Low</Badge></td>
+                      <td className="px-4 py-3 text-gray-300">Xem thông tin cơ bản</td>
+                      <td className="px-4 py-3"><Badge className="bg-green-500/20 text-green-300 border border-green-500/50">Thấp</Badge></td>
                     </tr>
                     <tr className="hover:bg-neon-500/5">
                       <td className="px-4 py-3 font-mono text-cyan-400">read:email</td>
-                      <td className="px-4 py-3 text-gray-300">Access email address</td>
-                      <td className="px-4 py-3"><Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/50">Medium</Badge></td>
+                      <td className="px-4 py-3 text-gray-300">Xem địa chỉ email</td>
+                      <td className="px-4 py-3"><Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/50">Trung Bình</Badge></td>
                     </tr>
                     <tr className="hover:bg-neon-500/5">
                       <td className="px-4 py-3 font-mono text-purple-400">write:posts</td>
-                      <td className="px-4 py-3 text-gray-300">Create new posts</td>
-                      <td className="px-4 py-3"><Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/50">Medium</Badge></td>
+                      <td className="px-4 py-3 text-gray-300">Đăng bài viết mới</td>
+                      <td className="px-4 py-3"><Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/50">Trung Bình</Badge></td>
                     </tr>
                     <tr className="hover:bg-neon-500/5">
                       <td className="px-4 py-3 font-mono text-red-400">delete:account</td>
-                      <td className="px-4 py-3 text-gray-300">Delete user account</td>
-                      <td className="px-4 py-3"><Badge className="bg-red-500/20 text-red-300 border border-red-500/50">High</Badge></td>
+                      <td className="px-4 py-3 text-gray-300">Xóa tài khoản vĩnh viễn</td>
+                      <td className="px-4 py-3"><Badge className="bg-red-500/20 text-red-300 border border-red-500/50">Cao</Badge></td>
                     </tr>
                   </tbody>
                 </table>
@@ -295,46 +381,44 @@ export default function OAuthLearnPage() {
               isCompleted={progress.completedSections.includes(sections[3].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                OAuth uses <span className="text-neon-400 font-bold">TWO types of tokens</span> for enhanced security:
-              </p>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/30 rounded-lg p-4">
-                  <Key className="w-8 h-8 text-cyan-400 mb-3" />
-                  <h4 className="text-cyan-300 font-black mb-2">Access Token</h4>
-                  <p className="text-xs text-gray-400 mb-3">Short-lived visitor badge</p>
-                  <div className="space-y-1 text-xs">
-                    <div className="text-gray-300"><strong>Purpose:</strong> Access protected resources</div>
-                    <div className="text-gray-300"><strong>Lifetime:</strong> 15 min - 1 hour</div>
-                    <div className="text-gray-300"><strong>Storage:</strong> Memory/sessionStorage</div>
-                    <div className="text-green-400">+ Limited damage if stolen</div>
-                  </div>
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-neon-950/20 border border-neon-500/20 rounded-lg p-5">
+                  <h4 className="text-neon-400 font-bold flex items-center gap-2 mb-3">
+                    <Key className="w-5 h-5" />
+                    Access Token
+                  </h4>
+                  <ul className="text-sm space-y-2 text-gray-300">
+                    <li>• Như <strong className="text-white">Thẻ Khách Vào Cửa</strong></li>
+                    <li>• <span className="text-red-400">Thời hạn ngắn</span> (vd: 1 giờ)</li>
+                    <li>• Gửi kèm mỗi request lên API</li>
+                    <li>• Mất = Kẻ xấu dùng được ngay (cho đến khi hết hạn)</li>
+                  </ul>
                 </div>
-
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500/30 rounded-lg p-4">
-                  <Database className="w-8 h-8 text-purple-400 mb-3" />
-                  <h4 className="text-purple-300 font-black mb-2">Refresh Token</h4>
-                  <p className="text-xs text-gray-400 mb-3">Long-lived master key</p>
-                  <div className="space-y-1 text-xs">
-                    <div className="text-gray-300"><strong>Purpose:</strong> Get new access tokens</div>
-                    <div className="text-gray-300"><strong>Lifetime:</strong> Days, weeks, months</div>
-                    <div className="text-gray-300"><strong>Storage:</strong> HTTP-Only cookie</div>
-                    <div className="text-yellow-400">~ Can be revoked in database</div>
-                  </div>
+                <div className="bg-purple-950/20 border border-purple-500/20 rounded-lg p-5">
+                  <h4 className="text-purple-400 font-bold flex items-center gap-2 mb-3">
+                    <Database className="w-5 h-5" />
+                    Refresh Token
+                  </h4>
+                  <ul className="text-sm space-y-2 text-gray-300">
+                    <li>• Như <strong className="text-white">Vé Gia Hạn Thẻ</strong></li>
+                    <li>• <span className="text-green-400">Thời hạn dài</span> (vd: 30 ngày)</li>
+                    <li>• Chỉ dùng để xin Access Token mới</li>
+                    <li>• Lưu trữ cực kỳ bảo mật (HttpOnly Cookie)</li>
+                  </ul>
                 </div>
               </div>
 
-              <div className="mt-4 bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-4">
-                <h5 className="text-neon-300 font-bold mb-2">Why Two Tokens?</h5>
-                <ul className="space-y-1 text-sm text-gray-300">
-                  <li>• Access tokens used frequently → short-lived limits damage if stolen</li>
-                  <li>• Refresh tokens used rarely → lower theft risk, long-lived for UX</li>
-                  <li>• Refresh tokens can be revoked; access tokens cannot (stateless)</li>
-                </ul>
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <h5 className="text-gray-300 font-semibold mb-2 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-yellow-500" />
+                  Cơ chế tự động làm mới (Silent Refresh)
+                </h5>
+                <p className="text-sm text-gray-400">
+                  Khi Access Token hết hạn, ứng dụng sẽ âm thầm dùng Refresh Token để xin cấp lại Access Token mới mà người dùng không hề hay biết (không cần đăng nhập lại).
+                </p>
               </div>
 
-              <CodeBlock examples={codeExamples.refreshTokenFlow?.javascript || []} title="refresh-token-flow.js" />
+              <CodeBlock examples={codeExamples.refreshTokenFlow?.javascript || []} title="token-refresh-flow.js" />
             </SectionCard>
 
             {/* Section 5: State Parameter */}
@@ -617,30 +701,24 @@ export default function OAuthLearnPage() {
               </div>
             </SectionCard>
 
-            {/* Section 7: Security Scenarios */}
-            <div className="space-y-4">
-              <h2 className="text-3xl font-black uppercase tracking-wider text-white flex items-center gap-3">
-                <AlertCircle className="w-8 h-8 text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-                Security Breach Scenarios
+            {/* Security Scenarios */}
+            <section className="max-w-4xl mx-auto mb-16 px-6">
+              <h2 className="text-3xl font-bold mb-8 text-center text-neon-400 border-b border-neon-500/30 pb-4">
+                Tình Huống Bảo Mật Thực Tế
               </h2>
-              <p className="text-gray-300 leading-relaxed">
-                Learn from real-world <span className="text-red-400 font-bold">security breaches</span>.
-                Each scenario shows the attack, exploitation, and defense strategies.
-              </p>
-
-              <div className="space-y-4">
-                {securityScenarios.map(scenario => (
-                  <SecurityScenario key={scenario.id} {...scenario} />
+              <div className="grid md:grid-cols-2 gap-6">
+                {securityScenarios.map((scenario, index) => (
+                  <SecurityScenario key={index} {...scenario} />
                 ))}
               </div>
-            </div>
+            </section>
 
             {/* Live Demo Section */}
             <Card className="bg-gray-900/80 backdrop-blur border-2 border-purple-500/30 shadow-[0_0_40px_rgba(168,85,247,0.3)]">
               <CardHeader>
                 <CardTitle className="text-2xl font-black uppercase tracking-wider text-white flex items-center gap-2">
                   <Shield className="w-7 h-7 text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
-                  Live Demo: OAuth Authorization Flow
+                  Minh Họa: Luồng Ủy Quyền OAuth
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -648,7 +726,7 @@ export default function OAuthLearnPage() {
                   <div className="space-y-5">
                     <div className="bg-purple-950/30 border-2 border-purple-500/50 rounded-xl p-4">
                       <p className="text-sm text-purple-200 font-bold mb-2">
-                        Demo Client Configuration:
+                        Cấu hình Client Demo:
                       </p>
                       <div className="space-y-1 text-sm text-purple-100">
                         <p>Client ID: <code className="bg-gray-950 text-purple-300 px-2 py-0.5 rounded border border-purple-500/30">{clientId}</code></p>
@@ -665,11 +743,11 @@ export default function OAuthLearnPage() {
                       {isAuthorizing ? (
                         <>
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Redirecting to Authorization Server...
+                          Đang chuyển hướng đến Authorization Server...
                         </>
                       ) : (
                         <>
-                          Start OAuth Authorization
+                          Bắt đầu Ủy Quyền OAuth
                           <ArrowRight className="w-5 h-5 ml-2" />
                         </>
                       )}
@@ -682,10 +760,10 @@ export default function OAuthLearnPage() {
                     <div className="bg-gradient-to-br from-neon-950/50 to-emerald-950/50 border-2 border-neon-500 rounded-xl p-6">
                       <div className="flex items-center gap-3 mb-2">
                         <CheckCircle2 className="w-8 h-8 text-neon-400" />
-                        <h3 className="text-2xl font-bold text-neon-200">User Authorized!</h3>
+                        <h3 className="text-2xl font-bold text-neon-200">Đã Ủy Quyền Thành Công!</h3>
                       </div>
                       <p className="text-neon-100 text-lg">
-                        Received authorization code from provider
+                        Đã nhận được Authorization Code từ nhà cung cấp
                       </p>
                     </div>
 
@@ -702,7 +780,7 @@ export default function OAuthLearnPage() {
                             <span className="text-neon-400">code:</span> {authorizationCode}
                           </div>
                           <div className="text-gray-400 text-xs mt-2">
-                            {`// Single-use, expires in 10 minutes`}
+                            {`// Chỉ dùng 1 lần, hết hạn sau 10 phút`}
                           </div>
                         </div>
                       </CardContent>
@@ -716,11 +794,11 @@ export default function OAuthLearnPage() {
                       {isAuthorizing ? (
                         <>
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Exchanging Code for Token...
+                          Đang đổi Code lấy Token...
                         </>
                       ) : (
                         <>
-                          Exchange Code for Access Token
+                          Đổi Code Lấy Access Token
                           <ArrowRight className="w-5 h-5 ml-2" />
                         </>
                       )}
@@ -733,10 +811,10 @@ export default function OAuthLearnPage() {
                     <div className="bg-gradient-to-br from-neon-950/50 to-emerald-950/50 border-2 border-neon-500 rounded-xl p-6">
                       <div className="flex items-center gap-3 mb-2">
                         <CheckCircle2 className="w-8 h-8 text-neon-400" />
-                        <h3 className="text-2xl font-bold text-neon-200">Token Exchange Complete!</h3>
+                        <h3 className="text-2xl font-bold text-neon-200">Trao Đổi Token Hoàn Tất!</h3>
                       </div>
                       <p className="text-neon-100 text-lg">
-                        OAuth flow successful - access granted
+                        Quy trình OAuth thành công - Đã cấp quyền truy cập
                       </p>
                     </div>
 
@@ -753,20 +831,20 @@ export default function OAuthLearnPage() {
                             <span className="text-cyan-400">access_token:</span> {accessToken}
                           </div>
                           <div className="text-gray-400 text-xs mt-2">
-                            {`// Expires in 1 hour`}
+                            {`// Hết hạn sau 1 giờ`}
                           </div>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-700">
-                          <span className="text-gray-200 font-medium text-sm">Type:</span>
+                          <span className="text-gray-200 font-medium text-sm">Loại (Type):</span>
                           <Badge className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/50">Bearer</Badge>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-700">
-                          <span className="text-gray-200 font-medium text-sm">Scopes:</span>
+                          <span className="text-gray-200 font-medium text-sm">Phạm vi (Scopes):</span>
                           <span className="text-white text-sm">read:profile read:email</span>
                         </div>
                         <div className="flex justify-between items-center py-2">
-                          <span className="text-gray-200 font-medium text-sm">Expires In:</span>
-                          <span className="text-white text-sm">3600 seconds (1 hour)</span>
+                          <span className="text-gray-200 font-medium text-sm">Hết hạn sau:</span>
+                          <span className="text-white text-sm">3600 giây (1 giờ)</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -784,7 +862,7 @@ export default function OAuthLearnPage() {
                             <span className="text-purple-400">refresh_token:</span> {refreshToken}
                           </div>
                           <div className="text-gray-400 text-xs mt-2">
-                            {`// Use to get new access tokens when expired`}
+                            {`// Dùng để xin access token mới khi hết hạn`}
                           </div>
                         </div>
                       </CardContent>
@@ -795,7 +873,7 @@ export default function OAuthLearnPage() {
                       variant="secondary"
                       className="w-full py-6 bg-gray-800 hover:bg-gray-700 text-white border-2 border-gray-700"
                     >
-                      Reset Demo
+                      Làm Mới Demo
                     </Button>
                   </div>
                 )}
@@ -806,11 +884,11 @@ export default function OAuthLearnPage() {
             <div className="space-y-4">
               <h2 className="text-3xl font-black uppercase tracking-wider text-white flex items-center gap-3">
                 <Zap className="w-8 h-8 text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
-                Interactive Challenges
+                Thử Thách (Interactive Challenges)
               </h2>
               <p className="text-gray-300 leading-relaxed">
-                Test your OAuth 2.0 knowledge with real-world scenarios.
-                Complete challenges to earn XP and level up your security skills.
+                Kiểm tra kiến thức OAuth 2.0 của bạn với các tình huống thực tế.
+                Hoàn thành thử thách để nhận XP và nâng cấp kỹ năng bảo mật.
               </p>
 
               <div className="grid md:grid-cols-3 gap-4">

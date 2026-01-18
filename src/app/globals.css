@@ -15,6 +15,7 @@
     background-color: var(--color-background);
     transition: background-color var(--duration-base) var(--ease-in-out),
       color var(--duration-base) var(--ease-in-out);
+    font-size: 1.125rem; /* 18px base size */
   }
 
   /* Headings */
@@ -55,8 +56,10 @@
 
   /* Paragraphs */
   p {
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-4);
+    line-height: 1.8; /* Increased line height */
+    margin-bottom: var(--space-6); /* Increased spacing */
+    font-size: 1.125rem; /* Ensure 18px */
+    color: #d4d4d8; /* zinc-300 for better contrast */
   }
 
   /* Links */
@@ -366,5 +369,31 @@
       padding-left: var(--space-8);
       padding-right: var(--space-8);
     }
+  }
+
+  /* Surface Utilities */
+  .surface-base {
+    background-color: #1a1a1a;
+  }
+
+  .surface-elevated {
+    background-color: #2a2a2a;
+  }
+
+  .surface-overlay {
+    background-color: rgba(26, 26, 26, 0.9);
+  }
+
+  /* Border Utilities */
+  .border-subtle {
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .border-base {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .border-emphasis {
+    border-color: rgba(255, 255, 255, 0.2);
   }
 }

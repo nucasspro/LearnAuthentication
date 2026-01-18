@@ -6,21 +6,23 @@
 
 'use client';
 
+import { AchievementTracker } from '@/components/learning/AchievementTracker';
+import { ChallengeCard } from '@/components/learning/ChallengeCard';
+import { ProgressSidebar } from '@/components/learning/ProgressSidebar';
+import { SectionCard } from '@/components/learning/SectionCard';
+import { SecurityScenario } from '@/components/learning/SecurityScenario';
+import { StoryHeader } from '@/components/learning/StoryHeader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { ProgressSidebar } from '@/components/learning/ProgressSidebar';
-import { SectionCard } from '@/components/learning/SectionCard';
-import { SecurityScenario } from '@/components/learning/SecurityScenario';
-import { AchievementTracker } from '@/components/learning/AchievementTracker';
-import { ChallengeCard } from '@/components/learning/ChallengeCard';
-import { StoryHeader } from '@/components/learning/StoryHeader';
 import { jwtAuthContent } from '@/lib/content/jwt-auth';
-import { Section, ProgressData } from '@/lib/types';
+import { ProgressData, Section } from '@/lib/types';
 import { AlertCircle, ArrowRight, CheckCircle2, Clock, Database, FileText, Key, Lock, RefreshCw, Shield, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 export default function JWTLearnPage() {
   const [username, setUsername] = useState('admin');
@@ -54,15 +56,15 @@ export default function JWTLearnPage() {
   }, [progress]);
 
   const sections: Section[] = [
-    { id: 'section-1', title: 'The Digital Passport: What is JWT?', icon: 'FileText', category: 'essential', estimatedTime: 3 },
-    { id: 'section-2', title: 'Token Anatomy: The Three-Part Structure', icon: 'Package', category: 'essential', estimatedTime: 4 },
-    { id: 'section-3', title: 'The Authentication Flow', icon: 'Workflow', category: 'essential', estimatedTime: 3 },
-    { id: 'section-4', title: 'Refresh Token Pattern: Staying Logged In', icon: 'RotateCw', category: 'important', estimatedTime: 5 },
-    { id: 'section-5', title: 'Signing Algorithms: HS256 vs RS256', icon: 'Lock', category: 'important', estimatedTime: 5 },
-    { id: 'section-6', title: 'JWT vs Session: The Ultimate Showdown', icon: 'Swords', category: 'important', estimatedTime: 5 },
-    { id: 'section-7', title: 'Security Vulnerabilities & Attacks', icon: 'ShieldAlert', category: 'advanced', estimatedTime: 8 },
-    { id: 'section-8', title: 'Claims Management & Best Practices', icon: 'FileText', category: 'advanced', estimatedTime: 6 },
-    { id: 'section-9', title: 'Production Deployment Checklist', icon: 'Rocket', category: 'advanced', estimatedTime: 6 },
+    { id: 'section-1', title: 'The Digital Passport: What is JWT?', icon: 'FileText', category: 'concepts', estimatedTime: 3 },
+    { id: 'section-2', title: 'Token Anatomy: The Three-Part Structure', icon: 'Package', category: 'concepts', estimatedTime: 4 },
+    { id: 'section-3', title: 'The Authentication Flow', icon: 'Workflow', category: 'concepts', estimatedTime: 3 },
+    { id: 'section-4', title: 'Refresh Token Pattern: Staying Logged In', icon: 'RotateCw', category: 'system', estimatedTime: 5 },
+    { id: 'section-5', title: 'Signing Algorithms: HS256 vs RS256', icon: 'Lock', category: 'security', estimatedTime: 5 },
+    { id: 'section-6', title: 'JWT vs Session: The Ultimate Showdown', icon: 'Swords', category: 'concepts', estimatedTime: 5 },
+    { id: 'section-7', title: 'Security Vulnerabilities & Attacks', icon: 'ShieldAlert', category: 'security', estimatedTime: 8 },
+    { id: 'section-8', title: 'Claims Management & Best Practices', icon: 'FileText', category: 'best_practices', estimatedTime: 6 },
+    { id: 'section-9', title: 'Production Deployment Checklist', icon: 'Rocket', category: 'best_practices', estimatedTime: 6 },
   ];
 
   const handleSectionComplete = (sectionId: string) => {
@@ -146,17 +148,17 @@ export default function JWTLearnPage() {
   const challenges = jwtAuthContent.challenges;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-green-950 to-gray-950">
+    <div className="min-h-screen bg-transparent text-zinc-400 font-sans selection:bg-zinc-800 selection:text-white">
       <StoryHeader
-        title="DIGITAL SIGNATURE PROTOCOL"
+        title={jwtAuthContent.storyHook.title}
         narrative={
           <>
-            <span className="text-neon-400 font-bold">CYBERPUNK 2084:</span> {jwtAuthContent.storyHook.narrative}
+            <span className="text-neon-400 font-bold">{jwtAuthContent.storyHook.subtitle}:</span> {jwtAuthContent.storyHook.narrative}
           </>
         }
         icon={FileText}
-        clearanceLevel="Advanced Access"
-        status="ACTIVE"
+        clearanceLevel={jwtAuthContent.storyHook.clearanceLevel}
+        status={jwtAuthContent.storyHook.status}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -164,7 +166,7 @@ export default function JWTLearnPage() {
           {/* Sticky Sidebar */}
           <aside className="lg:sticky lg:top-32 lg:self-start">
             <ProgressSidebar
-              sections={sections}
+              sections={sections.map((s, i) => ({ ...s, title: jwtAuthContent.sections[i]?.title || s.title, category: jwtAuthContent.sections[i]?.category || s.category }))}
               progress={progress}
               onSectionClick={scrollToSection}
             />
@@ -175,55 +177,85 @@ export default function JWTLearnPage() {
             {/* Section 1: What is JWT */}
             <SectionCard
               {...sections[0]}
+              title={jwtAuthContent.sections[0].title}
+              category={jwtAuthContent.sections[0].category}
               isCompleted={progress.completedSections.includes(sections[0].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg">
-                JSON Web Token (JWT) is a <span className="text-neon-400 font-semibold">compact, URL-safe</span> means of
-                representing claims to be transferred between two parties. Unlike sessions, JWTs are <span className="text-cyan-400">stateless</span> -
-                all user information is encoded in the token itself.
+              <p className="text-lg text-zinc-300">
+                JSON Web Token (JWT) giống như một <span className="text-white font-bold">Hộ Chiếu Điện Tử</span>.
+                Khác với session (sổ hộ khẩu để ở phường), JWT được user <span className="text-white">tự mang theo</span> -
+                mọi thông tin định danh đều nằm gọn trong token.
               </p>
 
-              <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5 my-4">
-                <h4 className="text-neon-300 font-bold mb-3 flex items-center gap-2">
-                  <Key className="w-5 h-5" />
-                  The Digital Passport
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/jwt/concept-passport.png"
+                      alt="Anime Style Digital Passport"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.01_Hộ_Chiếu_Điện_Tử</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/jwt/concept-passport.png"
+                      alt="Anime Style Digital Passport"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <div className="bg-zinc-900/50 border border-zinc-800 p-6 my-6">
+                <h4 className="text-white font-bold mb-4 flex items-center gap-2 uppercase tracking-wide text-sm">
+                  <Key className="w-4 h-4" />
+                  Cơ Chế Hộ Chiếu Số
                 </h4>
-                <ul className="space-y-2 text-gray-300">
+                <ul className="space-y-3 text-zinc-400 text-sm">
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">1.</span>
-                    Server signs token with secret key (or private key)
+                    <span className="text-white font-bold font-mono">01.</span>
+                    Server ký đóng dấu token bằng secret key (hoặc private key)
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">2.</span>
-                    Token contains <span className="text-cyan-300 font-mono">user data + expiration</span>
+                    <span className="text-white font-bold font-mono">02.</span>
+                    Token chứa <span className="text-zinc-200 font-mono">data user + ngày hết hạn</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">3.</span>
-                    Client stores token (memory, localStorage, or httpOnly cookie)
+                    <span className="text-white font-bold font-mono">03.</span>
+                    Client lưu token (memory, localStorage, hoặc httpOnly cookie)
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">4.</span>
-                    Client sends token in <span className="text-yellow-300">Authorization header</span>
+                    <span className="text-white font-bold font-mono">04.</span>
+                    Client gửi token trong <span className="text-white">Authorization header</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">5.</span>
-                    Server validates signature - no database lookup needed
+                    <span className="text-white font-bold font-mono">05.</span>
+                    Server kiểm tra chữ ký - không cần tra cứu database
                   </li>
                 </ul>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-gray-950/50 border border-cyan-500/30 rounded-lg p-4">
-                  <h5 className="text-cyan-400 font-bold mb-2">Stateless</h5>
-                  <p className="text-sm text-gray-400">
-                    Token contains all data. Server just verifies signature.
+              <div className="grid md:grid-cols-2 gap-px bg-zinc-800 border border-zinc-800">
+                <div className="bg-black p-6">
+                  <h5 className="text-white font-bold mb-2 uppercase tracking-wider text-xs">Stateless</h5>
+                  <p className="text-sm text-zinc-500">
+                    Token chứa mọi dữ liệu. Server chỉ cần verify chữ ký.
                   </p>
                 </div>
-                <div className="bg-gray-950/50 border border-purple-500/30 rounded-lg p-4">
-                  <h5 className="text-purple-400 font-bold mb-2">Portable</h5>
-                  <p className="text-sm text-gray-400">
-                    Any server with the secret key can validate the token.
+                <div className="bg-black p-6">
+                  <h5 className="text-white font-bold mb-2 uppercase tracking-wider text-xs">Portable (Linh Hoạt)</h5>
+                  <p className="text-sm text-zinc-500">
+                    Bất kỳ server nào có secret key đều có thể validate token.
                   </p>
                 </div>
               </div>
@@ -232,42 +264,72 @@ export default function JWTLearnPage() {
             {/* Section 2: Token Anatomy */}
             <SectionCard
               {...sections[1]}
+              title={jwtAuthContent.sections[1].title}
+              category={jwtAuthContent.sections[1].category}
               isCompleted={progress.completedSections.includes(sections[1].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                Every JWT has exactly <span className="text-neon-400 font-bold">three parts</span> separated by dots (.).
-                Each part serves a specific purpose in the authentication dance.
+              <p className="text-lg mb-6 text-zinc-300">
+                Giống như cuốn hộ chiếu, JWT có đúng <span className="text-white font-bold">3 phần</span> ngăn cách bởi dấu chấm (.).
+                Mỗi phần đảm nhiệm một vai trò sống còn trong vũ điệu xác thực.
               </p>
 
-              <div className="space-y-3">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/jwt/structure.png"
+                      alt="Anime Style JWT Structure"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.02_Cấu_Trúc_Token_Chibi</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/jwt/structure.png"
+                      alt="Anime Style JWT Structure"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <div className="space-y-px bg-zinc-800 border border-zinc-800">
                 {[
-                  { num: 1, label: 'Header', desc: 'Algorithm and token type', code: '{ "alg": "HS256", "typ": "JWT" }', color: 'red' },
-                  { num: 2, label: 'Payload', desc: 'User data, claims, expiration', code: '{ "sub": "12345", "exp": 1735603200 }', color: 'blue' },
-                  { num: 3, label: 'Signature', desc: 'HMAC(header.payload, secret)', code: 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c', color: 'purple' },
+                  { num: 1, label: 'Header', desc: 'Algorithm and token type', code: '{ "alg": "HS256", "typ": "JWT" }', color: 'bg-zinc-900' },
+                  { num: 2, label: 'Payload', desc: 'User data, claims, expiration', code: '{ "sub": "12345", "exp": 1735603200 }', color: 'bg-zinc-900' },
+                  { num: 3, label: 'Signature', desc: 'HMAC(header.payload, secret)', code: 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c', color: 'bg-zinc-900' },
                 ].map(step => (
-                  <div key={step.num} className={`flex gap-4 p-3 rounded-lg bg-gray-950/50 border border-${step.color}-500/20 hover:border-${step.color}-500/40 transition-all`}>
-                    <div className={`flex-shrink-0 w-8 h-8 bg-${step.color}-500 text-white rounded-full flex items-center justify-center font-black`}>
+                  <div key={step.num} className="flex gap-6 p-6 bg-black hover:bg-zinc-900/50 transition-colors group">
+                    <div className="flex-shrink-0 w-8 h-8 border border-zinc-700 text-zinc-500 group-hover:text-white group-hover:border-white rounded-none flex items-center justify-center font-bold font-mono transition-colors">
                       {step.num}
                     </div>
                     <div className="flex-1">
-                      <div className={`text-${step.color}-300 font-bold text-sm`}>{step.label}</div>
-                      <div className="text-gray-400 text-xs mt-0.5">{step.desc}</div>
-                      <code className="text-xs text-cyan-300 font-mono mt-1 block break-all">{step.code}</code>
+                      <div className="text-white font-bold text-sm uppercase tracking-wider mb-1">{step.label}</div>
+                      <div className="text-zinc-500 text-xs mb-3">{step.desc}</div>
+                      <code className="text-xs text-zinc-300 font-mono block break-all bg-zinc-900/50 p-2 border border-zinc-800">{step.code}</code>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-4 bg-red-950/30 border-2 border-red-500/50 rounded-lg p-4">
-                <h5 className="text-red-300 font-bold mb-2 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5" />
-                  Critical Security Note
+              <div className="mt-6 bg-zinc-900/30 border-l-2 border-l-red-500 border-y border-r border-zinc-800 p-6">
+                <h5 className="text-red-500 font-bold mb-2 flex items-center gap-2 uppercase tracking-wider text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  Lưu Ý Bảo Mật Chết Người
                 </h5>
-                <p className="text-sm text-gray-300">
-                  Base64 is <span className="text-red-400 font-bold">encoding, NOT encryption</span>. Anyone can decode
-                  the payload and read claims. The signature prevents <span className="text-neon-400">tampering</span>, not reading.
-                  Never put passwords or secrets in JWT payload!
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  Base64 là <span className="text-white font-bold">mã hóa (encoding), KHÔNG phải encryption</span>. Bất kỳ ai
+                  cũng có thể giải mã và đọc payload. Chữ ký (Signature) chỉ ngăn <span className="text-white">chỉnh sửa</span>, không ngăn đọc.
+                  Tuyệt đối KHÔNG để password hay thông tin mật trong JWT payload!
                 </p>
               </div>
             </SectionCard>
@@ -275,44 +337,45 @@ export default function JWTLearnPage() {
             {/* Section 3: Authentication Flow */}
             <SectionCard
               {...sections[2]}
+              title={jwtAuthContent.sections[2].title}
+              category={jwtAuthContent.sections[2].category}
               isCompleted={progress.completedSections.includes(sections[2].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                JWT authentication follows a different pattern than sessions. Instead of creating server-side state,
-                the server issues a <span className="text-neon-400 font-bold">signed token</span> and the client stores it.
+              <p className="text-lg mb-6 text-zinc-300">
+                Quy trình xác thực JWT khác hoàn toàn với Session. Thay vì tạo ra "sổ lưu trú" ở server,
+                server cấp một <span className="text-white font-bold">giấy thông hành có chữ ký</span> (token) và client tự giữ lấy.
               </p>
 
-              <div className="space-y-3">
+              <div className="space-y-px bg-zinc-800 border border-zinc-800">
                 {[
-                  { num: 1, label: 'Client → Server', desc: 'User submits credentials', code: '{ username, password }' },
-                  { num: 2, label: 'Server validates', desc: 'Compares bcrypt hash against database', code: 'bcrypt.compare(password, hash)' },
-                  { num: 3, label: 'Generate JWT', desc: 'Create token with user claims', code: 'jwt.sign({ sub: userId }, secret)' },
-                  { num: 4, label: 'Sign token', desc: 'HMAC signature with secret key', code: 'HMACSHA256(header.payload, secret)' },
-                  { num: 5, label: 'Server → Client', desc: 'Return JWT in response body', code: '{ token: "eyJhbGci..." }' },
-                  { num: 6, label: 'Client stores', desc: 'Memory, sessionStorage, httpOnly cookie', code: 'Authorization: Bearer <token>' },
-                  { num: 7, label: 'Client sends token', desc: 'Include in Authorization header', code: 'Authorization: Bearer eyJhbGci...' },
-                  { num: 8, label: 'Server verifies', desc: 'Check signature & expiration', code: 'jwt.verify(token, secret)' },
+                  { num: 1, label: 'Client → Server', desc: 'User gửi thông tin đăng nhập', code: '{ username, password }' },
+                  { num: 2, label: 'Server Kiểm Tra', desc: 'So sánh hash password với database', code: 'bcrypt.compare(password, hash)' },
+                  { num: 3, label: 'Tạo JWT', desc: 'Tạo token chứa thông tin user', code: 'jwt.sign({ sub: userId }, secret)' },
+                  { num: 4, label: 'Ký Tên (Sign)', desc: 'Tạo chữ ký HMAC với secret key', code: 'HMACSHA256(header.payload, secret)' },
+                  { num: 5, label: 'Server → Client', desc: 'Trả về JWT trong response', code: '{ token: "eyJhbGci..." }' },
+                  { num: 6, label: 'Client Lưu Trữ', desc: 'Lưu vào Memory, LocalStorage hoặc Cookie', code: 'Authorization: Bearer <token>' },
+                  { num: 7, label: 'Client Gửi Token', desc: 'Gửi kèm token trong Header mỗi request', code: 'Authorization: Bearer eyJhbGci...' },
+                  { num: 8, label: 'Server Xác Thực', desc: 'Kiểm tra chữ ký & hạn dùng', code: 'jwt.verify(token, secret)' },
                 ].map(step => (
-                  <div key={step.num} className="flex gap-4 p-3 rounded-lg bg-gray-950/50 border border-neon-500/20 hover:border-neon-500/40 transition-all">
-                    <div className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-black">
+                  <div key={step.num} className="flex gap-4 p-4 bg-black hover:bg-zinc-900/50 transition-colors border-l-2 border-l-transparent hover:border-l-white">
+                    <div className="flex-shrink-0 w-6 h-6 bg-zinc-900 text-zinc-400 border border-zinc-700 flex items-center justify-center text-xs font-bold font-mono">
                       {step.num}
                     </div>
                     <div className="flex-1">
-                      <div className="text-neon-300 font-bold text-sm">{step.label}</div>
-                      <div className="text-gray-400 text-xs mt-0.5">{step.desc}</div>
-                      <code className="text-xs text-cyan-300 font-mono mt-1 block">{step.code}</code>
+                      <div className="text-white font-bold text-sm uppercase tracking-wide mb-1">{step.label}</div>
+                      <div className="text-zinc-500 text-xs mb-2">{step.desc}</div>
+                      <code className="text-[10px] text-zinc-400 font-mono block bg-zinc-950 p-1.5 border border-zinc-900">{step.code}</code>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-4 bg-cyan-950/30 border-2 border-cyan-500/50 rounded-lg p-4">
-                <h5 className="text-cyan-300 font-bold mb-2">Key Insight</h5>
-                <p className="text-sm text-gray-300">
-                  Notice there&apos;s <span className="text-neon-400 font-bold">no database lookup</span> in steps 6-8.
-                  The server just verifies the signature. This is why JWT is &quot;stateless&quot; - all authentication
-                  data lives in the token itself.
+              <div className="mt-6 bg-zinc-900/30 border border-zinc-800 p-6">
+                <h5 className="text-zinc-300 font-bold mb-2 uppercase tracking-wider text-sm">Điểm Mấu Chốt</h5>
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  Chú ý rằng <span className="text-white font-bold">không có bước tra cứu database</span> ở bước 6-8.
+                  Server chỉ cần tính toán chữ ký để xác thực. Đây chính là lý do JWT được gọi là "stateless" (không trạng thái).
                 </p>
               </div>
             </SectionCard>
@@ -320,75 +383,71 @@ export default function JWTLearnPage() {
             {/* Section 4: Refresh Token Pattern */}
             <SectionCard
               {...sections[3]}
+              title={jwtAuthContent.sections[3].title}
+              category={jwtAuthContent.sections[3].category}
               isCompleted={progress.completedSections.includes(sections[3].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                Short-lived access tokens (15 minutes) are secure but annoying. <span className="text-neon-400 font-bold">Refresh tokens</span> solve
-                this: long-lived tokens (7 days) that can request new access tokens without re-authentication.
+              <p className="text-lg mb-6 text-zinc-300">
+                Access token ngắn hạn (15 phút) an toàn nhưng phiền toái. <span className="text-white font-bold">Refresh token</span> giải quyết
+                việc này: token dài hạn (7 ngày) dùng để xin cấp lại access token mới mà không cần đăng nhập lại.
               </p>
 
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-blue-500/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Clock className="w-6 h-6 text-blue-400" />
-                    <h4 className="text-blue-300 font-black">Access Token</h4>
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="bg-zinc-900 border border-zinc-800 p-6 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rotate-45 translate-x-12 -translate-y-12 blur-2xl group-hover:bg-white/10 transition-colors"></div>
+                  <div className="flex items-center gap-3 mb-4 relative z-10">
+                    <Clock className="w-5 h-5 text-white" />
+                    <h4 className="text-white font-bold uppercase tracking-wider text-sm">Access Token</h4>
                   </div>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Lifespan:</span>
-                      <span className="text-blue-300 font-bold">15 minutes</span>
+                  <div className="space-y-3 text-xs relative z-10 border-t border-zinc-800 pt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 uppercase tracking-wide">Thời Hạn</span>
+                      <span className="text-white font-bold font-mono">15 PHÚT</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Purpose:</span>
-                      <span className="text-white">API requests</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 uppercase tracking-wide">Mục Đích</span>
+                      <span className="text-zinc-300 text-right">Gọi API</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Storage:</span>
-                      <span className="text-white">Memory</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Risk if stolen:</span>
-                      <span className="text-green-400">Limited window</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 uppercase tracking-wide">Lưu Trữ</span>
+                      <span className="text-zinc-300 text-right">Memory (RAM)</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <RefreshCw className="w-6 h-6 text-purple-400" />
-                    <h4 className="text-purple-300 font-black">Refresh Token</h4>
+                <div className="bg-zinc-900 border border-zinc-800 p-6 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-zinc-700/20 rotate-45 translate-x-12 -translate-y-12 blur-2xl group-hover:bg-zinc-700/30 transition-colors"></div>
+                  <div className="flex items-center gap-3 mb-4 relative z-10">
+                    <RefreshCw className="w-5 h-5 text-zinc-400" />
+                    <h4 className="text-zinc-300 font-bold uppercase tracking-wider text-sm">Refresh Token</h4>
                   </div>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Lifespan:</span>
-                      <span className="text-purple-300 font-bold">7 days</span>
+                  <div className="space-y-3 text-xs relative z-10 border-t border-zinc-800 pt-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 uppercase tracking-wide">Thời Hạn</span>
+                      <span className="text-zinc-300 font-bold font-mono">7 NGÀY</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Purpose:</span>
-                      <span className="text-white">Get new access</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 uppercase tracking-wide">Mục Đích</span>
+                      <span className="text-zinc-400 text-right">Cấp Mới Access Token</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Storage:</span>
-                      <span className="text-white">httpOnly cookie</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Security:</span>
-                      <span className="text-green-400">Can be revoked</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 uppercase tracking-wide">Lưu Trữ</span>
+                      <span className="text-zinc-400 text-right">httpOnly Cookie</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-4">
-                <h5 className="text-neon-300 font-bold mb-2">The Flow</h5>
-                <ol className="space-y-2 text-sm text-gray-300">
-                  <li>1. Login → Receive both access token + refresh token</li>
-                  <li>2. Use access token for API requests</li>
-                  <li>3. Access token expires after 15 minutes</li>
-                  <li>4. Send refresh token to <code className="text-cyan-300 font-mono">/refresh</code> endpoint</li>
-                  <li>5. Receive new access token (and optionally new refresh token)</li>
-                  <li>6. Continue using new access token</li>
+              <div className="bg-black border border-white/10 p-6">
+                <h5 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Giao Thức Tuần Tự</h5>
+                <ol className="space-y-2 text-sm text-zinc-400 list-decimal list-inside font-mono">
+                  <li>Đăng nhập → Nhận cả access token + refresh token</li>
+                  <li>Dùng access token để gọi API</li>
+                  <li>Access token hết hạn sau 15 phút</li>
+                  <li>Gửi refresh token đến endpoint <code className="text-zinc-300">/refresh</code></li>
+                  <li>Nhận access token mới (và có thể cả refresh token mới)</li>
+                  <li>Tiếp tục dùng access token mới</li>
                 </ol>
               </div>
             </SectionCard>
@@ -396,44 +455,44 @@ export default function JWTLearnPage() {
             {/* Section 5: Signing Algorithms */}
             <SectionCard
               {...sections[4]}
+              title={jwtAuthContent.sections[4].title}
+              category={jwtAuthContent.sections[4].category}
               isCompleted={progress.completedSections.includes(sections[4].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                JWT supports multiple signing algorithms. The two most common are <span className="text-neon-400 font-bold">HS256</span> (symmetric)
-                and <span className="text-cyan-400 font-bold">RS256</span> (asymmetric).
+              <p className="text-lg mb-6 text-zinc-300">
+                JWT hỗ trợ nhiều thuật toán ký. Hai loại phổ biến nhất là <span className="text-white font-bold">HS256</span> (đối xứng)
+                và <span className="text-white font-bold">RS256</span> (bất đối xứng).
               </p>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-neon-950/30 to-green-950/30 border-2 border-neon-500/30 rounded-lg p-5">
-                  <h4 className="text-neon-300 font-black text-lg mb-3">HS256 (Symmetric)</h4>
-                  <p className="text-gray-300 mb-3 text-sm">
-                    Same secret key used for <span className="text-neon-400">signing AND verification</span>
+              <div className="grid md:grid-cols-2 gap-px bg-zinc-800 border border-zinc-800">
+                <div className="bg-black p-6 hover:bg-zinc-900/30 transition-colors">
+                  <h4 className="text-white font-bold uppercase tracking-wide text-sm mb-4 border-b border-zinc-800 pb-2">HS256 (Symmetric)</h4>
+                  <p className="text-zinc-400 mb-4 text-xs leading-relaxed">
+                    Dùng chung một secret key cho cả <span className="text-white">ký (sign) VÀ kiểm tra (verify)</span>
                   </p>
-                  <div className="space-y-1 text-xs">
-                    <div className="text-green-400">+ Simpler, faster, less overhead</div>
-                    <div className="text-green-400">+ Perfect for single application</div>
-                    <div className="text-red-400">- Anyone who can verify can create tokens</div>
-                    <div className="text-red-400">- Secret must be shared across services</div>
+                  <div className="space-y-2 text-[10px] uppercase font-bold tracking-wider">
+                    <div className="text-emerald-500">+ Đơn giản, nhanh</div>
+                    <div className="text-emerald-500">+ Ứng dụng đơn lẻ</div>
+                    <div className="text-red-500">- Rủi ro lộ Secret Key</div>
                   </div>
-                  <Badge className="mt-3 bg-neon-500/20 text-neon-300 border border-neon-500/50 text-xs">
-                    Use case: Monolithic apps
+                  <Badge className="mt-4 bg-zinc-900 text-zinc-300 border border-zinc-700 text-[10px] uppercase rounded-none tracking-widest">
+                    Phù hợp: Monoliths
                   </Badge>
                 </div>
 
-                <div className="bg-gradient-to-br from-cyan-950/30 to-blue-950/30 border-2 border-cyan-500/30 rounded-lg p-5">
-                  <h4 className="text-cyan-300 font-black text-lg mb-3">RS256 (Asymmetric)</h4>
-                  <p className="text-gray-300 mb-3 text-sm">
-                    Private key for signing, <span className="text-cyan-400">public key for verification</span>
+                <div className="bg-black p-6 hover:bg-zinc-900/30 transition-colors">
+                  <h4 className="text-white font-bold uppercase tracking-wide text-sm mb-4 border-b border-zinc-800 pb-2">RS256 (Asymmetric)</h4>
+                  <p className="text-zinc-400 mb-4 text-xs leading-relaxed">
+                    Private key để ký, <span className="text-white">Public key để kiểm tra</span>
                   </p>
-                  <div className="space-y-1 text-xs">
-                    <div className="text-green-400">+ Only auth server needs private key</div>
-                    <div className="text-green-400">+ API servers use public key (safe to share)</div>
-                    <div className="text-yellow-400">~ Slower signature verification</div>
-                    <div className="text-yellow-400">~ More complex key management</div>
+                  <div className="space-y-2 text-[10px] uppercase font-bold tracking-wider">
+                    <div className="text-emerald-500">+ Bảo mật Key tốt hơn</div>
+                    <div className="text-emerald-500">+ Ai cũng verify được</div>
+                    <div className="text-zinc-500">~ Phức tạp hơn</div>
                   </div>
-                  <Badge className="mt-3 bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 text-xs">
-                    Use case: Microservices, OAuth
+                  <Badge className="mt-4 bg-zinc-900 text-zinc-300 border border-zinc-700 text-[10px] uppercase rounded-none tracking-widest">
+                    Phù hợp: Microservices
                   </Badge>
                 </div>
               </div>
@@ -442,71 +501,72 @@ export default function JWTLearnPage() {
             {/* Section 6: JWT vs Session */}
             <SectionCard
               {...sections[5]}
+              title={jwtAuthContent.sections[5].title}
+              category={jwtAuthContent.sections[5].category}
               isCompleted={progress.completedSections.includes(sections[5].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                Choosing between JWT and sessions is one of the most debated topics. Understanding the
-                <span className="text-neon-400 font-bold"> trade-offs</span> is critical for making the right choice.
+              <p className="text-lg mb-6 text-zinc-300">
+                Chọn JWT hay Session là chủ đề tranh luận muôn thuở. Hiểu rõ <span className="text-white font-bold">sự đánh đổi (trade-offs)</span> là chìa khóa để chọn đúng công cụ.
               </p>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-2 border-neon-500/30 rounded-lg overflow-hidden">
-                  <thead className="bg-gray-900 border-b-2 border-neon-500/30">
+              <div className="overflow-x-auto border border-zinc-800 mb-6">
+                <table className="w-full text-sm">
+                  <thead className="bg-zinc-900 border-b border-zinc-800">
                     <tr>
-                      <th className="px-4 py-3 text-left text-neon-300 font-black">Factor</th>
-                      <th className="px-4 py-3 text-left text-cyan-400 font-black">JWT</th>
-                      <th className="px-4 py-3 text-left text-purple-400 font-black">Session</th>
+                      <th className="px-4 py-3 text-left text-zinc-500 font-bold uppercase tracking-wider text-xs">Factor</th>
+                      <th className="px-4 py-3 text-left text-white font-bold uppercase tracking-wider text-xs">JWT</th>
+                      <th className="px-4 py-3 text-left text-zinc-400 font-bold uppercase tracking-wider text-xs">Session</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800">
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">State</td>
-                      <td className="px-4 py-3 text-cyan-300">Stateless (token has all data)</td>
-                      <td className="px-4 py-3 text-purple-300">Stateful (server stores data)</td>
+                  <tbody className="divide-y divide-zinc-800">
+                    <tr className="hover:bg-zinc-900/30 bg-black">
+                      <td className="px-4 py-3 font-bold text-zinc-400">Trạng Thái</td>
+                      <td className="px-4 py-3 text-white">Stateless (Token chứa data)</td>
+                      <td className="px-4 py-3 text-zinc-500">Stateful (Server lưu data)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Scalability</td>
-                      <td className="px-4 py-3 text-green-400">Easy horizontal scaling</td>
-                      <td className="px-4 py-3 text-yellow-400">Requires shared session store</td>
+                    <tr className="hover:bg-zinc-900/30 bg-black">
+                      <td className="px-4 py-3 font-bold text-zinc-400">Scale Ngang</td>
+                      <td className="px-4 py-3 text-emerald-500">Dễ (Không cần DB chung)</td>
+                      <td className="px-4 py-3 text-zinc-500">Khó (Cần Redis/DB chung)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Revocation</td>
-                      <td className="px-4 py-3 text-red-400">Hard (need blacklist)</td>
-                      <td className="px-4 py-3 text-green-400">Instant (delete from DB)</td>
+                    <tr className="hover:bg-zinc-900/30 bg-black">
+                      <td className="px-4 py-3 font-bold text-zinc-400">Thu Hồi (Revoke)</td>
+                      <td className="px-4 py-3 text-red-500">Khó (Cần blacklist)</td>
+                      <td className="px-4 py-3 text-emerald-500">Tức thì (Xóa khỏi DB)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Mobile Apps</td>
-                      <td className="px-4 py-3 text-green-400">Simple Authorization header</td>
-                      <td className="px-4 py-3 text-yellow-400">Cookie handling tricky</td>
+                    <tr className="hover:bg-zinc-900/30 bg-black">
+                      <td className="px-4 py-3 font-bold text-zinc-400">Mobile Apps</td>
+                      <td className="px-4 py-3 text-emerald-500">Dễ (Header Authorization)</td>
+                      <td className="px-4 py-3 text-zinc-500">Khó (Cookie management)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Security</td>
-                      <td className="px-4 py-3 text-yellow-400">Token lives in client storage</td>
-                      <td className="px-4 py-3 text-green-400">Server controls everything</td>
+                    <tr className="hover:bg-zinc-900/30 bg-black">
+                      <td className="px-4 py-3 font-bold text-zinc-400">Bảo Mật</td>
+                      <td className="px-4 py-3 text-zinc-500">Token ở client (nguy cơ XSS)</td>
+                      <td className="px-4 py-3 text-emerald-500">Server kiểm soát hoàn toàn</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div className="mt-6 grid md:grid-cols-2 gap-4">
-                <div className="bg-cyan-950/30 border-2 border-cyan-500/30 rounded-lg p-4">
-                  <h4 className="text-cyan-300 font-black mb-3">Use JWT When:</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Building mobile/SPA apps</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Microservices architecture</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Cross-domain authentication</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Scalability matters more</li>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="border border-white/10 p-4 bg-zinc-950/50">
+                  <h4 className="text-white font-bold mb-3 uppercase tracking-wider text-xs">Dùng JWT Khi:</h4>
+                  <ul className="space-y-2 text-xs text-zinc-400">
+                    <li className="flex gap-2"><CheckCircle2 className="w-3 h-3 text-white flex-shrink-0 mt-0.5" /> Mobile App / SPA (React, Vue)</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-3 h-3 text-white flex-shrink-0 mt-0.5" /> Kiến trúc Microservices</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-3 h-3 text-white flex-shrink-0 mt-0.5" /> Cross-domain authentication</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-3 h-3 text-white flex-shrink-0 mt-0.5" /> Cần scale hệ thống lớn</li>
                   </ul>
                 </div>
 
-                <div className="bg-purple-950/30 border-2 border-purple-500/30 rounded-lg p-4">
-                  <h4 className="text-purple-300 font-black mb-3">Use Session When:</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" /> Traditional web apps with SSR</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" /> Need instant logout/revocation</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" /> Security is top priority</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" /> Single domain application</li>
+                <div className="border border-zinc-800 p-4 bg-black">
+                  <h4 className="text-zinc-500 font-bold mb-3 uppercase tracking-wider text-xs">Dùng Session Khi:</h4>
+                  <ul className="space-y-2 text-xs text-zinc-500">
+                    <li className="flex gap-2"><CheckCircle2 className="w-3 h-3 text-zinc-600 flex-shrink-0 mt-0.5" /> Web truyền thống (SSR, MVC)</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-3 h-3 text-zinc-600 flex-shrink-0 mt-0.5" /> Cần chức năng "Logout từ xa"</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-3 h-3 text-zinc-600 flex-shrink-0 mt-0.5" /> Bảo mật là ưu tiên số 1</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-3 h-3 text-zinc-600 flex-shrink-0 mt-0.5" /> Ứng dụng nội bộ đơn giản</li>
                   </ul>
                 </div>
               </div>
@@ -515,13 +575,46 @@ export default function JWTLearnPage() {
             {/* Section 7: Security Scenarios */}
             <SectionCard
               {...sections[6]}
+              title={jwtAuthContent.sections[6].title}
+              category={jwtAuthContent.sections[6].category}
               isCompleted={progress.completedSections.includes(sections[6].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                JWT is powerful but not bulletproof. Several <span className="text-red-400 font-bold">critical vulnerabilities</span> have
-                plagued real-world implementations. Understanding these attacks is essential for secure JWT usage.
+              <p className="text-lg mb-6 text-zinc-300">
+                JWT rất mạnh mẽ nhưng không phải "đạn bạc". Rất nhiều <span className="text-white font-bold">lỗ hổng nghiêm trọng</span> đã
+                xảy ra trong thực tế. Hiểu rõ cách tấn công là cách tốt nhất để phòng thủ.
               </p>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/jwt/security.png"
+                      alt="Anime Style Security Check"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <p className="text-sm font-mono text-red-500 font-bold uppercase tracking-wider">Warning: Fake_Token_Detected</p>
+                      </div>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/jwt/security.png"
+                      alt="Anime Style Security Check"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="space-y-4">
                 {securityScenarios.map(scenario => (
@@ -533,197 +626,202 @@ export default function JWTLearnPage() {
             {/* Section 8: Claims Management */}
             <SectionCard
               {...sections[7]}
+              title={jwtAuthContent.sections[7].title}
+              category={jwtAuthContent.sections[7].category}
               isCompleted={progress.completedSections.includes(sections[7].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                JWT claims are the payload data. Choosing what to include - and what to <span className="text-red-400 font-bold">EXCLUDE</span> -
-                is critical for both security and performance.
+              <p className="text-lg mb-6 text-zinc-300">
+                JWT claims là dữ liệu trong payload. Chọn những gì để đưa vào - và những gì <span className="text-white font-bold">CẦN TRÁNH</span> -
+                là rất quan trọng cho cả bảo mật và hiệu năng.
               </p>
 
-              <div className="grid md:grid-cols-3 gap-4 mb-4">
-                <div className="bg-gradient-to-br from-blue-950/30 to-cyan-950/30 border-2 border-blue-500/30 rounded-lg p-4">
-                  <h4 className="text-blue-300 font-black mb-3 text-sm">Standard Claims</h4>
-                  <div className="space-y-2 text-xs">
-                    <div className="border-l-2 border-blue-500/50 pl-2">
-                      <code className="text-blue-300 font-mono font-bold">iss</code>
-                      <p className="text-gray-400">Issuer (auth server URL)</p>
+              <div className="grid md:grid-cols-3 gap-px bg-zinc-800 border border-zinc-800 mb-6">
+                <div className="p-6 bg-black hover:bg-zinc-900/30 transition-colors">
+                  <h4 className="text-white font-bold mb-4 text-xs uppercase tracking-wider">Chuẩn (Standard Claims)</h4>
+                  <div className="space-y-4 text-xs">
+                    <div className="border-l-2 border-zinc-700 pl-3">
+                      <code className="text-white font-mono font-bold block mb-1">iss</code>
+                      <p className="text-zinc-500">Issuer (Nơi phát hành)</p>
                     </div>
-                    <div className="border-l-2 border-blue-500/50 pl-2">
-                      <code className="text-blue-300 font-mono font-bold">sub</code>
-                      <p className="text-gray-400">Subject (user ID)</p>
+                    <div className="border-l-2 border-zinc-700 pl-3">
+                      <code className="text-white font-mono font-bold block mb-1">sub</code>
+                      <p className="text-zinc-500">Subject (User ID)</p>
                     </div>
-                    <div className="border-l-2 border-blue-500/50 pl-2">
-                      <code className="text-blue-300 font-mono font-bold">exp</code>
-                      <p className="text-gray-400">Expiration timestamp</p>
+                    <div className="border-l-2 border-zinc-700 pl-3">
+                      <code className="text-white font-mono font-bold block mb-1">exp</code>
+                      <p className="text-zinc-500">Hạn sử dụng</p>
                     </div>
-                    <div className="border-l-2 border-blue-500/50 pl-2">
-                      <code className="text-blue-300 font-mono font-bold">iat</code>
-                      <p className="text-gray-400">Issued at timestamp</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-neon-950/30 to-green-950/30 border-2 border-neon-500/30 rounded-lg p-4">
-                  <h4 className="text-neon-300 font-black mb-3 text-sm">Custom Claims</h4>
-                  <div className="space-y-2 text-xs">
-                    <div className="border-l-2 border-neon-500/50 pl-2">
-                      <code className="text-neon-300 font-mono font-bold">email</code>
-                      <p className="text-gray-400">User&apos;s email address</p>
-                    </div>
-                    <div className="border-l-2 border-neon-500/50 pl-2">
-                      <code className="text-neon-300 font-mono font-bold">role</code>
-                      <p className="text-gray-400">User&apos;s role (admin, user)</p>
-                    </div>
-                    <div className="border-l-2 border-neon-500/50 pl-2">
-                      <code className="text-neon-300 font-mono font-bold">permissions</code>
-                      <p className="text-gray-400">Array of permissions</p>
-                    </div>
-                    <div className="border-l-2 border-neon-500/50 pl-2">
-                      <code className="text-neon-300 font-mono font-bold">tenant_id</code>
-                      <p className="text-gray-400">Multi-tenant identifier</p>
+                    <div className="border-l-2 border-zinc-700 pl-3">
+                      <code className="text-white font-mono font-bold block mb-1">iat</code>
+                      <p className="text-zinc-500">Thời điểm phát hành</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-red-950/30 to-orange-950/30 border-2 border-red-500/30 rounded-lg p-4">
-                  <h4 className="text-red-300 font-black mb-3 text-sm">NEVER Include</h4>
-                  <div className="space-y-2 text-xs">
-                    <div className="border-l-2 border-red-500/50 pl-2">
-                      <span className="text-red-400">✗</span>
-                      <p className="text-gray-400">Passwords or hashes</p>
+                <div className="p-6 bg-black hover:bg-zinc-900/30 transition-colors">
+                  <h4 className="text-emerald-500 font-bold mb-4 text-xs uppercase tracking-wider">Tùy Biến (Custom Claims)</h4>
+                  <div className="space-y-4 text-xs">
+                    <div className="border-l-2 border-emerald-900 pl-3">
+                      <code className="text-emerald-400 font-mono font-bold block mb-1">email</code>
+                      <p className="text-zinc-500">Email người dùng</p>
                     </div>
-                    <div className="border-l-2 border-red-500/50 pl-2">
-                      <span className="text-red-400">✗</span>
-                      <p className="text-gray-400">SSN, PII, sensitive data</p>
+                    <div className="border-l-2 border-emerald-900 pl-3">
+                      <code className="text-emerald-400 font-mono font-bold block mb-1">role</code>
+                      <p className="text-zinc-500">Vai trò (Admin/User)</p>
                     </div>
-                    <div className="border-l-2 border-red-500/50 pl-2">
-                      <span className="text-red-400">✗</span>
-                      <p className="text-gray-400">Credit card information</p>
+                    <div className="border-l-2 border-emerald-900 pl-3">
+                      <code className="text-emerald-400 font-mono font-bold block mb-1">permissions</code>
+                      <p className="text-zinc-500">Danh sách quyền</p>
                     </div>
-                    <div className="border-l-2 border-red-500/50 pl-2">
-                      <span className="text-red-400">✗</span>
-                      <p className="text-gray-400">Large data sets (&gt;8KB)</p>
+                    <div className="border-l-2 border-emerald-900 pl-3">
+                      <code className="text-emerald-400 font-mono font-bold block mb-1">tenant_id</code>
+                      <p className="text-zinc-500">ID tổ chức (SaaS)</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-black hover:bg-zinc-900/30 transition-colors">
+                  <h4 className="text-red-500 font-bold mb-4 text-xs uppercase tracking-wider">CẤM (NEVER Include)</h4>
+                  <div className="space-y-4 text-xs">
+                    <div className="border-l-2 border-red-900 pl-3">
+                      <span className="text-red-500 font-bold block mb-1">╳</span>
+                      <p className="text-zinc-500">Mật khẩu hoặc băm (hash)</p>
+                    </div>
+                    <div className="border-l-2 border-red-900 pl-3">
+                      <span className="text-red-500 font-bold block mb-1">╳</span>
+                      <p className="text-zinc-500">SSN, CCCD, dữ liệu nhạy cảm</p>
+                    </div>
+                    <div className="border-l-2 border-red-900 pl-3">
+                      <span className="text-red-500 font-bold block mb-1">╳</span>
+                      <p className="text-zinc-500">Thông tin thẻ tín dụng</p>
+                    </div>
+                    <div className="border-l-2 border-red-900 pl-3">
+                      <span className="text-red-500 font-bold block mb-1">╳</span>
+                      <p className="text-zinc-500">Dữ liệu quá lớn (&gt;8KB)</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-yellow-950/30 border-2 border-yellow-500/50 rounded-lg p-4">
-                <h5 className="text-yellow-300 font-bold mb-2 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5" />
-                  Size Matters
-                </h5>
-                <p className="text-sm text-gray-300">
-                  Every request includes the JWT. A 50KB token kills performance. Keep it under <span className="text-neon-400 font-bold">1-2KB</span>.
-                </p>
+              <div className="bg-zinc-900 border border-zinc-800 p-6 flex items-start gap-4">
+                <AlertCircle className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
+                <div>
+                  <h5 className="text-white font-bold mb-1 uppercase tracking-wider text-xs">
+                    Kích Thước Rất Quan Trọng
+                  </h5>
+                  <p className="text-sm text-zinc-400">
+                    Mỗi request đều phải gửi kèm JWT. Token nặng 50KB sẽ giết chết hiệu năng. Hãy giữ nó dưới <span className="text-white font-bold">1-2KB</span>.
+                  </p>
+                </div>
               </div>
             </SectionCard>
 
             {/* Section 9: Best Practices */}
             <SectionCard
               {...sections[8]}
+              title={jwtAuthContent.sections[8].title}
+              category={jwtAuthContent.sections[8].category}
               isCompleted={progress.completedSections.includes(sections[8].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                Deploying JWT to production? This checklist covers the <span className="text-neon-400 font-bold">critical security</span> and
-                operational concerns that separate hobbyist implementations from enterprise-grade systems.
+              <p className="text-lg mb-6 text-zinc-300">
+                Khi deploy JWT lên production? Checklist này bao gồm các quy tắc <span className="text-white font-bold">bảo mật cốt lõi</span> và
+                vận hành phân biệt giữa "làm chơi" và hệ thống Enterprise.
               </p>
 
-              <div className="space-y-3">
+              <div className="space-y-px bg-zinc-800 border border-zinc-800 mb-6">
                 {[
                   {
                     icon: Key,
-                    title: 'Strong Secret Key Management',
-                    desc: 'Min 32 bytes random, store in env vars',
-                    detail: 'Use crypto.randomBytes(64).toString(\'hex\') - never hardcode secrets',
-                    color: 'neon',
+                    title: 'Quản Lý Secret Key',
+                    desc: 'Tối thiểu 32 bytes ngẫu nhiên, lưu trong biến môi trường',
+                    detail: 'Use crypto.randomBytes(64).toString(\'hex\')',
                   },
                   {
                     icon: Clock,
-                    title: 'Short Token Expiration',
-                    desc: 'Access: 15 min | Refresh: 7 days',
-                    detail: 'Minimizes damage window if token is stolen',
-                    color: 'cyan',
+                    title: 'Token Hết Hạn Ngắn',
+                    desc: 'Access: 15 phút | Refresh: 7 ngày',
+                    detail: 'Giảm thiểu rủi ro khi token bị đánh cắp',
                   },
                   {
                     icon: Shield,
-                    title: 'Comprehensive Validation',
-                    desc: 'Verify signature, exp, iss, aud',
-                    detail: 'Always reject "alg: none" tokens - enforce expected algorithm',
-                    color: 'purple',
+                    title: 'Validate Chặt Chẽ',
+                    desc: 'Kiểm tra chữ ký, exp, iss, aud',
+                    detail: 'Luôn từ chối token có "alg: none"',
                   },
                   {
                     icon: Database,
-                    title: 'Secure Token Storage',
-                    desc: 'Access in memory, refresh in httpOnly cookie',
-                    detail: 'Never localStorage for web apps - vulnerable to XSS attacks',
-                    color: 'yellow',
+                    title: 'Lưu Trữ An Toàn',
+                    desc: 'Access ở memory, Refresh ở httpOnly cookie',
+                    detail: 'Tuyệt đối không dùng localStorage cho web - dễ bị XSS',
                   },
                   {
                     icon: Lock,
-                    title: 'HTTPS Only',
-                    desc: 'Never send tokens over HTTP',
-                    detail: 'Set Secure and SameSite flags on cookies',
-                    color: 'pink',
+                    title: 'Bắt Buộc HTTPS',
+                    desc: 'Không bao giờ gửi token qua HTTP',
+                    detail: 'Set cờ Secure và SameSite cho cookies',
                   },
                 ].map((item, index) => {
                   const Icon = item.icon;
                   return (
-                    <div key={index} className={`border-l-4 border-${item.color}-500 bg-${item.color}-950/20 p-4 rounded-r-lg`}>
-                      <div className="flex items-start gap-3">
-                        <Icon className={`w-6 h-6 text-${item.color}-400 flex-shrink-0 mt-0.5`} />
-                        <div className="flex-1">
-                          <h4 className={`text-${item.color}-300 font-black mb-1`}>{item.title}</h4>
-                          <p className="text-sm text-gray-300 mb-1">{item.desc}</p>
-                          <p className="text-xs text-gray-500">{item.detail}</p>
-                        </div>
+                    <div key={index} className="flex gap-4 p-6 bg-black hover:bg-zinc-900/50 transition-colors border-l-2 border-l-transparent hover:border-l-white group">
+                      <Icon className="w-5 h-5 text-zinc-500 group-hover:text-white flex-shrink-0 mt-0.5 transition-colors" />
+                      <div className="flex-1">
+                        <h4 className="text-white font-bold uppercase tracking-wide text-sm mb-1">{item.title}</h4>
+                        <p className="text-sm text-zinc-400 mb-1">{item.desc}</p>
+                        <p className="text-xs text-zinc-600 font-mono">{item.detail}</p>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="mt-6 bg-gradient-to-r from-neon-950/50 to-cyan-950/50 border-2 border-neon-500 rounded-lg p-5">
-                <h4 className="text-neon-300 font-black text-lg mb-3 flex items-center gap-2">
-                  <CheckCircle2 className="w-6 h-6" />
-                  Production Checklist
+              <div className="bg-zinc-900 border border-zinc-800 p-6">
+                <h4 className="text-white font-bold text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Checklist Production
                 </h4>
-                <div className="grid md:grid-cols-2 gap-3 text-sm">
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-4 h-4 border border-zinc-600 group-hover:border-white bg-black flex items-center justify-center transition-colors">
+                        <div className="w-2 h-2 bg-white opacity-100"></div>
+                      </div>
                       Strong secret (min 32 chars)
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                    <label className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-4 h-4 border border-zinc-600 group-hover:border-white bg-black flex items-center justify-center transition-colors">
+                        <div className="w-2 h-2 bg-white opacity-100"></div>
+                      </div>
                       Short expiration (15 min access)
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
+                    <label className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-4 h-4 border border-zinc-600 group-hover:border-white bg-black flex items-center justify-center transition-colors">
+                        <div className="w-2 h-2 bg-white opacity-100"></div>
+                      </div>
                       Algorithm enforcement (reject &quot;none&quot;)
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                    <label className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-4 h-4 border border-zinc-600 group-hover:border-white bg-black flex items-center justify-center transition-colors"></div>
                       Refresh token rotation
                     </label>
                   </div>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-4 h-4 border border-zinc-600 group-hover:border-white bg-black flex items-center justify-center transition-colors"></div>
                       Token monitoring/logging
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                    <label className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-4 h-4 border border-zinc-600 group-hover:border-white bg-black flex items-center justify-center transition-colors"></div>
                       HTTPS enforcement
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                    <label className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-4 h-4 border border-zinc-600 group-hover:border-white bg-black flex items-center justify-center transition-colors"></div>
                       Security penetration testing
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                    <label className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors cursor-pointer group">
+                      <div className="w-4 h-4 border border-zinc-600 group-hover:border-white bg-black flex items-center justify-center transition-colors"></div>
                       Key rotation strategy
                     </label>
                   </div>
@@ -732,147 +830,161 @@ export default function JWTLearnPage() {
             </SectionCard>
 
             {/* Live Demo Section */}
-            <Card className="bg-gray-900/80 backdrop-blur border-2 border-cyan-500/30 shadow-[0_0_40px_rgba(34,211,238,0.3)]">
-              <CardHeader>
-                <CardTitle className="text-2xl font-black uppercase tracking-wider text-white flex items-center gap-2">
-                  <Shield className="w-7 h-7 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
-                  Live Demo: Try JWT Authentication
+            <Card className="bg-black border border-white/10 shadow-none rounded-none">
+              <CardHeader className="border-b border-white/10 pb-6">
+                <CardTitle className="text-xl font-bold uppercase tracking-widest text-white flex items-center gap-3">
+                  <Shield className="w-5 h-5 text-white" />
+                  Live Demo: Giao Thức JWT
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {!isLoggedIn ? (
-                  <div className="space-y-5">
-                    <div className="bg-cyan-950/30 border-2 border-cyan-500/50 rounded-xl p-4">
-                      <p className="text-sm text-cyan-200 font-bold mb-2">
-                        Demo Credentials:
+                  <div className="space-y-6">
+                    <div className="bg-zinc-900 border border-zinc-800 p-4">
+                      <p className="text-xs text-white font-bold uppercase tracking-wider mb-3">
+                        Required Credentials
                       </p>
-                      <div className="space-y-1 text-sm text-cyan-100">
-                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin123</code></p>
-                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user123</code></p>
+                      <div className="space-y-2 text-xs font-mono">
+                        <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
+                          <span className="text-zinc-500">ADMIN ACCESS</span>
+                          <span className="text-zinc-300">user: <span className="text-white">admin</span> / pass: <span className="text-white">admin123</span></span>
+                        </div>
+                        <div className="flex justify-between items-center pt-1">
+                          <span className="text-zinc-500">STANDARD USER</span>
+                          <span className="text-zinc-300">user: <span className="text-white">user</span> / pass: <span className="text-white">user123</span></span>
+                        </div>
                       </div>
                     </div>
 
                     {error && (
-                      <Alert variant="destructive">
-                        <AlertCircle className="w-5 h-5" />
-                        <AlertDescription className="ml-2">{error}</AlertDescription>
+                      <Alert variant="destructive" className="rounded-none border-red-500 bg-red-950/10 text-red-500">
+                        <AlertCircle className="w-4 h-4" />
+                        <AlertDescription className="ml-2 font-mono text-xs uppercase">{error}</AlertDescription>
                       </Alert>
                     )}
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-200 mb-2">
-                        Username
-                      </label>
-                      <Input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="admin"
-                        className="bg-gray-950 border-2 border-gray-700 text-white placeholder:text-gray-400"
-                      />
-                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">
+                          Username
+                        </label>
+                        <Input
+                          type="text"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder="ENTER USERNAME"
+                          className="bg-black border-zinc-800 text-white placeholder:text-zinc-700 rounded-none focus:border-white focus:ring-0 uppercase font-mono"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-200 mb-2">
-                        Password
-                      </label>
-                      <Input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                        placeholder="admin123"
-                        className="bg-gray-950 border-2 border-gray-700 text-white placeholder:text-gray-400"
-                      />
+                      <div>
+                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">
+                          Password
+                        </label>
+                        <Input
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                          placeholder="ENTER PASSWORD"
+                          className="bg-black border-zinc-800 text-white placeholder:text-zinc-700 rounded-none focus:border-white focus:ring-0 font-mono"
+                        />
+                      </div>
                     </div>
 
                     <Button
                       onClick={handleLogin}
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 text-black font-semibold py-6"
+                      className="w-full bg-white text-black hover:bg-zinc-200 font-bold py-6 rounded-none uppercase tracking-widest text-sm"
                     >
                       {isLoading ? (
                         <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
                           Authenticating...
                         </>
                       ) : (
                         <>
-                          Login with JWT
-                          <ArrowRight className="w-5 h-5 ml-2" />
+                          Khởi Tạo Session
+                          <ArrowRight className="w-4 h-4 ml-2" />
                         </>
                       )}
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-5">
-                    <div className="bg-gradient-to-br from-neon-950/50 to-emerald-950/50 border-2 border-neon-500 rounded-xl p-6">
-                      <div className="flex items-center gap-3 mb-2">
-                        <CheckCircle2 className="w-8 h-8 text-neon-400" />
-                        <h3 className="text-2xl font-bold text-neon-200">Token Generated!</h3>
+                  <div className="space-y-6">
+                    <div className="bg-zinc-900 border border-zinc-800 p-6 flex items-center gap-4">
+                      <div className="w-12 h-12 bg-white text-black flex items-center justify-center">
+                        <CheckCircle2 className="w-6 h-6" />
                       </div>
-                      <p className="text-neon-100 text-lg">
-                        Logged in as <strong className="text-neon-300">{username}</strong>
-                      </p>
+                      <div>
+                        <h3 className="text-lg font-bold text-white uppercase tracking-wider">Authentication Successful</h3>
+                        <p className="text-zinc-400 text-sm font-mono">
+                          Session established for user: <strong className="text-white">{username}</strong>
+                        </p>
+                      </div>
                     </div>
 
-                    <Card className="bg-gray-900/50 border-2 border-gray-700">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-white">
-                          <FileText className="w-6 h-6 text-neon-400" />
-                          JWT Token Structure
+                    <Card className="bg-black border border-zinc-800 shadow-none rounded-none">
+                      <CardHeader className="border-b border-zinc-800 py-3 px-4">
+                        <CardTitle className="flex items-center gap-2 text-white text-sm uppercase tracking-wider">
+                          <FileText className="w-4 h-4 text-zinc-500" />
+                          Cấu Trúc Token (Đã Decode)
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="bg-gray-950 rounded-lg p-3 border-2 border-gray-800">
-                          <div className="text-xs text-gray-400 mb-1">Full Token:</div>
-                          <div className="font-mono text-xs text-white break-all">{tokenData?.token}</div>
+                      <CardContent className="space-y-4 p-4">
+                        <div className="space-y-1">
+                          <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Raw Token</div>
+                          <div className="bg-zinc-950 border border-zinc-900 p-3">
+                            <div className="font-mono text-[10px] text-zinc-400 break-all leading-relaxed">{tokenData?.token}</div>
+                          </div>
                         </div>
 
-                        <div className="border-l-4 border-red-500 bg-red-950/20 p-3 rounded-r-lg">
-                          <div className="text-xs text-red-300 font-bold mb-1">Header:</div>
-                          <pre className="font-mono text-xs text-red-200">{JSON.stringify(tokenData?.header, null, 2)}</pre>
-                        </div>
+                        <div className="grid gap-4">
+                          <div className="bg-zinc-950 border-l-2 border-l-white border-y border-r border-zinc-900 p-3">
+                            <div className="text-[10px] text-white font-bold uppercase mb-2">Header</div>
+                            <pre className="font-mono text-[10px] text-zinc-400">{JSON.stringify(tokenData?.header, null, 2)}</pre>
+                          </div>
 
-                        <div className="border-l-4 border-blue-500 bg-blue-950/20 p-3 rounded-r-lg">
-                          <div className="text-xs text-blue-300 font-bold mb-1">Payload (Claims):</div>
-                          <pre className="font-mono text-xs text-blue-200">{JSON.stringify(tokenData?.payload, null, 2)}</pre>
-                        </div>
+                          <div className="bg-zinc-950 border-l-2 border-l-zinc-500 border-y border-r border-zinc-900 p-3">
+                            <div className="text-[10px] text-white font-bold uppercase mb-2">Payload (Claims)</div>
+                            <pre className="font-mono text-[10px] text-zinc-400">{JSON.stringify(tokenData?.payload, null, 2)}</pre>
+                          </div>
 
-                        <div className="border-l-4 border-purple-500 bg-purple-950/20 p-3 rounded-r-lg">
-                          <div className="text-xs text-purple-300 font-bold mb-1">Signature:</div>
-                          <div className="font-mono text-xs text-purple-200 break-all">{tokenData?.signature}</div>
+                          <div className="bg-zinc-950 border-l-2 border-l-zinc-700 border-y border-r border-zinc-900 p-3">
+                            <div className="text-[10px] text-white font-bold uppercase mb-2">Signature</div>
+                            <div className="font-mono text-[10px] text-zinc-400 break-all">{tokenData?.signature}</div>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-gray-900/50 border-2 border-gray-700">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-white">
-                          <Lock className="w-6 h-6 text-neon-400" />
-                          Token Information
+                    <Card className="bg-black border border-zinc-800 shadow-none rounded-none">
+                      <CardHeader className="border-b border-zinc-800 py-3 px-4">
+                        <CardTitle className="flex items-center gap-2 text-white text-sm uppercase tracking-wider">
+                          <Lock className="w-4 h-4 text-zinc-500" />
+                          Session Metadata
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        <div className="flex justify-between items-center py-2 border-b border-gray-700">
-                          <span className="text-gray-200 font-medium text-sm">Username:</span>
-                          <span className="text-white font-semibold">{tokenData?.username}</span>
+                      <CardContent className="space-y-0 text-sm">
+                        <div className="flex justify-between items-center py-3 border-b border-zinc-900">
+                          <span className="text-zinc-500 uppercase text-xs font-bold tracking-wider">Identity</span>
+                          <span className="text-white font-mono">{tokenData?.username}</span>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-gray-700">
-                          <span className="text-gray-200 font-medium text-sm">Status:</span>
-                          <Badge className="bg-neon-500/20 text-neon-300 border border-neon-500/50">
+                        <div className="flex justify-between items-center py-3 border-b border-zinc-900">
+                          <span className="text-zinc-500 uppercase text-xs font-bold tracking-wider">Status</span>
+                          <Badge className="bg-white text-black border-none rounded-none uppercase font-bold tracking-widest text-[10px]">
                             {tokenData?.status}
                           </Badge>
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b border-gray-700">
-                          <span className="text-gray-200 font-medium text-sm">Issued:</span>
-                          <span className="text-white text-sm">
+                        <div className="flex justify-between items-center py-3 border-b border-zinc-900">
+                          <span className="text-zinc-500 uppercase text-xs font-bold tracking-wider">Issued At</span>
+                          <span className="text-zinc-300 font-mono text-xs">
                             {tokenData?.issuedAt && new Date(tokenData.issuedAt).toLocaleString()}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center py-2">
-                          <span className="text-gray-200 font-medium text-sm">Expires:</span>
-                          <span className="text-white text-sm">
+                        <div className="flex justify-between items-center py-3">
+                          <span className="text-zinc-500 uppercase text-xs font-bold tracking-wider">Expires</span>
+                          <span className="text-zinc-300 font-mono text-xs">
                             {tokenData?.expiresAt && new Date(tokenData.expiresAt).toLocaleString()}
                           </span>
                         </div>
@@ -881,10 +993,10 @@ export default function JWTLearnPage() {
 
                     <Button
                       onClick={handleLogout}
-                      variant="secondary"
-                      className="w-full py-6 bg-gray-800 hover:bg-gray-700 text-white border-2 border-gray-700"
+                      variant="outline"
+                      className="w-full py-6 bg-transparent hover:bg-white hover:text-black text-white border border-white/20 rounded-none uppercase tracking-widest font-bold transition-all"
                     >
-                      Logout
+                      Terminate Session
                     </Button>
                   </div>
                 )}
@@ -894,10 +1006,10 @@ export default function JWTLearnPage() {
             {/* Challenges Section */}
             <div className="space-y-4">
               <h2 className="text-3xl font-black uppercase tracking-wider text-white flex items-center gap-3">
-                <Zap className="w-8 h-8 text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
+                <Zap className="w-6 h-6 text-white" />
                 Interactive Challenges
               </h2>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-zinc-400 leading-relaxed">
                 Test your JWT authentication knowledge with real-world scenarios.
                 Complete challenges to earn XP and level up your security skills.
               </p>

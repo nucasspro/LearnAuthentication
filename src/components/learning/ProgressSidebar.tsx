@@ -1,10 +1,9 @@
 'use client';
 
-import { CheckCircle2, ChevronDown, ChevronRight, Award } from 'lucide-react';
-import { useState } from 'react';
-import { Section, ProgressData } from '@/lib/types';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ProgressData, Section } from '@/lib/types';
+import { ChevronDown, ChevronRight, Hash } from 'lucide-react';
+import { useState } from 'react';
 
 interface ProgressSidebarProps {
   sections: Section[];
@@ -14,9 +13,12 @@ interface ProgressSidebarProps {
 
 export function ProgressSidebar({ sections, progress, onSectionClick }: ProgressSidebarProps) {
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-    essential: true,
-    important: true,
+    concepts: true,
+    success: true,
+    security: true,
     advanced: true,
+    best_practices: true,
+    system: true,
   });
 
   const toggleCategory = (category: string) => {
@@ -38,100 +40,125 @@ export function ProgressSidebar({ sections, progress, onSectionClick }: Progress
   };
 
   const categoryConfig = {
-    essential: {
-      label: 'ESSENTIAL',
-      subtitle: 'Beginner • 10 min',
-      color: 'text-neon-400',
-      bgColor: 'bg-neon-500/10',
-      borderColor: 'border-neon-500/50',
-    },
-    important: {
-      label: 'IMPORTANT',
-      subtitle: 'Intermediate • 15 min',
+    concepts: {
+      label: 'CONCEPTS',
+      subtitle: 'CORE',
       color: 'text-cyan-400',
-      bgColor: 'bg-cyan-500/10',
-      borderColor: 'border-cyan-500/50',
+      bgColor: 'bg-zinc-900',
+      borderColor: 'border-cyan-500/30',
+      hoverColor: 'hover:text-cyan-300',
+    },
+    success: {
+      label: 'SUCCESS',
+      subtitle: 'ACHIEVED',
+      color: 'text-emerald-400',
+      bgColor: 'bg-zinc-900',
+      borderColor: 'border-emerald-500/30',
+      hoverColor: 'hover:text-emerald-300',
+    },
+    security: {
+      label: 'SECURITY',
+      subtitle: 'CRITICAL',
+      color: 'text-rose-400',
+      bgColor: 'bg-zinc-900',
+      borderColor: 'border-rose-500/30',
+      hoverColor: 'hover:text-rose-300',
     },
     advanced: {
       label: 'ADVANCED',
-      subtitle: 'Expert • 20 min',
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-500/10',
-      borderColor: 'border-purple-500/50',
+      subtitle: 'EXPERT',
+      color: 'text-violet-400',
+      bgColor: 'bg-zinc-900',
+      borderColor: 'border-violet-500/30',
+      hoverColor: 'hover:text-violet-300',
+    },
+    best_practices: {
+      label: 'BEST PRACTICES',
+      subtitle: 'GUIDE',
+      color: 'text-amber-400',
+      bgColor: 'bg-zinc-900',
+      borderColor: 'border-amber-500/30',
+      hoverColor: 'hover:text-amber-300',
+    },
+    system: {
+      label: 'SYSTEM',
+      subtitle: 'MECHANISM',
+      color: 'text-zinc-400',
+      bgColor: 'bg-zinc-900',
+      borderColor: 'border-zinc-500/30',
+      hoverColor: 'hover:text-zinc-300',
     },
   };
 
   return (
-    <Card className="bg-gray-900/80 backdrop-blur border-2 border-neon-500/30 sticky top-32 h-[calc(100vh-9rem)] overflow-hidden flex flex-col">
-      <CardHeader className="flex-shrink-0">
-        <CardTitle className="text-xl font-black uppercase tracking-wider text-white flex items-center gap-2">
-          <Award className="w-6 h-6 text-neon-400" />
-          Progress Tracker
+    <Card className="bg-black border border-white/10 sticky top-32 h-[calc(100vh-9rem)] overflow-hidden flex flex-col rounded-none shadow-none">
+      <CardHeader className="flex-shrink-0 border-b border-white/10 bg-zinc-950 px-6 py-6">
+        <CardTitle className="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-3">
+          <Hash className="w-4 h-4 text-zinc-500" />
+          Progress Log
         </CardTitle>
 
         {/* Overall Progress */}
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-300 font-semibold">Current Level:</span>
-            <Badge className={`${categoryConfig.essential.bgColor} ${categoryConfig.essential.color} border ${categoryConfig.essential.borderColor}`}>
-              {progress.level}
-            </Badge>
+        <div className="mt-6 space-y-4">
+          <div className="flex items-center justify-between text-xs uppercase tracking-wider">
+            <span className="text-zinc-500 font-bold">Rank</span>
+            <span className="text-white font-mono">{progress.level}</span>
           </div>
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-400">Overall Progress</span>
-              <span className="text-neon-400 font-bold">{progress.percentage}%</span>
+
+          <div className="space-y-2">
+            <div className="flex justify-between text-[10px] uppercase tracking-widest font-bold">
+              <span className="text-zinc-500">Completion</span>
+              <span className="text-white font-mono">{progress.percentage}%</span>
             </div>
-            <div className="h-2 bg-gray-800 rounded-full overflow-hidden border border-neon-500/30">
+            <div className="h-1 bg-zinc-900 w-full">
               <div
-                className="h-full bg-gradient-to-r from-neon-500 to-cyan-400 transition-all duration-500 shadow-[0_0_10px_rgba(74,255,0,0.5)]"
+                className="h-full bg-white transition-all duration-500"
                 style={{ width: `${progress.percentage}%` }}
               />
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-2">
-            {progress.completedSections.length} of {sections.length} sections complete
+          <p className="text-[10px] text-zinc-600 uppercase tracking-wider font-mono">
+            {progress.completedSections.length}/{sections.length} MODULES COMPLETED
           </p>
         </div>
       </CardHeader>
 
       {/* Scrollable Section List */}
-      <CardContent className="flex-1 overflow-y-auto space-y-4 pt-4">
-        {(['essential', 'important', 'advanced'] as const).map(category => {
+      <CardContent className="flex-1 overflow-y-auto space-y-px p-0 bg-black">
+        {(['concepts', 'success', 'security', 'advanced', 'best_practices', 'system'] as const).map(category => {
           const config = categoryConfig[category];
           const catProgress = categoryProgress(category);
           const isExpanded = expandedCategories[category];
 
           return (
-            <div key={category} className="space-y-2">
+            <div key={category} className="border-b border-zinc-900 last:border-0">
               {/* Category Header */}
               <button
                 onClick={() => toggleCategory(category)}
-                className={`w-full flex items-center justify-between p-3 rounded-lg border-2 ${config.borderColor} ${config.bgColor} hover:bg-opacity-80 transition-all`}
+                className={`w-full flex items-center justify-between p-4 hover:bg-zinc-900/50 transition-all group`}
               >
-                <div className="flex items-center gap-2">
-                  {isExpanded ? (
-                    <ChevronDown className={`w-4 h-4 ${config.color}`} />
-                  ) : (
-                    <ChevronRight className={`w-4 h-4 ${config.color}`} />
-                  )}
+                <div className="flex items-center gap-3">
+                  <div className={`w-4 h-4 flex items-center justify-center border border-zinc-800 bg-zinc-950 ${isExpanded ? 'bg-zinc-900 border-zinc-700' : ''}`}>
+                    {isExpanded ? (
+                      <ChevronDown className="w-3 h-3 text-zinc-400" />
+                    ) : (
+                      <ChevronRight className="w-3 h-3 text-zinc-600" />
+                    )}
+                  </div>
                   <div className="text-left">
-                    <div className={`text-sm font-black ${config.color}`}>
+                    <div className={`text-xs font-bold uppercase tracking-wider ${config.color} ${config.hoverColor} transition-colors`}>
                       {config.label}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {config.subtitle}
                     </div>
                   </div>
                 </div>
-                <div className="text-xs font-bold text-gray-300">
+                <div className="text-[10px] font-mono text-zinc-600 group-hover:text-zinc-400 transition-colors">
                   {catProgress.completed}/{catProgress.total}
                 </div>
               </button>
 
               {/* Section List */}
               {isExpanded && (
-                <div className="space-y-1 pl-2">
+                <div className="bg-zinc-950/30 border-t border-zinc-900/50">
                   {categorySections(category).map(section => {
                     const isCompleted = progress.completedSections.includes(section.id);
 
@@ -139,23 +166,21 @@ export function ProgressSidebar({ sections, progress, onSectionClick }: Progress
                       <button
                         key={section.id}
                         onClick={() => onSectionClick(section.id)}
-                        className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-all ${
-                          isCompleted
-                            ? 'bg-neon-500/10 hover:bg-neon-500/20'
-                            : 'hover:bg-gray-800'
-                        }`}
+                        className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-all border-l-2 ${isCompleted
+                          ? 'bg-zinc-900/40 border-white/50'
+                          : 'border-transparent hover:bg-zinc-900/40 hover:border-zinc-700'
+                          }`}
                       >
-                        {isCompleted ? (
-                          <CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0" />
-                        ) : (
-                          <div className="w-4 h-4 border-2 border-gray-600 rounded-full flex-shrink-0" />
-                        )}
+                        <div className={`mt-0.5 w-3 h-3 rounded-none border flex items-center justify-center ${isCompleted ? 'border-zinc-400 bg-zinc-400' : 'border-zinc-800'}`}>
+                          {isCompleted && <div className="w-1.5 h-1.5 bg-black" />}
+                        </div>
+
                         <div className="flex-1 min-w-0">
-                          <div className={`text-sm font-semibold ${isCompleted ? 'text-neon-300' : 'text-gray-300'}`}>
+                          <div className={`text-xs font-bold uppercase tracking-wide leading-tight mb-1 ${isCompleted ? 'text-zinc-400 line-through decoration-zinc-600' : 'text-zinc-300'}`}>
                             {section.title}
                           </div>
-                          <div className="text-xs text-gray-500">
-                            {section.estimatedTime} min
+                          <div className="text-[10px] text-zinc-600 font-mono">
+                            {section.estimatedTime} MIN
                           </div>
                         </div>
                       </button>

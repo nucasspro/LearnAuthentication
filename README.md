@@ -1,19 +1,21 @@
-# Learn Authentication - Interactive Authentication Learning Platform
+# Learn Authentication - Nền Tảng Học Tập Xác Thực Tương Tác
+## (Phiên Bản Việt Hóa & Thiết Kế Cyberpunk)
 
-A comprehensive, hands-on learning platform for understanding web authentication mechanisms including Session-based, JWT, OAuth 2.0, and Multi-Factor Authentication (MFA/2FA).
+Một nền tảng toàn diện, thực hành giúp bạn hiểu sâu về các cơ chế xác thực web bao gồm Session, JWT, OAuth 2.0 và Multi-Factor Authentication (MFA/2FA).
 
-## 🎯 Project Overview
+## 🎯 Tổng Quan Dự Án
 
-This project is an **educational platform** designed to teach developers about authentication and authorization through interactive demos, visualizations, and real implementations. It covers all major authentication patterns used in modern web applications.
+Đây là một **nền tảng giáo dục** được thiết kế để dạy lập trình viên về xác thực (Authentication) và ủy quyền (Authorization) thông qua các bản demo tương tác, hình ảnh minh họa 3D sống động và code mẫu thực tế. Dự án bao gồm tất cả các mẫu xác thực chính được sử dụng trong các ứng dụng web hiện đại.
 
-### What You'll Learn
+### Bạn Sẽ Học Được Gì?
 
-- ✅ **Session-Based Authentication** - Server-side sessions with HTTP-Only cookies
-- ✅ **JWT (JSON Web Tokens)** - Stateless token-based authentication
-- ✅ **OAuth 2.0** - Third-party authorization (Google, GitHub, etc.)
-- ✅ **Multi-Factor Authentication (MFA/2FA)** - TOTP-based security
-- ✅ **Security Best Practices** - OWASP guidelines, vulnerabilities, and mitigations
-- ✅ **Protected Routes** - Client and server-side route protection
+- ✅ **Xác Thực Dựa Trên Session** - Server-side sessions với HTTP-Only cookies
+- ✅ **JWT (JSON Web Tokens)** - Xác thực stateless dựa trên token
+- ✅ **OAuth 2.0** - Ủy quyền bên thứ ba (Google, GitHub, Facebook, v.v.)
+- ✅ **Xác Thực Đa Yếu Tố (MFA/2FA)** - Bảo mật dựa trên TOTP
+- ✅ **Các Thực Hành Bảo Mật Tốt Nhất** - Hướng dẫn OWASP, lỗ hổng và cách phòng chống
+- ✅ **Bảo Vệ Route** - Bảo vệ route phía Client và Server
+
 
 ## 🚀 Quick Start
 
@@ -57,61 +59,28 @@ npm start
 ```
 LearnAuthentication/
 ├── src/
+│   ├── app/                   # App Router
+│   │   ├── api/auth/          # API Routes (Route Handlers)
+│   │   │   └── route.ts       # Auth API logic
+│   │   ├── jwt/               # JWT Module
+│   │   ├── mfa/               # MFA Module
+│   │   ├── oauth/             # OAuth Module
+│   │   ├── session/           # Session Module
+│   │   ├── layout.tsx         # Root Layout
+│   │   ├── page.tsx           # Home Page
+│   │   └── globals.css        # Global Styles
 │   ├── components/
-│   │   ├── auth/              # Authentication components
-│   │   │   ├── ProtectedRoute.tsx
-│   │   │   ├── LoginForm.tsx
-│   │   │   └── LogoutButton.tsx
-│   │   ├── demo/              # Demo components
-│   │   │   ├── TOTPSetup.tsx
-│   │   │   └── AuthenticatorSimulator.tsx
-│   │   └── visualization/     # Flow diagrams
-│   │       └── OAuthFlowDiagram.tsx
-│   ├── lib/
-│   │   ├── auth-middleware.ts # Session & JWT verification
-│   │   ├── crypto.ts          # Password hashing, session IDs
-│   │   ├── jwt.ts             # JWT generation & verification
-│   │   ├── mfa.ts             # TOTP & backup codes
-│   │   ├── mock-oauth.ts      # OAuth simulation
-│   │   ├── mock-db.ts         # In-memory database
-│   │   ├── types.ts           # TypeScript interfaces
-│   │   └── constants.ts       # Configuration constants
-│   ├── pages/
-│   │   ├── api/auth/          # Authentication API routes
-│   │   │   ├── login.ts       # Session login
-│   │   │   ├── logout.ts      # Session logout
-│   │   │   ├── verify.ts      # Auth verification
-│   │   │   ├── jwt-sign.ts    # JWT generation
-│   │   │   ├── jwt-verify.ts  # JWT validation
-│   │   │   ├── refresh-token.ts
-│   │   │   ├── protected-test.ts
-│   │   │   ├── session-check.ts
-│   │   │   ├── mfa/
-│   │   │   │   ├── setup.ts   # MFA setup
-│   │   │   │   └── verify.ts  # MFA verification
-│   │   │   └── oauth/
-│   │   │       ├── authorize.ts
-│   │   │       ├── callback.ts
-│   │   │       └── token.ts
-│   │   ├── dashboard.tsx      # Protected dashboard
-│   │   ├── session-demo.tsx   # Session auth demo
-│   │   ├── jwt-demo.tsx       # JWT demo
-│   │   ├── oauth-demo.tsx     # OAuth flow demo
-│   │   ├── mfa-demo.tsx       # MFA setup demo
-│   │   ├── comparison.tsx     # Auth methods comparison
-│   │   ├── learn/             # Educational pages
-│   │   │   ├── session.tsx
-│   │   │   ├── jwt.tsx
-│   │   │   ├── oauth.tsx
-│   │   │   └── mfa.tsx
-│   │   └── index.tsx          # Home page
-│   └── styles/
-│       └── globals.css
-├── docs/
-│   └── SPECIFICATION.md       # Full specification
+│   │   ├── ui/                # Reusable UI (Button, Card, etc.)
+│   │   ├── learning/          # Lesson-specific components
+│   │   └── auth/              # Auth forms
+│   └── lib/
+│       ├── auth-middleware.ts # Middleware logic
+│       ├── jwt.ts             # JWT utilities
+│       ├── mfa.ts             # TOTP utilities
+│       └── mock-db.ts         # In-memory database
+├── public/                    # Static assets
 ├── package.json
 ├── tsconfig.json
-├── next.config.js
 └── README.md
 ```
 

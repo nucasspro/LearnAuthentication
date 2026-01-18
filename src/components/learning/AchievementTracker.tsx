@@ -1,9 +1,9 @@
 'use client';
 
-import { Award, Shield, Star, Trophy } from 'lucide-react';
-import { ProgressData } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ProgressData } from '@/lib/types';
+import { Award, Shield, Star, Trophy } from 'lucide-react';
 
 interface AchievementTrackerProps {
   progress: ProgressData;
@@ -16,32 +16,28 @@ export function AchievementTracker({ progress }: AchievementTrackerProps) {
       minPercentage: 0,
       maxPercentage: 30,
       icon: Shield,
-      color: 'text-gray-400',
-      gradient: 'from-gray-500 to-gray-600',
+      color: 'text-zinc-500',
     },
     {
       name: 'Security Operative',
       minPercentage: 31,
       maxPercentage: 60,
       icon: Award,
-      color: 'text-cyan-400',
-      gradient: 'from-cyan-500 to-blue-500',
+      color: 'text-white',
     },
     {
       name: 'Elite Guardian',
       minPercentage: 61,
       maxPercentage: 90,
       icon: Star,
-      color: 'text-purple-400',
-      gradient: 'from-purple-500 to-pink-500',
+      color: 'text-white',
     },
     {
       name: 'Master Architect',
       minPercentage: 91,
       maxPercentage: 100,
       icon: Trophy,
-      color: 'text-neon-400',
-      gradient: 'from-neon-500 to-yellow-500',
+      color: 'text-white',
     },
   ];
 
@@ -54,30 +50,30 @@ export function AchievementTracker({ progress }: AchievementTrackerProps) {
   const CurrentLevelIcon = currentLevel.icon;
 
   return (
-    <Card className="bg-gray-900/80 backdrop-blur border-2 border-neon-500/30 shadow-[0_0_30px_rgba(74,255,0,0.2)]">
-      <CardHeader>
-        <CardTitle className="text-2xl font-black uppercase tracking-wider text-white flex items-center gap-2">
-          <Trophy className="w-7 h-7 text-neon-400 drop-shadow-[0_0_10px_rgba(74,255,0,0.5)]" />
-          Achievement Tracker
+    <Card className="bg-black border border-white/10 shadow-none rounded-none">
+      <CardHeader className="border-b border-white/10 pb-4">
+        <CardTitle className="text-xl font-bold uppercase tracking-widest text-white flex items-center gap-3">
+          <Trophy className="w-5 h-5 text-zinc-500" />
+          Achievement Log
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         {/* Current Level Display */}
-        <div className="flex items-center gap-4 p-4 rounded-lg bg-gradient-to-r from-gray-900 to-gray-800 border-2 border-neon-500/30">
-          <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${currentLevel.gradient} flex items-center justify-center shadow-lg`}>
-            <CurrentLevelIcon className="w-8 h-8 text-white drop-shadow-lg" />
+        <div className="flex items-center gap-6 p-6 rounded-none bg-zinc-900/30 border border-white/10">
+          <div className="w-16 h-16 border border-zinc-700 bg-black flex items-center justify-center">
+            <CurrentLevelIcon className="w-8 h-8 text-white" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-gray-400 uppercase tracking-wide">Current Level</p>
-            <h3 className={`text-xl font-black ${currentLevel.color}`}>
+            <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Current Rank</p>
+            <h3 className="text-2xl font-black uppercase text-white tracking-wide">
               {currentLevel.name}
             </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              {currentLevel.minPercentage}% - {currentLevel.maxPercentage}% Complete
+            <p className="text-xs text-zinc-500 mt-1 font-mono">
+              RANGE: {currentLevel.minPercentage}% - {currentLevel.maxPercentage}%
             </p>
           </div>
-          <Badge className="bg-neon-500/20 text-neon-300 border-2 border-neon-500/50 text-lg font-black px-4 py-2">
+          <Badge className="bg-black text-white border border-white/20 text-xl font-bold px-4 py-2 rounded-none font-mono tracking-widest">
             {progress.percentage}%
           </Badge>
         </div>
@@ -85,42 +81,42 @@ export function AchievementTracker({ progress }: AchievementTrackerProps) {
         {/* Progress to Next Level */}
         {nextLevel && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-400">Next Level:</span>
-              <span className={`text-sm font-bold ${nextLevel.color}`}>
+            <div className="flex items-center justify-between text-xs uppercase tracking-wider">
+              <span className="text-zinc-500">Next Promotion:</span>
+              <span className="text-white font-bold decoration-zinc-500 underline decoration-dotted underline-offset-4">
                 {nextLevel.name}
               </span>
             </div>
-            <div className="relative h-3 bg-gray-800 rounded-full overflow-hidden border-2 border-gray-700">
+            <div className="relative h-1 bg-zinc-900 rounded-none overflow-hidden w-full">
               <div
-                className={`h-full bg-gradient-to-r ${currentLevel.gradient} transition-all duration-500 shadow-lg`}
+                className="h-full bg-white transition-all duration-500"
                 style={{
                   width: `${((progress.percentage - currentLevel.minPercentage) / (nextLevel.minPercentage - currentLevel.minPercentage)) * 100}%`,
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500 text-center">
-              {nextLevel.minPercentage - progress.percentage}% until next level
+            <p className="text-[10px] text-zinc-600 text-center uppercase tracking-widest font-mono">
+              {nextLevel.minPercentage - progress.percentage}% EXP REQUIRED FOR PROMOTION
             </p>
           </div>
         )}
 
         {progress.percentage === 100 && (
-          <div className="p-4 rounded-lg bg-gradient-to-r from-neon-500/20 to-yellow-500/20 border-2 border-neon-500">
-            <div className="flex items-center gap-3">
-              <Trophy className="w-8 h-8 text-neon-400 animate-bounce" />
+          <div className="p-6 rounded-none bg-white text-black border border-white">
+            <div className="flex items-center gap-4">
+              <Trophy className="w-8 h-8 text-black" />
               <div>
-                <p className="text-neon-300 font-black text-lg">MISSION COMPLETE!</p>
-                <p className="text-gray-300 text-sm">You&apos;ve mastered session authentication!</p>
+                <p className="font-black text-lg uppercase tracking-wider">MISSION COMPLETE</p>
+                <p className="text-sm font-medium">Session authentication mastery achieved.</p>
               </div>
             </div>
           </div>
         )}
 
         {/* Level Milestones */}
-        <div className="space-y-2">
-          <p className="text-sm text-gray-400 font-semibold">All Levels:</p>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-3 pt-4 border-t border-zinc-900">
+          <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Rank Hierarchy:</p>
+          <div className="grid grid-cols-2 gap-3">
             {levels.map(level => {
               const LevelIcon = level.icon;
               const isUnlocked = progress.percentage >= level.minPercentage;
@@ -128,19 +124,18 @@ export function AchievementTracker({ progress }: AchievementTrackerProps) {
               return (
                 <div
                   key={level.name}
-                  className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all ${
-                    isUnlocked
-                      ? `bg-gradient-to-br ${level.gradient} bg-opacity-10 border-${level.color} border-opacity-50`
-                      : 'bg-gray-900 border-gray-700 opacity-50'
-                  }`}
+                  className={`flex items-center gap-3 p-3 rounded-none border transition-all ${isUnlocked
+                    ? 'bg-zinc-900 border-zinc-700'
+                    : 'bg-black border-zinc-900 opacity-40'
+                    }`}
                 >
-                  <LevelIcon className={`w-5 h-5 ${isUnlocked ? level.color : 'text-gray-600'}`} />
+                  <LevelIcon className={`w-4 h-4 ${isUnlocked ? 'text-white' : 'text-zinc-700'}`} />
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-600'}`}>
+                    <p className={`text-[10px] font-bold uppercase tracking-wide truncate ${isUnlocked ? 'text-zinc-300' : 'text-zinc-700'}`}>
                       {level.name}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {level.maxPercentage}%
+                    <p className="text-[10px] text-zinc-600 font-mono">
+                      MAX {level.maxPercentage}%
                     </p>
                   </div>
                 </div>
@@ -151,16 +146,16 @@ export function AchievementTracker({ progress }: AchievementTrackerProps) {
 
         {/* Next Objective */}
         {progress.percentage < 100 && (
-          <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
-            <p className="text-xs text-cyan-300 font-semibold mb-1">NEXT OBJECTIVE:</p>
-            <p className="text-sm text-gray-300">
-              {progress.percentage < 30
-                ? 'Complete all Essential sections to reach Security Operative level'
+          <div className="p-4 rounded-none bg-zinc-950 border border-zinc-800">
+            <p className="text-[10px] text-zinc-500 font-bold uppercase mb-2 tracking-widest">CURRENT OBJECTIVE:</p>
+            <p className="text-xs text-zinc-300 font-mono leading-relaxed">
+              &gt; {progress.percentage < 30
+                ? 'Initialize protocol: Complete Essential sections.'
                 : progress.percentage < 60
-                ? 'Complete Important sections to become an Elite Guardian'
-                : progress.percentage < 90
-                ? 'Master Advanced sections to achieve Master Architect status'
-                : 'Complete all remaining sections to finish the mission!'}
+                  ? 'Escalate privileges: Complete Important sections.'
+                  : progress.percentage < 90
+                    ? 'System hardening: Master Advanced sections.'
+                    : 'Finalize deployment: Complete all remaining tasks.'}
             </p>
           </div>
         )}

@@ -9,15 +9,20 @@
 
 export const oauthAuthContent = {
   storyHook: {
-    title: "DELEGATION PROTOCOL",
-    subtitle: "OAuth 2.0 Authorization Framework",
+    title: "GIAO QUYỀN (OAUTH 2.0)",
+    subtitle: "Chìa Khóa Valet & Tấm Thẻ Khách Sạn",
     clearanceLevel: "Advanced Access",
     status: "ACTIVE",
-    narrative: `The year is 2084. You're a corporate security consultant hired by multiple megacorporations. Each corp has its own security system, but they need to share data without exposing their master credentials.
+    narrative: `Năm 2026. Bạn sở hữu một chiếc siêu xe và rất nhiều tài sản quý giá. Nhưng bạn không thể tự mình làm mọi việc.
+Bạn cần giao xe cho nhân viên khách sạn (Valet) đi đỗ.
+Bạn cần cho phép ứng dụng in ảnh truy cập vào Google Photos của mình.
 
-Enter the DELEGATION PROTOCOL - a sophisticated system where one entity can grant LIMITED, TEMPORARY access to another without revealing their primary credentials. Think of it as issuing a visitor badge instead of handing over your master keycard.
+Làm sao để giao chìa khóa cho họ mà họ KHÔNG THỂ:
+- Mở cốp xe lấy đồ?
+- Lái xe đi bán?
+- Đổi mật khẩu Google của bạn?
 
-Your mission: Master the art of secure delegation in a world where trust is scarce and data breaches cost billions.`,
+Chào mừng đến với **OAuth 2.0 (Open Authorization)** - Nghệ thuật của sự "Ủy Quyền Có Kiểm Soát".`,
   },
 
   sections: [
@@ -26,107 +31,111 @@ Your mission: Master the art of secure delegation in a world where trust is scar
     // ============================================
     {
       id: 'section-1',
-      category: 'essential' as const,
-      title: 'The Visitor Badge: What is OAuth 2.0?',
+      category: 'concepts' as const,
+      title: 'Valet Key: OAuth 2.0 Là Gì?',
       icon: 'Shield',
       estimatedTime: '3 min',
-      content: `OAuth 2.0 is an **authorization framework** that allows third-party applications to obtain LIMITED access to user accounts WITHOUT exposing passwords.
+      content: `OAuth 2.0 là một **framework ủy quyền** cho phép bên thứ 3 truy cập vào tài nguyên của bạn MỘT CÁCH HẠN CHẾ mà KHÔNG CẦN biết mật khẩu.
 
-**Real-World Analogy:**
-You're at NeoTech Tower, and a delivery courier needs to drop off a package in your office. Instead of giving them your master keycard (your password), security issues them a **temporary visitor badge** that:
-- Only works for today
-- Only grants access to the lobby and your floor
-- Can be revoked at any time
-- Expires automatically after 8 hours
+### 🚗 Ví Dụ Kinh Điển: Valet Parking
+Bạn (Resource Owner) đi xe đến khách sạn. Bạn giao xe cho nhân viên Valet (Client) để họ đi đỗ (Access Resource).
 
-That's OAuth 2.0 - controlled delegation of access.
+**Cách 1 (Sai lầm - Password Sharing):**
+Bạn đưa cả chùm chìa khóa nhà, khóa két sắt, khóa xe cho nhân viên.
+-> ❌ Rủi ro: Họ có thể vào nhà bạn trộm đồ.
 
-**Key Terminology:**
-- **Resource Owner**: You (the user with the data)
-- **Client**: Third-party app requesting access (the courier)
-- **Authorization Server**: Issues access tokens (security desk)
-- **Resource Server**: Holds protected data (your office)
-- **Access Token**: Temporary credential (visitor badge)
-- **Scope**: Permissions granted (which floors can be accessed)`,
+**Cách 2 (OAuth 2.0 - Valet Key):**
+Bạn đưa cho nhân viên một **Valet Key** (Access Token) đặc biệt:
+- ✅ Chỉ nổ máy và lái được một đoạn ngắn.
+- ❌ Không thể mở cốp xe.
+- ❌ Không thể mở hộc đựng găng tay.
+- ⏰ Chìa khóa tự vô hiệu hóa sau 30 phút.
+
+Đó chính là OAuth!
+
+### 🔑 Các Vai Trò Chính (Team OAuth)
+Để hiểu OAuth, hãy nhớ 4 nhân vật này:
+
+1.  **Resource Owner (Là Bạn)**: Người sở hữu dữ liệu (Ví dụ: Bạn có tài khoản Google).
+2.  **Client (Ứng Dụng)**: App muốn xin quyền (Ví dụ: App chỉnh sửa ảnh VSCO muốn lấy ảnh từ Google Photos).
+3.  **Authorization Server (Người Gác Cổng)**: Server cấp quyền (Ví dụ: Server của Google hiện lên hỏi "Bạn có cho phép VSCO xem ảnh không?").
+4.  **Resource Server (Kho Chứa)**: Nơi chứa dữ liệu (Ví dụ: Database của Google Photos).
+
+### 🔄 Luồng Hoạt Động (Đơn Giản Hóa)
+1. **Client**: "Anh chủ ơi, cho em xin quyền lấy ảnh nhé?"
+2. **Owner**: "Ok, Google cấp quyền cho nó đi."
+3. **Auth Server**: "Ok, đây là cái **Access Token** (Thẻ bài) cho mày."
+4. **Client**: "Cảm ơn". (Cầm Token chạy sang Resource Server lấy ảnh).`,
 
       keyPoints: [
-        'OAuth 2.0 is for AUTHORIZATION, not authentication',
-        'Users grant limited access without sharing passwords',
-        'Tokens have scopes (permissions) and expiration times',
-        'Common for "Login with Google/GitHub/Facebook"',
-        'More complex than session/JWT, but more secure for third-party access',
+        'OAuth 2.0 dùng để ỦY QUYỀN (Authorization), không phải xác thực (Authentication)',
+        'Giúp chia sẻ dữ liệu mà KHÔNG lộ mật khẩu gốc',
+        'Valet Key (Access Token) có quyền hạn hẹp và thời hạn ngắn',
+        'Phổ biến nhất: "Đăng nhập bằng Facebook/Google"',
       ],
 
       visual: `
 ┌─────────────────────────────────────────────────────────┐
-│         DELEGATION PROTOCOL FLOW (Authorization Code)    │
+│              CÂU CHUYỆN ĐI ĐỖ XE (OAUTH FLOW)           │
 ├─────────────────────────────────────────────────────────┤
-│                                                           │
-│  1. CLIENT requests authorization                        │
-│     "Hey user, can I access your data?"                  │
-│                                                           │
-│  2. USER approves on Authorization Server                │
-│     "Yes, but only read access to my profile"            │
-│                                                           │
-│  3. AUTH SERVER returns authorization code               │
-│     Code: abc123 (single-use, expires in 10 min)         │
-│                                                           │
-│  4. CLIENT exchanges code for access token               │
-│     Sends: code + client_secret (proves identity)        │
-│                                                           │
-│  5. AUTH SERVER issues access token                      │
-│     Token: eyJhbG... (expires in 1 hour, scope: read)    │
-│                                                           │
-│  6. CLIENT uses token to access protected resources      │
-│     Header: Authorization: Bearer eyJhbG...              │
-│                                                           │
+│                                                         │
+│  1. KHÁCH (User) đến khách sạn                          │
+│     "Ê Valet (Client), đi đỗ xe giùm anh"               │
+│                                                         │
+│  2. VALET (Client) xin chìa khóa                        │
+│     "Anh cho em xin chìa khóa (Authorization)"          │
+│                                                         │
+│  3. KHÁCH đưa Chìa Valet (Access Token)                 │
+│     "Đây, chỉ lái được thôi nhé, không mở cốp đâu"      │
+│     (Token Scope: drive:only, trunk:deny)               │
+│                                                         │
+│  4. VALET lái xe vào Bãi (Resource Server)              │
+│     Bãi xe kiểm tra chìa Valet -> Hợp lệ -> Cho vào     │
+│                                                         │
 └─────────────────────────────────────────────────────────┘`,
     },
 
     {
       id: 'section-2',
-      category: 'essential' as const,
-      title: 'The Four Grant Types: Choosing Your Delegation Strategy',
+      category: 'concepts' as const,
+      title: 'Các Loại "Giấy Phép" (Grant Types)',
       icon: 'GitBranch',
       estimatedTime: '4 min',
-      content: `OAuth 2.0 provides **four grant types** (flows) for different scenarios. Think of these as different types of visitor badges for different situations.
+      content: `Trong OAuth 2.0, không phải ai cũng xin quyền giống nhau. Có 4 cách xin quyền (Grant Types) phổ biến:
 
-**1. Authorization Code Flow** (Most Secure)
-- **Use Case**: Server-side web applications
-- **Security**: Client secret stored on server (never exposed to browser)
-- **Example**: "Login with Google" on a web app
-- **Steps**: User authorizes → Get code → Exchange code for token (server-side)
+### 1. Authorization Code Flow (Chuẩn Mực) 🌟
+- **Dùng cho**: Web Server (Node.js, PHP, Java).
+- **Độ an toàn**: Cao nhất.
+- **Cách hoạt động**:
+  1. Client dẫn User đến trang đăng nhập của Google.
+  2. User đăng nhập xong -> Google trả về một **"Code"** (Mã vé).
+  3. Server của Client mang "Code" + "Secret Key" đến đổi lấy **Access Token**.
+- **Ví dụ**: Đăng nhập Shopee bằng Facebook.
 
-**2. Implicit Flow** (DEPRECATED - Don't Use!)
-- **Use Case**: Was for browser-based apps (SPAs)
-- **Security**: INSECURE - tokens exposed in browser URL
-- **Status**: Replaced by Authorization Code + PKCE
-- **Why Deprecated**: Vulnerable to token theft via browser history
+### 2. Authorization Code + PKCE (Hiện Đại) 📱
+- **PKCE**: Proof Key for Code Exchange (Chống trộm mã vé).
+- **Dùng cho**: Mobile App (React Native, Flutter) hoặc SPA (React, Vue).
+- **Tại sao cần?**: Mobile App không thể giữ bí mật "Secret Key" (vì hacker có thể decompile app). Nên phải dùng kỹ thuật PKCE để bảo mật thay thế.
 
-**3. Client Credentials Flow**
-- **Use Case**: Machine-to-machine (no user involved)
-- **Security**: Client authenticates with secret
-- **Example**: Microservice accessing another service's API
-- **Steps**: Client sends credentials → Gets token → Access resources
+### 3. Client Credentials Flow (Máy với Máy) 🤖
+- **Dùng cho**: Hai Server nói chuyện với nhau (Không có người dùng).
+- **Cách hoạt động**: "Tao là Service A, đây là ID và Secret của tao, cho tao token để gọi API của mày".
+- **Ví dụ**: Payment Service gọi sang Inventory Service.
 
-**4. Resource Owner Password Credentials** (Legacy)
-- **Use Case**: Trusted first-party apps only
-- **Security**: User provides password to client (defeats OAuth purpose!)
-- **Status**: Use only when you control both client and server
-- **Example**: Mobile app for your own service
+### 4. Implicit Flow (Đã Khai Tử) ☠️
+- **Cảnh báo**: KHÔNG ĐƯỢC DÙNG NỮA.
+- **Lý do**: Trả Token trực tiếp trên URL -> Dễ bị lộ.
+- **Thay thế bằng**: Authorizaton Code + PKCE.
 
-**Modern Best Practice: Authorization Code + PKCE**
-- PKCE = Proof Key for Code Exchange
-- Adds security layer even without client secret
-- Required for mobile/SPA apps
-- Recommended for ALL OAuth flows now`,
+### 5. Resource Owner Password Credentials (Cấm Kỵ) 🚫
+- **Cách hoạt động**: User nhập thẳng Username/Password vào App của Client.
+- **Rủi ro**: App có thể đánh cắp mật khẩu. Chỉ dùng cho ứng dụng "nhà làm" (First-party) cực kỳ tin tưởng.`,
 
       keyPoints: [
-        'Authorization Code Flow: Most secure for server-side apps',
-        'Implicit Flow: DEPRECATED - use Auth Code + PKCE instead',
-        'Client Credentials: Machine-to-machine, no user login',
-        'Password Grant: Legacy, avoid unless you own everything',
-        'PKCE: Essential for mobile/SPA, recommended for all flows',
+        'Auth Code Flow: Cách chuẩn nhất cho Web Server',
+        'PKCE: Bắt buộc cho Mobile App & SPA (React/Angular)',
+        'Client Credentials: Dùng cho Backend - Backend',
+        'ĐỪNG DÙNG: Implicit Flow (Lỗi thời) & Password Grant (Kém bảo mật)',
       ],
 
       codeExamples: {
@@ -592,52 +601,45 @@ end`,
 
     {
       id: 'section-3',
-      category: 'essential' as const,
-      title: 'Scopes & Permissions: Controlling Access Levels',
+      category: 'concepts' as const,
+      title: 'Scopes: Giới Hạn Quyền Lực',
       icon: 'Lock',
       estimatedTime: '3 min',
-      content: `**Scopes** define WHAT the access token can do. Think of them as specific permissions on your visitor badge.
+      content: `**Scopes (Phạm Vi)** là danh sách những gì Client ĐƯỢC PHÉP và KHÔNG ĐƯỢC PHÉP làm. Nó giống như những dòng chữ ghi trên "Chìa khóa Valet".
 
-**Example Scopes:**
-- \`read:profile\` - View basic profile info
-- \`read:email\` - Access email address
-- \`write:posts\` - Create new posts
-- \`delete:account\` - Delete user account (dangerous!)
+### 📋 Ví Dụ Về Scopes
+Khi bạn đăng nhập bằng Facebook, bạn sẽ thấy thông báo:
+*"Ứng dụng này muốn truy cập vào:"*
+- \`public_profile\` (Tên, ảnh đại diện) -> ✅ Cho phép.
+- \`email\` (Địa chỉ email) -> ✅ Cho phép.
+- \`user_friends\` (Danh sách bạn bè) -> ❌ Từ chối.
 
-**Scope Anatomy:**
+Client chỉ nhận được token có những quyền bạn đã ✅.
+
+### 🔬 Cấu Trúc Scope
+Thường có dạng: \`hành_động:tài_nguyên\`
 \`\`\`
-action:resource
-  ↓       ↓
-read:profile
+read:profile   (Đọc hồ sơ)
+write:posts    (Đăng bài viết mới)
+delete:account (Xóa tài khoản - Nguy hiểm!)
 \`\`\`
 
-**Best Practices:**
+### 💡 Nguyên Tắc Vàng: "Vừa Đủ Dùng" (Least Privilege)
+1. **Client**: Chỉ xin những quyền CẦN THIẾT nhất. Đừng xin quyền "Sửa file Google Drive" nếu bạn chỉ là app "Xem lịch".
+2. **User**: Luôn đọc kỹ bảng xin quyền trước khi bấm "Allow".
+3. **Server**: Luôn kiểm tra Scope trước khi thực hiện hành động. (Token có quyền \`read\` mà đòi \`delete\` -> Chặn ngay!).
 
-1. **Principle of Least Privilege**
-   - Request ONLY the scopes you need
-   - Don't ask for \`admin:*\` if you only need \`read:email\`
-
-2. **User Consent**
-   - Users see requested scopes during authorization
-   - Suspicious scopes = users decline authorization
-
-3. **Scope Validation**
-   - Resource server MUST check token scopes
-   - Don't trust the token alone - verify permissions
-
-4. **Hierarchical Scopes** (some providers)
-   - \`read:profile\` might include \`read:username\`
-   - Check provider documentation
-
-**Common Pitfall:**
-Even if a token has \`admin:*\` scope, you must still validate that the USER has admin permissions in YOUR system. The token proves what the CLIENT can do, not what the USER is allowed to do.`,
+### ⚠️ Cạm Bẫy Phổ Biến
+Token có scope \`admin:all\` **KHÔNG CÓ NGHĨA LÀ** user đó là Admin.
+- Scope chỉ nói lên: *"Token này được phép làm gì"*.
+- Quyền của User (Role) lại là chuyện khác: *"User này là ai"*.
+=> Phải kiểm tra cả hai!`,
 
       keyPoints: [
-        'Scopes define permissions granted to the access token',
-        'Follow least privilege - request minimum necessary scopes',
-        'Users review scopes before granting authorization',
-        'Resource server MUST validate scopes on every request',
-        'Token scopes ≠ User permissions (validate both!)',
+        'Scopes xác định giới hạn quyền lực của Access Token',
+        'Nguyên tắc Least Privilege: Chỉ xin quyền tối thiểu cần thiết',
+        'Người dùng (User) có quyền từ chối các Scope nhạy cảm',
+        'Server phải luôn check Scope trước khi xử lý request',
       ],
 
       codeExamples: {
@@ -719,61 +721,46 @@ app.delete('/api/account',
     // ============================================
     {
       id: 'section-4',
-      category: 'important' as const,
-      title: 'Access Tokens vs Refresh Tokens: The Two-Key System',
+      category: 'system' as const,
+      title: 'Access Token vs Refresh Token: Bộ Đôi Hoàn Hảo',
       icon: 'Key',
       estimatedTime: '5 min',
-      content: `OAuth uses TWO types of tokens for enhanced security:
+      content: `OAuth sử dụng HỆ THỐNG 2 CHÌA KHÓA để cân bằng giữa An Toàn và Tiện Lợi:
 
-**Access Token** (Short-lived visitor badge)
-- **Purpose**: Access protected resources
-- **Lifetime**: 15 minutes - 1 hour (short!)
-- **Storage**: Memory or sessionStorage (never localStorage!)
-- **Usage**: Sent with EVERY API request
-- **If stolen**: Limited damage (expires soon)
+### 🎫 1. Access Token (Thẻ Từ Ngắn Hạn)
+- **Vai trò**: Giống cái thẻ từ đi thang máy ở chung cư.
+- **Quyền hạn**: Mở cửa, đi thang máy.
+- **Tuổi thọ**: Rất ngắn (30 phút - 1 tiếng).
+- **Lưu trữ**: Trong bộ nhớ (RAM) của ứng dụng.
+- **Sử dụng**: Gửi kèm mọi request lấy dữ liệu.
+- **Nếu bị mất**: Kẻ trộm chỉ dùng được một lúc là thẻ hết hạn.
 
-**Refresh Token** (Long-lived master key)
-- **Purpose**: Obtain NEW access tokens without re-login
-- **Lifetime**: Days, weeks, or months
-- **Storage**: HTTP-Only secure cookie or encrypted database
-- **Usage**: ONLY sent to token endpoint to get new access token
-- **If stolen**: Major damage (can generate unlimited access tokens)
+### 📜 2. Refresh Token (Giấy Tờ Gốc Dài Hạn)
+- **Vai trò**: Giống như Sổ Đỏ hoặc Hợp Đồng Thuê Nhà gốc.
+- **Quyền hạn**: **Chỉ dùng để xin cấp lại thẻ từ mới**. KHÔNG DÙNG để mở cửa.
+- **Tuổi thọ**: Rất dài (1 tháng, 1 năm, hoặc vĩnh viễn).
+- **Lưu trữ**: Cất kỹ trong két sắt (HttpOnly Cookie an toàn).
+- **Nếu bị mất**: Cực kỳ nguy hiểm. Nhưng ta có thể "thu hồi" (revoke) nó từ phía Server.
 
-**Why Two Tokens?**
+### 🔄 Tại Sao Phải Rắc Rối Vậy?
+1. **An toàn hơn**: Access Token hay phải gửi đi gửi lại trên mạng -> Dễ bị lộ. Cho nó hết hạn sớm để giảm rủi ro.
+2. **Trải nghiệm tốt**: Refresh Token giúp User không phải đăng nhập lại liên tục (dù Access Token hết hạn sau 30p, app sẽ âm thầm dùng Refresh Token đổi thẻ mới).
 
-1. **Security Trade-off**
-   - Access tokens are used frequently → higher theft risk
-   - Refresh tokens used rarely → lower theft risk
-   - Short-lived access tokens limit damage if stolen
+### ♻️ Quy Trình Đổi Thẻ (Refresh Token Flow)
+1. App dùng Access Token gọi API -> Server báo lỗi 401 "Thẻ hết hạn rồi em ơi".
+2. App lặng lẽ lấy Refresh Token gửi lên Server: "Anh ơi cấp cho em thẻ mới".
+3. Server kiểm tra Refresh Token còn hiệu lực -> Trả về Access Token mới toanh.
+4. App dùng thẻ mới gọi lại API -> Thành công. User không hề hay biết gì cả!
 
-2. **User Experience**
-   - Users stay logged in for days/weeks (refresh token)
-   - But attackers can't use stolen access token for long
-
-3. **Revocation**
-   - Access tokens can't be revoked (stateless)
-   - Refresh tokens CAN be revoked (stored in database)
-
-**Refresh Token Flow:**
-\`\`\`
-1. Access token expires (401 Unauthorized)
-2. Client sends refresh token to /oauth/token
-3. Server validates refresh token
-4. Server issues NEW access token (and optionally new refresh token)
-5. Client retries original request with new access token
-\`\`\`
-
-**Refresh Token Rotation** (Best Practice)
-- When issuing new access token, also issue NEW refresh token
-- Invalidate old refresh token
-- Prevents replay attacks if refresh token is stolen`,
+### 🛡️ Chiến Thuật: Refresh Token Rotation
+- Mỗi khi dùng Refresh Token để đổi thẻ mới, Server sẽ **HỦY LUÔN cái Refresh Token cũ** và cấp cho cả cặp mới (New Access + New Refresh).
+- Nếu hacker ăn trộm được Refresh Token cũ và mang đi đổi -> Server sẽ phát hiện "Ủa cái này xài rồi mà?" -> Báo động đỏ -> Khóa toàn bộ tài khoản.`,
 
       keyPoints: [
-        'Access tokens: Short-lived (minutes), used for API requests',
-        'Refresh tokens: Long-lived (days), used to get new access tokens',
-        'Access tokens in memory/sessionStorage, refresh tokens in HTTP-Only cookies',
-        'Refresh token rotation: Issue new refresh token each time, invalidate old one',
-        'Refresh tokens can be revoked; access tokens cannot (stateless)',
+        'Access Token: Ngắn hạn, dùng thường xuyên, rủi ro thấp',
+        'Refresh Token: Dài hạn, dùng ít, rủi ro cao, cần cất kỹ',
+        'Không bao giờ lưu Refresh Token ở nơi hacker đọc được (như localStorage)',
+        'Refresh Token Rotation giúp phát hiện và ngăn chặn hành vi trộm token',
       ],
 
       codeExamples: {
@@ -910,7 +897,7 @@ async function refreshAccessToken() {
 
     {
       id: 'section-5',
-      category: 'important' as const,
+      category: 'security' as const,
       title: 'State Parameter: CSRF Protection for OAuth',
       icon: 'Shield',
       estimatedTime: '5 min',
@@ -1081,7 +1068,7 @@ function validateStatelessState(state) {
 
     {
       id: 'section-6',
-      category: 'important' as const,
+      category: 'security' as const,
       title: 'PKCE: Securing Mobile & SPA Applications',
       icon: 'Smartphone',
       estimatedTime: '5 min',
@@ -1821,7 +1808,7 @@ app.delete('/oauth/register/:client_id', authenticateClient, async (req, res) =>
 
     {
       id: 'section-9',
-      category: 'advanced' as const,
+      category: 'best_practices' as const,
       title: 'OAuth Security Best Practices & Production Checklist',
       icon: 'ShieldCheck',
       estimatedTime: '7 min',
@@ -1919,374 +1906,122 @@ if (!code) {
   securityScenarios: [
     {
       id: 'scenario-1',
-      title: 'Redirect URI Manipulation (Open Redirect)',
+      title: 'Redirect URI Manipulation (Bẻ Lái Redirect)',
       threatLevel: 'HIGH' as const,
-      attack: 'Attacker tricks authorization server to send authorization code to malicious server by manipulating redirect_uri parameter.',
-      exploitation: 'Without strict redirect_uri validation, attackers can intercept authorization codes by setting redirect_uri=https://evil.com in the OAuth flow.',
-      defense: 'Register redirect URIs during client registration (whitelist). Validate redirect_uri with EXACT match (no wildcards, no partial matches). Enforce HTTPS for all redirect URIs (except localhost for development). Bind authorization code to redirect_uri and validate again on token exchange.',
+      attack: 'Hacker lừa Server gửi "Mã vé" (Auth Code) về trang web giả mạo thay vì trang web thật của bạn.',
+      exploitation: 'Nếu không kiểm tra kỹ Redirect URI, hacker có thể set `redirect_uri=https://web-hacker.com` và nhận được Auth Code của nạn nhân.',
+      defense: 'Đăng ký sẵn danh sách các Redirect URI hợp lệ (Whitelist) và kiểm tra CHÍNH XÁC từng ký tự (Exact match). Không dùng wildcard (*). Bắt buộc dùng HTTPS.',
       vulnerableCode: {
         language: 'javascript' as const,
-        label: 'Vulnerable Code',
-        code: `// ❌ VULNERABLE: No redirect_uri validation
+        label: 'Code Lỏng Lẻo (Nguy Hiểm)',
+        code: `// ❌ SAI LẦM: Không kiểm tra Redirect URI
 app.get('/oauth/authorize', (req, res) => {
   const { client_id, redirect_uri, state } = req.query;
 
-  // Look up client
-  const client = db.clients.findOne({ clientId: client_id });
+  // ❌ CHẾT NGƯỜI: Cho phép chuyển hướng đi bất cứ đâu!
+  // Hacker có thể set redirect_uri=https://hacker.com
 
-  // ❌ BAD: Allowing any redirect_uri!
-  // Attacker can set redirect_uri=https://evil.com
-
-  // User approves authorization
   const authCode = generateAuthCode();
 
-  // ❌ DANGEROUS: Redirecting to attacker-controlled domain
+  // Redirect về web của hacker
   res.redirect(\`\${redirect_uri}?code=\${authCode}&state=\${state}\`);
-  // Result: Authorization code sent to evil.com
 });`,
       },
       secureCode: {
         language: 'javascript' as const,
-        label: 'Secure Code',
-        code: `// ✅ SECURE: Strict redirect_uri validation
+        label: 'Code An Toàn',
+        code: `// ✅ AN TOÀN: Kiểm tra Whitelist
 app.get('/oauth/authorize', (req, res) => {
-  const { client_id, redirect_uri, state } = req.query;
-
-  // Look up client
+  const { client_id, redirect_uri } = req.query;
   const client = db.clients.findOne({ clientId: client_id });
 
-  if (!client) {
-    return res.status(400).send('Unknown client');
+  // ✅ Kiểm tra CHÍNH XÁC trong danh sách đã đăng ký
+  const isValid = client.redirect_uris.includes(redirect_uri);
+
+  if (!isValid) {
+    return res.status(400).send('Redirect URI lạ hoắc!');
   }
 
-  // ✅ CRITICAL: Validate redirect_uri against registered URIs
-  const isValidRedirect = client.redirect_uris.some(registered => {
-    // EXACT match - no wildcards, no subdomain tricks
-    return registered === redirect_uri;
-  });
-
-  if (!isValidRedirect) {
-    console.error('Invalid redirect_uri attempted:', {
-      clientId: client_id,
-      attempted: redirect_uri,
-      registered: client.redirect_uris,
-    });
-    return res.status(400).send('Invalid redirect_uri');
+  // ✅ Chỉ cho phép HTTPS
+  if (!redirect_uri.startsWith('https://')) {
+    return res.status(400).send('Phải dùng HTTPS!');
   }
 
-  // ✅ Additional check: HTTPS required (except localhost for dev)
-  try {
-    const url = new URL(redirect_uri);
-    if (url.protocol !== 'https:' && url.hostname !== 'localhost') {
-      return res.status(400).send('redirect_uri must use HTTPS');
-    }
-  } catch (e) {
-    return res.status(400).send('Invalid redirect_uri format');
-  }
-
-  // User approves authorization
-  const authCode = generateAuthCode();
-
-  // Store code with bound redirect_uri for validation on token exchange
-  await db.authCodes.create({
-    code: authCode,
-    clientId: client.clientId,
-    redirectUri: redirect_uri,  // Bind to this URI
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-  });
-
-  // Safe to redirect
-  res.redirect(\`\${redirect_uri}?code=\${authCode}&state=\${state}\`);
-});
-
-// Token endpoint also validates redirect_uri
-app.post('/oauth/token', async (req, res) => {
-  const { code, redirect_uri } = req.body;
-
-  const authCode = await db.authCodes.findOne({ code });
-
-  // ✅ Verify redirect_uri matches the one used in authorization
-  if (authCode.redirectUri !== redirect_uri) {
-    return res.status(400).json({ error: 'invalid_grant' });
-  }
-
-  // Proceed with token issuance...
+  // Ok thì mới redirect
+  res.redirect(\`\${redirect_uri}?code=...\`);
 });`,
       },
     },
     {
       id: 'scenario-2',
-      title: 'CSRF Attack via Missing State Parameter',
+      title: 'CSRF Attack (Bẫy Đăng Nhập)',
       threatLevel: 'HIGH' as const,
-      attack: 'Attacker tricks victim into logging into the attacker\'s account, allowing attacker to see victim\'s activity (e.g., credit card entered).',
-      exploitation: 'Without state parameter validation, attackers can craft malicious callback URLs with their authorization codes and trick victims into clicking them, logging victims into the attacker\'s account.',
-      defense: 'Always generate cryptographically random state parameter before redirecting to authorization server. Store state in user\'s session and validate it matches in the callback. Delete state after validation (single-use). Set state expiration (10 minutes maximum). Log state mismatches as potential CSRF attempts.',
+      attack: 'Hacker lừa bạn đăng nhập vào TÀI KHOẢN CỦA HẮN. Bạn nạp tiền -> Tiền vào ví hắn.',
+      exploitation: 'Hacker gửi cho bạn một link Login đã kèm sẵn "state" của hắn. Bạn bấm vào -> Bạn đang dùng App dưới danh nghĩa của Hacker.',
+      defense: 'Luôn tạo mã `state` ngẫu nhiên cho mỗi phiên đăng nhập, lưu vào Session và kiểm tra lại khi nhận callback. Nếu `state` không khớp -> Chặn ngay.',
       vulnerableCode: {
         language: 'javascript' as const,
-        label: 'Vulnerable Code',
-        code: `// ❌ VULNERABLE: No state parameter validation
+        label: 'Code Thiếu State',
+        code: `// ❌ NGUY HIỂM: Không dùng State parameter
 app.get('/login', (req, res) => {
-  const authUrl = \`https://provider.com/oauth/authorize?\` +
-    \`client_id=\${CLIENT_ID}&\` +
-    \`redirect_uri=\${REDIRECT_URI}&\` +
-    \`response_type=code&\` +
-    \`scope=read:profile\`;
-    // ❌ Missing state parameter!
-
+  const authUrl = \`https://google.com/oauth?client_id=...\`;
+  // ❌ Mất tham số state -> Dễ dính CSRF
   res.redirect(authUrl);
-});
-
-app.get('/oauth/callback', async (req, res) => {
-  const { code } = req.query;
-  // ❌ No state validation!
-
-  // Exchange code for token
-  const tokens = await exchangeCodeForToken(code);
-
-  // User is now logged in
-  req.session.accessToken = tokens.access_token;
-  res.redirect('/dashboard');
-});
-
-// Attack scenario:
-// 1. Attacker starts OAuth flow for THEIR account, gets callback URL:
-//    yourapp.com/oauth/callback?code=ATTACKERS_CODE
-// 2. Attacker sends this link to victim via email/phishing
-// 3. Victim clicks link → logged into ATTACKER'S account
-// 4. Victim enters credit card → attacker sees it!`,
+});`,
       },
       secureCode: {
         language: 'javascript' as const,
-        label: 'Secure Code',
-        code: `// ✅ SECURE: Proper state parameter implementation
+        label: 'Code Chuẩn State',
+        code: `// ✅ AN TOÀN: Sinh và kiểm tra State
 const crypto = require('crypto');
 
 app.get('/login', (req, res) => {
-  // ✅ Generate cryptographically random state
+  // 1. Sinh mã ngẫu nhiên
   const state = crypto.randomBytes(32).toString('hex');
 
-  // ✅ Store state in user's session
-  req.session.oauthState = state;
-  req.session.oauthStateCreatedAt = Date.now();
+  // 2. Lưu vào Session của User
+  req.session.oauth_state = state;
 
-  const authUrl = \`https://provider.com/oauth/authorize?\` +
-    \`client_id=\${CLIENT_ID}&\` +
-    \`redirect_uri=\${REDIRECT_URI}&\` +
-    \`response_type=code&\` +
-    \`scope=read:profile&\` +
-    \`state=\${state}\`;  // ✅ Include state parameter
-
+  // 3. Gửi kèm trong URL
+  const authUrl = \`https://google.com/oauth?state=\${state}...\`;
   res.redirect(authUrl);
 });
 
-app.get('/oauth/callback', async (req, res) => {
-  const { code, state } = req.query;
+app.get('/callback', (req, res) => {
+  const { state } = req.query;
 
-  // ✅ CRITICAL: Validate state parameter
-  const storedState = req.session.oauthState;
-  const stateCreatedAt = req.session.oauthStateCreatedAt;
-
-  // Check 1: State exists in session
-  if (!storedState) {
-    console.error('CSRF attempt: No stored state found');
-    return res.status(400).send('Invalid OAuth state');
+  // 4. Kiểm tra xem có khớp với Session không
+  if (state !== req.session.oauth_state) {
+    return res.status(400).send('Cảnh báo: Phát hiện tấn công CSRF!');
   }
 
-  // Check 2: State matches
-  if (state !== storedState) {
-    console.error('CSRF attempt detected:', {
-      received: state,
-      expected: storedState,
-      userIp: req.ip,
-    });
-    return res.status(400).send('Invalid OAuth state - possible CSRF attack');
-  }
-
-  // Check 3: State not expired (10 minute limit)
-  const stateAge = Date.now() - stateCreatedAt;
-  if (stateAge > 10 * 60 * 1000) {
-    console.error('OAuth state expired');
-    return res.status(400).send('OAuth state expired');
-  }
-
-  // ✅ Delete state after validation (single-use)
-  delete req.session.oauthState;
-  delete req.session.oauthStateCreatedAt;
-
-  // State validated - proceed safely
-  const tokens = await exchangeCodeForToken(code);
-  req.session.accessToken = tokens.access_token;
-  res.redirect('/dashboard');
-});
-
-// Attack now fails:
-// 1. Attacker gets: yourapp.com/oauth/callback?code=EVIL&state=attacker_state
-// 2. Victim clicks link
-// 3. Your app checks: victim's session state ≠ attacker_state
-// 4. Request rejected → attack prevented!`,
+  // An toàn, tiếp tục xử lý...
+});`,
       },
     },
     {
       id: 'scenario-3',
-      title: 'Authorization Code Interception (No PKCE)',
+      title: 'Interception Attack (Trộm Code Mobile)',
       threatLevel: 'MEDIUM' as const,
-      attack: 'On mobile apps or SPAs, attacker intercepts authorization code from callback URL and exchanges it for access token (no client_secret protection).',
-      exploitation: 'Malicious apps can register the same custom URL scheme and intercept authorization codes from deep links. Without PKCE, stolen codes can be exchanged for tokens.',
-      defense: 'ALWAYS implement PKCE for mobile apps and SPAs (public clients). Use S256 (SHA-256) code challenge method, not "plain". Store code_verifier securely in app memory. Server MUST validate code_verifier matches code_challenge. Use custom URL schemes with app links/universal links for iOS/Android.',
+      attack: 'Trên Mobile, hacker cài app giả mạo để bắt trộm "Auth Code" khi App chuyển đổi qua lại.',
+      exploitation: 'App độc hại đăng ký cùng Deep Link (ví dụ `myapp://callback`). Khi Server trả Code về, App độc hại nhảy ra đớp lấy Code.',
+      defense: 'BẮT BUỘC dùng PKCE (Proof Key for Code Exchange). Dù hacker có trộm được Code, nhưng không có "Code Verifier" (đang nằm trong RAM của App thật) thì cũng không đổi được Token.',
       vulnerableCode: {
         language: 'javascript' as const,
-        label: 'Vulnerable Code',
-        code: `// ❌ VULNERABLE: Mobile app without PKCE
-// Mobile App Code
-async function login() {
-  const authUrl = \`https://provider.com/oauth/authorize?\` +
-    \`client_id=mobile_app_123&\` +
-    \`redirect_uri=myapp://callback&\` +
-    \`response_type=code&\` +
-    \`state=\${randomState()}\`;
-    // ❌ No PKCE code_challenge!
-
-  // Open browser for authorization
-  await openBrowser(authUrl);
-}
-
-// Handle deep link callback
-function handleCallback(url) {
-  const params = parseUrl(url);
-  const code = params.code;
-
-  // ❌ Exchange code for token WITHOUT code_verifier
-  fetch('https://provider.com/oauth/token', {
-    method: 'POST',
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      code: code,
-      redirect_uri: 'myapp://callback',
-      client_id: 'mobile_app_123',
-      // ❌ No client_secret (public client)
-      // ❌ No code_verifier (no PKCE)
-    }),
-  });
-}
-
-// Attack scenario:
-// 1. Malicious app registers custom URL scheme: myapp://
-// 2. User authorizes legitimate app
-// 3. Callback: myapp://callback?code=abc123
-// 4. Malicious app intercepts deep link, steals code
-// 5. Malicious app exchanges code for token (no PKCE to stop it!)`,
+        label: 'Mobile Không PKCE',
+        code: `// ❌ Mobile App cũ kỹ: Rất dễ bị trộm Code
+// Không gửi code_challenge khi login
+// Không gửi code_verifier khi đổi token`,
       },
       secureCode: {
         language: 'javascript' as const,
-        label: 'Secure Code',
-        code: `// ✅ SECURE: Mobile app with PKCE
-import crypto from 'crypto';
-
-// Generate PKCE parameters
-function generatePKCE() {
-  // Code verifier: Random 43-128 character string
-  const codeVerifier = crypto.randomBytes(32).toString('base64url');
-
-  // Code challenge: SHA-256 hash of verifier
-  const codeChallenge = crypto
-    .createHash('sha256')
-    .update(codeVerifier)
-    .digest('base64url');
-
-  return { codeVerifier, codeChallenge };
-}
-
-async function login() {
-  // ✅ Generate PKCE parameters
-  const { codeVerifier, codeChallenge } = generatePKCE();
-  const state = crypto.randomBytes(16).toString('hex');
-
-  // ✅ Store code_verifier securely (in-memory or secure storage)
-  await secureStorage.set('pkce_code_verifier', codeVerifier);
-  await secureStorage.set('oauth_state', state);
-
-  // ✅ Include code_challenge in authorization URL
-  const authUrl = \`https://provider.com/oauth/authorize?\` +
-    \`client_id=mobile_app_123&\` +
-    \`redirect_uri=myapp://callback&\` +
-    \`response_type=code&\` +
-    \`state=\${state}&\` +
-    \`code_challenge=\${codeChallenge}&\` +  // ✅ PKCE challenge
-    \`code_challenge_method=S256\`;  // ✅ SHA-256
-
-  await openBrowser(authUrl);
-}
-
-async function handleCallback(url) {
-  const params = parseUrl(url);
-  const code = params.code;
-  const state = params.state;
-
-  // Validate state
-  const storedState = await secureStorage.get('oauth_state');
-  if (state !== storedState) {
-    throw new Error('Invalid state - CSRF attack');
-  }
-
-  // ✅ Retrieve code_verifier
-  const codeVerifier = await secureStorage.get('pkce_code_verifier');
-
-  // ✅ Exchange code for token WITH code_verifier
-  const response = await fetch('https://provider.com/oauth/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      code: code,
-      redirect_uri: 'myapp://callback',
-      client_id: 'mobile_app_123',
-      code_verifier: codeVerifier,  // ✅ PKCE verification
-    }),
-  });
-
-  const tokens = await response.json();
-
-  // Clean up
-  await secureStorage.delete('pkce_code_verifier');
-  await secureStorage.delete('oauth_state');
-
-  return tokens;
-}
-
-// Server-side: Validate PKCE on token exchange
-app.post('/oauth/token', async (req, res) => {
-  const { code, code_verifier } = req.body;
-
-  // Retrieve stored authorization code
-  const authCode = await db.authCodes.findOne({ code });
-
-  if (!authCode || !authCode.codeChallenge) {
-    return res.status(400).json({ error: 'invalid_grant' });
-  }
-
-  // ✅ CRITICAL: Verify code_verifier matches code_challenge
-  const computedChallenge = crypto
-    .createHash('sha256')
-    .update(code_verifier)
-    .digest('base64url');
-
-  if (computedChallenge !== authCode.codeChallenge) {
-    console.error('PKCE validation failed - possible code theft');
-    return res.status(400).json({ error: 'invalid_grant' });
-  }
-
-  // PKCE validated - issue token
-  const accessToken = generateAccessToken(authCode.userId);
-  res.json({ access_token: accessToken });
-});
-
-// Attack now fails:
-// 1. Malicious app intercepts: myapp://callback?code=abc123
-// 2. Tries to exchange code for token
-// 3. Server asks for code_verifier
-// 4. Malicious app doesn't have it (stored in legitimate app's memory)
-// 5. Server validates SHA256(code_verifier) ≠ stored code_challenge
-// 6. Token exchange rejected → attack prevented!`,
+        label: 'Mobile Có PKCE',
+        code: `// ✅ Mobile App hiện đại:
+// 1. Tạo code_verifier ngẫu nhiên.
+// 2. Hash nó thành code_challenge.
+// 3. Gửi code_challenge lúc Login.
+// 4. Gửi code_verifier lúc đổi Token.
+// => Hacker trộm được Code cũng khóc thét vì thiếu code_verifier!`,
       },
     },
   ],
@@ -2294,49 +2029,49 @@ app.post('/oauth/token', async (req, res) => {
   challenges: [
     {
       id: 'challenge-1',
-      title: 'Implement Authorization Code Flow',
+      title: 'Xây Dựng Auth Flow',
       difficulty: 'Easy' as const,
       points: 100,
-      description: 'Build a complete OAuth 2.0 authorization code flow with PKCE for a browser-based application. User should be redirected to mock authorization server, approve scopes, and receive access token.',
+      description: 'Tự tay code một quy trình Authorization Code Flow hoàn chỉnh. Từ lúc chuyển hướng User đến lúc lấy được Access Token.',
     },
     {
       id: 'challenge-2',
-      title: 'Secure Refresh Token Rotation',
+      title: 'Xoay Vòng Refresh Token',
       difficulty: 'Medium' as const,
       points: 200,
-      description: 'Implement refresh token rotation where each token refresh returns a NEW refresh token and invalidates the old one. Detect refresh token reuse attacks (if old token is used again, revoke entire token family).',
+      description: 'Cài đặt cơ chế "Refresh Token Rotation". Mỗi lần đổi thẻ mới là hủy luôn thẻ cũ. Nếu ai dùng lại thẻ cũ -> Khóa tài khoản ngay.',
     },
     {
       id: 'challenge-3',
-      title: 'Break the OAuth Flow',
+      title: 'Vượt Rào Bảo Mật',
       difficulty: 'Hard' as const,
       points: 300,
-      description: 'Given a vulnerable OAuth implementation, exploit it using: (1) Redirect URI manipulation, (2) State parameter CSRF attack, and (3) Authorization code interception. Then FIX all vulnerabilities.',
+      description: 'Thử đóng vai Hacker: Tấn công hệ thống bị lỗi Redirect URI và CSRF. Sau đó viết code vá lỗ hổng.',
     },
   ],
 
   achievements: {
     protocolInitiate: {
-      title: 'Protocol Initiate',
-      description: 'Complete all Essential sections',
+      title: 'Học Việc Valet',
+      description: 'Hoàn thành các kiến thức cơ bản về OAuth',
       icon: 'Shield',
       color: 'text-green-400',
     },
     securityOperative: {
-      title: 'Security Operative',
-      description: 'Complete all Essential + Important sections',
+      title: 'Vệ Sĩ Cấp Cao',
+      description: 'Nắm vững các kịch bản tấn công và phòng thủ',
       icon: 'ShieldCheck',
       color: 'text-blue-400',
     },
     eliteGuardian: {
-      title: 'Elite Guardian',
-      description: 'Complete all sections + 2 challenges',
+      title: 'Kiến Trúc Sư Cổng Thành',
+      description: 'Hoàn thành tất cả bài học và thử thách',
       icon: 'ShieldAlert',
       color: 'text-purple-400',
     },
     masterArchitect: {
-      title: 'Master Architect',
-      description: 'Complete everything + all challenges',
+      title: 'Trùm Cuối OAuth',
+      description: 'Đạt điểm tuyệt đối mọi hạng mục',
       icon: 'Crown',
       color: 'text-yellow-400',
     },
@@ -2344,16 +2079,16 @@ app.post('/oauth/token', async (req, res) => {
 
   crossReferences: {
     session: {
-      title: 'Session-Based Authentication',
-      comparison: 'Session auth stores state on server; OAuth delegates authorization to third party without sharing passwords.',
+      title: 'So Sánh: Session Auth',
+      comparison: 'Session giống như "Thẻ Nhân Viên" nội bộ. OAuth giống như "Thẻ Khách" cho người ngoài.',
     },
     jwt: {
-      title: 'JWT Authentication',
-      comparison: 'OAuth often uses JWTs as access tokens, but JWT is a token format while OAuth is an authorization framework.',
+      title: 'So Sánh: JWT',
+      comparison: 'JWT là định dạng của cái thẻ. OAuth là quy trình cấp cái thẻ đó.',
     },
     mfa: {
-      title: 'Multi-Factor Authentication',
-      comparison: 'MFA can be combined with OAuth - users authenticate to OAuth provider with 2FA, then authorize your app.',
+      title: 'Kết Hợp: MFA',
+      comparison: 'OAuth và MFA là bạn thân. Đăng nhập 2 lớp (MFA) xong mới được cấp quyền (OAuth).',
     },
   },
 };

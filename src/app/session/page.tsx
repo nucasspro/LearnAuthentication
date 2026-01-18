@@ -1,21 +1,23 @@
 'use client';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { AchievementTracker } from '@/components/learning/AchievementTracker';
+import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { CodeBlock } from '@/components/learning/CodeBlock';
 import { ProgressSidebar } from '@/components/learning/ProgressSidebar';
 import { SectionCard } from '@/components/learning/SectionCard';
 import { SecurityScenario } from '@/components/learning/SecurityScenario';
-import { AchievementTracker } from '@/components/learning/AchievementTracker';
-import { ChallengeCard } from '@/components/learning/ChallengeCard';
 import { StoryHeader } from '@/components/learning/StoryHeader';
-import { codeExamples, securityScenarios, challenges } from '@/lib/content/session-auth';
-import { Section, ProgressData } from '@/lib/types';
-import { AlertCircle, ArrowRight, CheckCircle2, Clock, Cookie, Database, Key, Lock, RefreshCw, Shield, Users, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { challenges, codeExamples, securityScenarios, sessionAuthContent } from '@/lib/content/session-auth';
+import { ProgressData, Section } from '@/lib/types';
+import { AlertCircle, CheckCircle2, Clock, Cookie, Database, Key, Lock, RefreshCw, Shield, Zap } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 
 export default function SessionPage() {
   const [username, setUsername] = useState('admin');
@@ -49,15 +51,15 @@ export default function SessionPage() {
   }, [progress]);
 
   const sections: Section[] = [
-    { id: 'section-1', title: 'Access Granted: What is Session Auth?', icon: 'Key', category: 'essential', estimatedTime: 3 },
-    { id: 'section-2', title: 'The Authentication Sequence', icon: 'Zap', category: 'essential', estimatedTime: 4 },
-    { id: 'section-3', title: 'Cookie Security Protocols', icon: 'Shield', category: 'essential', estimatedTime: 3 },
-    { id: 'section-4', title: 'Session Storage: Where to Keep State', icon: 'Database', category: 'important', estimatedTime: 5 },
-    { id: 'section-5', title: 'Session Lifecycle: Birth to Termination', icon: 'RefreshCw', category: 'important', estimatedTime: 5 },
-    { id: 'section-6', title: 'Session vs JWT: Choosing Your Protocol', icon: 'Users', category: 'important', estimatedTime: 5 },
-    { id: 'section-7', title: 'Security Breach Scenarios', icon: 'AlertCircle', category: 'advanced', estimatedTime: 8 },
-    { id: 'section-8', title: 'Scaling to Millions: Enterprise Patterns', icon: 'Zap', category: 'advanced', estimatedTime: 6 },
-    { id: 'section-9', title: 'The Guardian\'s Checklist: Best Practices', icon: 'CheckCircle2', category: 'advanced', estimatedTime: 6 },
+    { id: 'section-1', title: sessionAuthContent.sections[0].title, icon: 'Key', category: 'concepts', estimatedTime: 3 },
+    { id: 'section-2', title: sessionAuthContent.sections[1].title, icon: 'Zap', category: 'concepts', estimatedTime: 4 },
+    { id: 'section-3', title: sessionAuthContent.sections[2].title, icon: 'Shield', category: 'security', estimatedTime: 3 },
+    { id: 'section-4', title: sessionAuthContent.sections[3].title, icon: 'Database', category: 'system', estimatedTime: 5 },
+    { id: 'section-5', title: 'Vòng Đời Session: Từ Khởi Tạo Đến Hủy', icon: 'RefreshCw', category: 'concepts', estimatedTime: 5 },
+    { id: 'section-6', title: 'Session vs JWT: Chọn Giao Thức Nào?', icon: 'Users', category: 'concepts', estimatedTime: 5 },
+    { id: 'section-7', title: 'Kịch Bản Tấn Công Thực Tế', icon: 'AlertCircle', category: 'security', estimatedTime: 8 },
+    { id: 'section-8', title: 'Scaling: Mô Hình Enterprise', icon: 'Zap', category: 'advanced', estimatedTime: 6 },
+    { id: 'section-9', title: 'Checklist Bảo Mật Của Guardian', icon: 'CheckCircle2', category: 'best_practices', estimatedTime: 6 },
   ];
 
   const handleSectionComplete = (sectionId: string) => {
@@ -144,21 +146,17 @@ export default function SessionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-green-950 to-gray-950">
+    <div className="min-h-screen bg-transparent text-zinc-300">
       <StoryHeader
-        title="KEYCARD PROTOCOL"
+        title={sessionAuthContent.storyHook.title}
         narrative={
           <>
-            <span className="text-neon-400 font-bold">CYBERPUNK 2084:</span> You&apos;re entering NeoTech Tower,
-            the most secure facility in Neo-Tokyo. Your physical keycard grants access to restricted floors -
-            but how does it work in the digital realm? Learn how servers remember you through
-            <span className="text-neon-300 font-semibold"> session-based authentication</span>,
-            the stateful protocol that powers millions of secure applications.
+            <span className="text-neon-400 font-bold">{sessionAuthContent.storyHook.subtitle}:</span> {sessionAuthContent.storyHook.narrative}
           </>
         }
         icon={Cookie}
-        clearanceLevel="Basic Access"
-        status="ACTIVE"
+        clearanceLevel={sessionAuthContent.storyHook.clearanceLevel}
+        status={sessionAuthContent.storyHook.status}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -174,138 +172,194 @@ export default function SessionPage() {
 
           {/* Main Content */}
           <main className="space-y-8">
-            {/* Section 1: What is Session Auth */}
+            {/* Section 1: Session Auth Là Gì? */}
             <SectionCard
               {...sections[0]}
               isCompleted={progress.completedSections.includes(sections[0].id)}
               onComplete={handleSectionComplete}
             >
               <p className="text-lg">
-                Session-based authentication works like a <span className="text-neon-400 font-semibold">physical keycard</span> at
-                NeoTech Tower. When you swipe your card, the building&apos;s central computer <span className="text-cyan-400">remembers</span> you&apos;re
-                inside and grants access to authorized floors.
+                Session-based authentication hoạt động như một <span className="text-zinc-100 font-semibold">thẻ thang máy</span> tại
+                chung cư cao cấp. Khi bạn quẹt thẻ, hệ thống tòa nhà <span className="text-zinc-100">nhớ</span> bạn đang ở trong
+                và cấp quyền truy cập vào các tầng được phép.
               </p>
 
-              <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-5 my-4">
-                <h4 className="text-neon-300 font-bold mb-3 flex items-center gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/session/concept-card.png"
+                      alt="Cyberpunk Access Card Concept"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.01_Giao_Thức_Truy_Cập</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/session/concept-card.png"
+                      alt="Cyberpunk Access Card Concept"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <div className="bg-zinc-900/30 border border-white/10 p-6 my-4 rounded-none">
+                <h4 className="text-zinc-100 font-bold mb-3 flex items-center gap-2">
                   <Key className="w-5 h-5" />
-                  The Digital Keycard
+                  Cơ Chế Hoạt Động Kỹ Thuật Số
                 </h4>
                 <ul className="space-y-2 text-gray-300">
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">1.</span>
-                    You prove your identity (username + password)
+                    <span className="text-zinc-400 font-bold">1.</span>
+                    Bạn chứng minh danh tính (username + password)
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">2.</span>
-                    Server generates a unique <span className="text-cyan-300 font-mono">session ID</span>
+                    <span className="text-zinc-400 font-bold">2.</span>
+                    Server tạo một <span className="text-orange-400 font-mono">Session ID</span> duy nhất
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">3.</span>
-                    Server stores your data in its <span className="text-purple-300">memory/database</span>
+                    <span className="text-zinc-400 font-bold">3.</span>
+                    Server lưu dữ liệu của bạn vào <span className="text-zinc-200">bộ nhớ/database</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">4.</span>
-                    Browser receives session ID via <span className="text-yellow-300">HTTP cookie</span>
+                    <span className="text-zinc-400 font-bold">4.</span>
+                    Browser nhận Session ID qua <span className="text-zinc-200">HTTP cookie</span>
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-neon-400 font-bold">5.</span>
-                    Every request auto-sends cookie - server recognizes you
+                    <span className="text-zinc-400 font-bold">5.</span>
+                    Mọi request sau đó tự động gửi kèm cookie - server nhận ra bạn
                   </li>
                 </ul>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-gray-950/50 border border-cyan-500/30 rounded-lg p-4">
-                  <h5 className="text-cyan-400 font-bold mb-2">Stateful</h5>
-                  <p className="text-sm text-gray-400">
-                    Server stores session data. Cookie is just an ID reference.
+                <div className="bg-zinc-900/30 border border-white/10 rounded-none p-4">
+                  <h5 className="text-zinc-100 font-bold mb-2">Stateful</h5>
+                  <p className="text-sm text-zinc-400">
+                    Server lưu trữ dữ liệu session. Cookie chỉ chứa ID tham chiếu.
                   </p>
                 </div>
-                <div className="bg-gray-950/50 border border-purple-500/30 rounded-lg p-4">
-                  <h5 className="text-purple-400 font-bold mb-2">Server-Side</h5>
-                  <p className="text-sm text-gray-400">
-                    All authentication logic lives on the server, not in the cookie.
+                <div className="bg-zinc-900/30 border border-white/10 rounded-none p-4">
+                  <h5 className="text-zinc-100 font-bold mb-2">Server-Side</h5>
+                  <p className="text-sm text-zinc-400">
+                    Mọi logic xác thực nằm ở server, không phải trong cookie.
                   </p>
                 </div>
               </div>
             </SectionCard>
 
-            {/* Section 2: Authentication Sequence */}
+            {/* Section 2: Quy Trình Đăng Nhập */}
             <SectionCard
               {...sections[1]}
               isCompleted={progress.completedSections.includes(sections[1].id)}
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                The authentication sequence is a <span className="text-neon-400 font-bold">7-step handshake</span> between
-                client and server, establishing a secure communication channel.
+                Quy trình xác thực là một <span className="text-zinc-100 font-bold">cái bắt tay 7 bước</span> giữa
+                client và server, thiết lập kênh liên lạc bảo mật.
               </p>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/session/login-flow.png"
+                      alt="Login Security Flow"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <p className="text-sm font-mono text-neon-400 font-bold uppercase tracking-wider">Hình.02_Bắt_Tay_Bảo_Mật</p>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/session/login-flow.png"
+                      alt="Login Security Flow"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               <div className="space-y-3">
                 {[
-                  { num: 1, label: 'Client → Server', desc: 'POST /login with credentials', code: '{ username, password }' },
-                  { num: 2, label: 'Server validates', desc: 'Compares bcrypt hash against database', code: 'bcrypt.compare(password, hash)' },
-                  { num: 3, label: 'Generate session ID', desc: '256 bits of cryptographic entropy', code: 'crypto.randomBytes(32)' },
-                  { num: 4, label: 'Store in database', desc: 'Session object with expiration', code: '{ userId, expiresAt }' },
-                  { num: 5, label: 'Set cookie header', desc: 'HttpOnly, Secure, SameSite flags', code: 'Set-Cookie: sessionId=...' },
-                  { num: 6, label: 'Browser stores', desc: 'Cookie auto-sent on future requests', code: 'Cookie: sessionId=...' },
-                  { num: 7, label: 'Validate each request', desc: 'Look up session ID in database', code: 'SELECT * FROM sessions WHERE id=?' },
+                  { num: 1, label: 'Client → Server', desc: 'Gửi POST /login kèm credentials', code: '{ username, password }' },
+                  { num: 2, label: 'Server kiểm tra', desc: 'So sánh bcrypt hash với database', code: 'bcrypt.compare(password, hash)' },
+                  { num: 3, label: 'Tạo Session ID', desc: '256 bits entropy ngẫu nhiên', code: 'crypto.randomBytes(32)' },
+                  { num: 4, label: 'Lưu vào Database', desc: 'Session object kèm thời hạn', code: '{ userId, expiresAt }' },
+                  { num: 5, label: 'Set Cookie Header', desc: 'HttpOnly, Secure, SameSite flags', code: 'Set-Cookie: sessionId=...' },
+                  { num: 6, label: 'Browser lưu trữ', desc: 'Cookie tự động gửi cho request sau', code: 'Cookie: sessionId=...' },
+                  { num: 7, label: 'Validate mỗi request', desc: 'Tra cứu Session ID trong database', code: 'SELECT * FROM sessions WHERE id=?' },
                 ].map(step => (
-                  <div key={step.num} className="flex gap-4 p-3 rounded-lg bg-gray-950/50 border border-neon-500/20 hover:border-neon-500/40 transition-all">
-                    <div className="flex-shrink-0 w-8 h-8 bg-neon-500 text-black rounded-full flex items-center justify-center font-black">
+                  <div key={step.num} className="flex gap-4 p-3 rounded-none bg-zinc-900/30 border border-white/10 hover:border-white/20 transition-all">
+                    <div className="flex-shrink-0 w-8 h-8 bg-zinc-800 text-zinc-300 rounded-none flex items-center justify-center font-bold">
                       {step.num}
                     </div>
                     <div className="flex-1">
-                      <div className="text-neon-300 font-bold text-sm">{step.label}</div>
-                      <div className="text-gray-400 text-xs mt-0.5">{step.desc}</div>
-                      <code className="text-xs text-cyan-300 font-mono mt-1 block">{step.code}</code>
+                      <div className="text-zinc-200 font-bold text-sm">{step.label}</div>
+                      <div className="text-zinc-500 text-xs mt-0.5">{step.desc}</div>
+                      <code className="text-xs text-orange-400 font-mono mt-1 block">{step.code}</code>
                     </div>
                   </div>
                 ))}
               </div>
             </SectionCard>
 
-            {/* Section 3: Cookie Security */}
+            {/* Section 3: Bảo Mật Cookie */}
             <SectionCard
               {...sections[2]}
               isCompleted={progress.completedSections.includes(sections[2].id)}
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                Cookie security attributes are your <span className="text-neon-400 font-bold">first line of defense</span> against
-                common web attacks. Each attribute protects against specific threats.
+                Cookie security attributes là <span className="text-zinc-100 font-bold">tấm khiên đầu tiên</span> bảo vệ
+                bạn trước các cuộc tấn công web phổ biến. Mỗi attribute chặn đứng một loại nguy cơ cụ thể.
               </p>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-2 border-neon-500/30 rounded-lg overflow-hidden">
-                  <thead className="bg-gray-900 border-b-2 border-neon-500/30">
+                <table className="w-full text-sm border border-white/10 rounded-none overflow-hidden">
+                  <thead className="bg-[#111] border-b border-white/10">
                     <tr>
-                      <th className="px-4 py-3 text-left text-neon-300 font-black">Attribute</th>
-                      <th className="px-4 py-3 text-left text-neon-300 font-black">Protection</th>
-                      <th className="px-4 py-3 text-left text-neon-300 font-black">Attack Prevented</th>
+                      <th className="px-6 py-4 text-left text-zinc-300 font-bold uppercase tracking-wider text-xs">Thuộc Tính</th>
+                      <th className="px-6 py-4 text-left text-zinc-300 font-bold uppercase tracking-wider text-xs">Cơ Chế Bảo Vệ</th>
+                      <th className="px-6 py-4 text-left text-zinc-300 font-bold uppercase tracking-wider text-xs">Chặn Tấn Công</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800">
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-mono text-neon-400">HttpOnly</td>
-                      <td className="px-4 py-3 text-gray-300">JavaScript cannot read cookie</td>
-                      <td className="px-4 py-3"><Badge className="bg-red-500/20 text-red-300 border border-red-500/50">XSS Theft</Badge></td>
+                  <tbody className="divide-y divide-white/5 bg-[#0a0a0a]">
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-mono text-zinc-300">HttpOnly</td>
+                      <td className="px-6 py-4 text-zinc-400">JavaScript không thể đọc cookie</td>
+                      <td className="px-6 py-4"><Badge variant="outline" className="border-red-900/50 text-red-400 bg-red-900/10">XSS Theft</Badge></td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-mono text-cyan-400">Secure</td>
-                      <td className="px-4 py-3 text-gray-300">Only sent over HTTPS</td>
-                      <td className="px-4 py-3"><Badge className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/50">MITM Sniffing</Badge></td>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-mono text-zinc-300">Secure</td>
+                      <td className="px-6 py-4 text-zinc-400">Chỉ gửi qua kết nối HTTPS an toàn</td>
+                      <td className="px-6 py-4"><Badge variant="outline" className="border-yellow-900/50 text-yellow-500 bg-yellow-900/10">MITM Sniffing</Badge></td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-mono text-purple-400">SameSite=Strict</td>
-                      <td className="px-4 py-3 text-gray-300">Blocks cross-site requests</td>
-                      <td className="px-4 py-3"><Badge className="bg-orange-500/20 text-orange-300 border border-orange-500/50">CSRF</Badge></td>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-mono text-zinc-300">SameSite=Strict</td>
+                      <td className="px-6 py-4 text-zinc-400">Chặn gửi cookie từ trang thứ 3</td>
+                      <td className="px-6 py-4"><Badge variant="outline" className="border-orange-900/50 text-orange-500 bg-orange-900/10">CSRF</Badge></td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-mono text-green-400">Max-Age</td>
-                      <td className="px-4 py-3 text-gray-300">Auto-expiration timer</td>
-                      <td className="px-4 py-3"><Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/50">Session Hijacking</Badge></td>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-mono text-zinc-300">Max-Age</td>
+                      <td className="px-6 py-4 text-zinc-400">Tự động hủy sau thời gian thực</td>
+                      <td className="px-6 py-4"><Badge variant="outline" className="border-blue-900/50 text-blue-500 bg-blue-900/10">Session Hijacking</Badge></td>
                     </tr>
                   </tbody>
                 </table>
@@ -314,110 +368,110 @@ export default function SessionPage() {
               <CodeBlock examples={codeExamples.settingCookie} title="secure-cookie.js" />
             </SectionCard>
 
-            {/* Section 4: Session Storage */}
+            {/* Section 4: Lưu Session Ở Đâu? */}
             <SectionCard
               {...sections[3]}
               isCompleted={progress.completedSections.includes(sections[3].id)}
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                Where you <span className="text-neon-400 font-bold">store sessions</span> affects performance, scalability,
-                and security. Choose based on your application&apos;s needs.
+                Nơi bạn <span className="text-zinc-100 font-bold">lưu data session</span> quyết định hiệu năng,
+                khả năng mở rộng (scale) và bảo mật của hệ thống.
               </p>
 
               <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-purple-500/30 rounded-lg p-4">
-                  <Database className="w-8 h-8 text-purple-400 mb-3" />
-                  <h4 className="text-purple-300 font-black mb-2">In-Memory</h4>
-                  <p className="text-xs text-gray-400 mb-3">Node.js process memory (express-session default)</p>
+                <div className="bg-zinc-900/30 border border-white/10 rounded-none p-4">
+                  <Database className="w-8 h-8 text-zinc-100 mb-3" />
+                  <h4 className="text-zinc-100 font-black mb-2">In-Memory</h4>
+                  <p className="text-xs text-zinc-500 mb-3">RAM của Node.js (default)</p>
                   <div className="space-y-1 text-xs">
-                    <div className="text-green-400">+ Ultra-fast access</div>
-                    <div className="text-green-400">+ Simple setup</div>
-                    <div className="text-red-400">- Lost on restart</div>
-                    <div className="text-red-400">- Single server only</div>
+                    <div className="text-zinc-400">+ Truy cập siêu tốc</div>
+                    <div className="text-zinc-400">+ Setup đơn giản</div>
+                    <div className="text-zinc-500">- Mất hết khi restart</div>
+                    <div className="text-zinc-500">- Chỉ chạy được 1 server</div>
                   </div>
-                  <Badge className="mt-3 bg-purple-500/20 text-purple-300 border border-purple-500/50 text-xs">
-                    Best for: Development
+                  <Badge variant="outline" className="mt-3 bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs rounded-none">
+                    Phù hợp: Development
                   </Badge>
                 </div>
 
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-cyan-500/30 rounded-lg p-4">
-                  <Database className="w-8 h-8 text-cyan-400 mb-3" />
-                  <h4 className="text-cyan-300 font-black mb-2">Database</h4>
-                  <p className="text-xs text-gray-400 mb-3">PostgreSQL, MySQL, MongoDB</p>
+                <div className="bg-zinc-900/30 border border-white/10 rounded-none p-4">
+                  <Database className="w-8 h-8 text-zinc-100 mb-3" />
+                  <h4 className="text-zinc-100 font-black mb-2">Database</h4>
+                  <p className="text-xs text-zinc-500 mb-3">PostgreSQL, MySQL, MongoDB</p>
                   <div className="space-y-1 text-xs">
-                    <div className="text-green-400">+ Persistent storage</div>
-                    <div className="text-green-400">+ Works with load balancers</div>
-                    <div className="text-yellow-400">~ Slower than memory</div>
-                    <div className="text-yellow-400">~ Query optimization needed</div>
+                    <div className="text-zinc-400">+ Lưu trữ vĩnh viễn</div>
+                    <div className="text-zinc-400">+ Load balancing OK</div>
+                    <div className="text-zinc-500">~ Chậm hơn RAM</div>
+                    <div className="text-zinc-500">~ Cần tối ưu query</div>
                   </div>
-                  <Badge className="mt-3 bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 text-xs">
-                    Best for: Small-Medium apps
+                  <Badge variant="outline" className="mt-3 bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs rounded-none">
+                    Phù hợp: App Vừa & Nhỏ
                   </Badge>
                 </div>
 
-                <div className="bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-neon-500/30 rounded-lg p-4">
-                  <Zap className="w-8 h-8 text-neon-400 mb-3" />
-                  <h4 className="text-neon-300 font-black mb-2">Redis</h4>
-                  <p className="text-xs text-gray-400 mb-3">In-memory data store with persistence</p>
+                <div className="bg-zinc-900/30 border border-white/10 rounded-none p-4">
+                  <Zap className="w-8 h-8 text-zinc-100 mb-3" />
+                  <h4 className="text-zinc-100 font-black mb-2">Redis</h4>
+                  <p className="text-xs text-zinc-500 mb-3">In-memory data store có persistence</p>
                   <div className="space-y-1 text-xs">
-                    <div className="text-green-400">+ Blazing fast (sub-ms)</div>
-                    <div className="text-green-400">+ Built-in expiration</div>
-                    <div className="text-green-400">+ Scales horizontally</div>
-                    <div className="text-yellow-400">~ Requires Redis server</div>
+                    <div className="text-zinc-400">+ Tốc độ ánh sáng (sub-ms)</div>
+                    <div className="text-zinc-400">+ Tự động hết hạn</div>
+                    <div className="text-zinc-400">+ Scale ngang dễ dàng</div>
+                    <div className="text-zinc-500">~ Cần server Redis riêng</div>
                   </div>
-                  <Badge className="mt-3 bg-neon-500/20 text-neon-300 border border-neon-500/50 text-xs">
-                    Best for: Production/Enterprise
+                  <Badge variant="outline" className="mt-3 bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs rounded-none">
+                    Phù hợp: Production / Enterprise
                   </Badge>
                 </div>
               </div>
             </SectionCard>
 
-            {/* Section 5: Session Lifecycle */}
+            {/* Section 5: Vòng Đời Session */}
             <SectionCard
               {...sections[4]}
               isCompleted={progress.completedSections.includes(sections[4].id)}
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                Sessions have a <span className="text-neon-400 font-bold">complete lifecycle</span> from
-                creation to destruction. Understanding each phase is critical for security.
+                Session có một <span className="text-zinc-100 font-bold">vòng đời hoàn chỉnh</span> từ
+                lúc sinh ra đến khi bị hủy diệt. Hiểu rõ từng pha là chìa khóa để bảo mật.
               </p>
 
               <div className="space-y-4">
-                <div className="border-l-4 border-neon-500 bg-neon-950/30 p-4 rounded-r-lg">
-                  <h4 className="text-neon-300 font-black mb-2 flex items-center gap-2">
-                    <span className="w-6 h-6 bg-neon-500 text-black rounded-full flex items-center justify-center text-sm">1</span>
-                    Creation (Login)
+                <div className="border-l-4 border-zinc-700 bg-zinc-900/30 p-4 rounded-none">
+                  <h4 className="text-zinc-100 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-zinc-800 text-white rounded-none flex items-center justify-center text-sm">1</span>
+                    Khởi Tạo (Login)
                   </h4>
-                  <p className="text-sm text-gray-300 mb-2">Generate cryptographically secure session ID, store user data, set cookie</p>
+                  <p className="text-sm text-zinc-400 mb-2">Tạo session ID ngẫu nhiên, lưu thông tin user, gửi cookie về browser</p>
                   <CodeBlock examples={codeExamples.settingCookie.slice(0, 1)} showLineNumbers={false} />
                 </div>
 
-                <div className="border-l-4 border-cyan-500 bg-cyan-950/30 p-4 rounded-r-lg">
-                  <h4 className="text-cyan-300 font-black mb-2 flex items-center gap-2">
-                    <span className="w-6 h-6 bg-cyan-500 text-black rounded-full flex items-center justify-center text-sm">2</span>
-                    Validation (Each Request)
+                <div className="border-l-4 border-zinc-500 bg-zinc-900/30 p-4 rounded-none">
+                  <h4 className="text-zinc-200 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-zinc-600 text-white rounded-none flex items-center justify-center text-sm">2</span>
+                    Xác Thực (Mỗi Request)
                   </h4>
-                  <p className="text-sm text-gray-300 mb-2">Look up session in store, check expiration, update last activity</p>
+                  <p className="text-sm text-zinc-400 mb-2">Tra cứu session tồn tại không, check hết hạn chưa, update thời gian hoạt động</p>
                   <CodeBlock examples={codeExamples.validatingSession.slice(0, 1)} showLineNumbers={false} />
                 </div>
 
-                <div className="border-l-4 border-purple-500 bg-purple-950/30 p-4 rounded-r-lg">
-                  <h4 className="text-purple-300 font-black mb-2 flex items-center gap-2">
-                    <span className="w-6 h-6 bg-purple-500 text-black rounded-full flex items-center justify-center text-sm">3</span>
-                    Regeneration (Security Event)
+                <div className="border-l-4 border-zinc-700 bg-zinc-900/30 p-4 rounded-none">
+                  <h4 className="text-zinc-100 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-zinc-800 text-white rounded-none flex items-center justify-center text-sm">3</span>
+                    Tái Tạo (Sự Kiện Bảo Mật)
                   </h4>
-                  <p className="text-sm text-gray-300 mb-2">Generate new session ID after privilege escalation to prevent session fixation</p>
+                  <p className="text-sm text-zinc-400 mb-2">Đổi session ID mới sau khi đăng nhập hoặc đổi quyền (chống session fixation)</p>
                   <CodeBlock examples={codeExamples.sessionRegeneration} showLineNumbers={false} />
                 </div>
 
-                <div className="border-l-4 border-red-500 bg-red-950/30 p-4 rounded-r-lg">
-                  <h4 className="text-red-300 font-black mb-2 flex items-center gap-2">
-                    <span className="w-6 h-6 bg-red-500 text-black rounded-full flex items-center justify-center text-sm">4</span>
-                    Destruction (Logout)
+                <div className="border-l-4 border-zinc-500 bg-zinc-900/30 p-4 rounded-none">
+                  <h4 className="text-zinc-200 font-black mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 bg-zinc-600 text-white rounded-none flex items-center justify-center text-sm">4</span>
+                    Hủy Diệt (Logout)
                   </h4>
-                  <p className="text-sm text-gray-300 mb-2">Delete session from store, clear cookie, invalidate all references</p>
+                  <p className="text-sm text-zinc-400 mb-2">Xóa khỏi database, xóa cookie client, vô hiệu hóa token</p>
                   <CodeBlock examples={codeExamples.logout} showLineNumbers={false} />
                 </div>
               </div>
@@ -430,72 +484,72 @@ export default function SessionPage() {
               onComplete={handleSectionComplete}
             >
               <p className="text-lg mb-4">
-                Choosing between Session and JWT is like choosing between a <span className="text-neon-400 font-bold">keycard</span> (Session)
-                and a <span className="text-cyan-400 font-bold">self-contained badge</span> (JWT). Each has trade-offs.
+                Chọn Session hay JWT giống như chọn giữa <span className="text-zinc-100 font-bold">thẻ từ thang máy</span> (Session)
+                và <span className="text-zinc-100 font-bold">hộ chiếu</span> (JWT). Mỗi công nghệ có ưu nhược điểm riêng.
               </p>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-2 border-neon-500/30 rounded-lg overflow-hidden">
-                  <thead className="bg-gray-900 border-b-2 border-neon-500/30">
+                <table className="w-full text-sm border border-white/10 rounded-none overflow-hidden">
+                  <thead className="bg-surface-elevated border-b border-white/10">
                     <tr>
-                      <th className="px-4 py-3 text-left text-neon-300 font-black">Factor</th>
-                      <th className="px-4 py-3 text-left text-neon-400 font-black">Session (Keycard)</th>
-                      <th className="px-4 py-3 text-left text-cyan-400 font-black">JWT (Badge)</th>
+                      <th className="px-6 py-4 text-left text-zinc-300 font-bold uppercase tracking-wider text-xs">Yếu Tố</th>
+                      <th className="px-6 py-4 text-left text-zinc-300 font-bold uppercase tracking-wider text-xs">Session (Thẻ Từ)</th>
+                      <th className="px-6 py-4 text-left text-zinc-300 font-bold uppercase tracking-wider text-xs">JWT (Hộ Chiếu)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-800">
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">State</td>
-                      <td className="px-4 py-3 text-neon-300">Stateful (server stores data)</td>
-                      <td className="px-4 py-3 text-cyan-300">Stateless (token has all data)</td>
+                  <tbody className="divide-y divide-white/5 bg-surface">
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-bold text-zinc-400 uppercase text-xs tracking-wide">Trạng Thái</td>
+                      <td className="px-6 py-4 text-zinc-100">Stateful (Server lưu data)</td>
+                      <td className="px-6 py-4 text-zinc-200">Stateless (Token chứa data)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Server Load</td>
-                      <td className="px-4 py-3 text-neon-300">Database lookup per request</td>
-                      <td className="px-4 py-3 text-cyan-300">No database needed</td>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-bold text-zinc-400 uppercase text-xs tracking-wide">Tải Server</td>
+                      <td className="px-6 py-4 text-zinc-100">Tra cứu DB mỗi request</td>
+                      <td className="px-6 py-4 text-zinc-200">Không cần DB (CPU verify chữ ký)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Scalability</td>
-                      <td className="px-4 py-3 text-neon-300">Requires shared session store (Redis)</td>
-                      <td className="px-4 py-3 text-cyan-300">Easy horizontal scaling</td>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-bold text-zinc-400 uppercase text-xs tracking-wide">Mở Rộng (Scale)</td>
+                      <td className="px-6 py-4 text-zinc-100">Khó (Cần Redis cluster)</td>
+                      <td className="px-6 py-4 text-zinc-200">Dễ (Scale ngang tự do)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Revocation</td>
-                      <td className="px-4 py-3 text-green-400">Instant (delete from DB)</td>
-                      <td className="px-4 py-3 text-red-400">Hard (need blacklist)</td>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-bold text-zinc-400 uppercase text-xs tracking-wide">Thu Hồi (Revoke)</td>
+                      <td className="px-6 py-4 text-zinc-100">Tức thì (Xóa khỏi DB)</td>
+                      <td className="px-6 py-4 text-zinc-500">Khó (Token vẫn sống đến khi hết hạn)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Mobile Apps</td>
-                      <td className="px-4 py-3 text-yellow-400">Cookie handling tricky</td>
-                      <td className="px-4 py-3 text-green-400">Simple Authorization header</td>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-bold text-zinc-400 uppercase text-xs tracking-wide">Mobile Apps</td>
+                      <td className="px-6 py-4 text-zinc-500">Xử lý cookie phức tạp</td>
+                      <td className="px-6 py-4 text-zinc-100">Dễ (Header Authorization)</td>
                     </tr>
-                    <tr className="hover:bg-neon-500/5">
-                      <td className="px-4 py-3 font-bold text-gray-300">Security</td>
-                      <td className="px-4 py-3 text-green-400">Server controls everything</td>
-                      <td className="px-4 py-3 text-yellow-400">Token lives in client storage</td>
+                    <tr className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 font-bold text-zinc-400 uppercase text-xs tracking-wide">Bảo Mật</td>
+                      <td className="px-6 py-4 text-zinc-100">Server kiểm soát tuyệt đối</td>
+                      <td className="px-6 py-4 text-zinc-500">Rủi ro XSS lộ token</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
               <div className="mt-6 grid md:grid-cols-2 gap-4">
-                <div className="bg-neon-950/30 border-2 border-neon-500/30 rounded-lg p-4">
-                  <h4 className="text-neon-300 font-black mb-3">Use Session When:</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Traditional web apps with server-side rendering</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Need instant logout/revocation</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Security is top priority</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-neon-400 flex-shrink-0 mt-0.5" /> Single domain application</li>
+                <div className="bg-zinc-900/30 border border-white/10 rounded-none p-6">
+                  <h4 className="text-zinc-100 font-black mb-3">Dùng Session Khi:</h4>
+                  <ul className="space-y-2 text-sm text-zinc-400">
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-zinc-100 flex-shrink-0 mt-0.5" /> Web app truyền thống (SSR, Admin)</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-zinc-100 flex-shrink-0 mt-0.5" /> Cần logout tức thì (Ngân hàng, Y tế)</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-zinc-100 flex-shrink-0 mt-0.5" /> Bảo mật là ưu tiên số 1</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-zinc-100 flex-shrink-0 mt-0.5" /> Duy nhất 1 domain</li>
                   </ul>
                 </div>
 
-                <div className="bg-cyan-950/30 border-2 border-cyan-500/30 rounded-lg p-4">
-                  <h4 className="text-cyan-300 font-black mb-3">Use JWT When:</h4>
-                  <ul className="space-y-2 text-sm text-gray-300">
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Building mobile/SPA apps</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Microservices architecture</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Cross-domain authentication</li>
-                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" /> Scalability matters more than instant revocation</li>
+                <div className="bg-zinc-900/30 border border-white/10 rounded-none p-6">
+                  <h4 className="text-zinc-100 font-black mb-3">Dùng JWT Khi:</h4>
+                  <ul className="space-y-2 text-sm text-zinc-400">
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-zinc-500 flex-shrink-0 mt-0.5" /> Mobile App / SPA</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-zinc-500 flex-shrink-0 mt-0.5" /> Microservices architecture</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-zinc-500 flex-shrink-0 mt-0.5" /> Nhiều domain khác nhau</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-zinc-500 flex-shrink-0 mt-0.5" /> Scale &gt; Khả năng thu hồi (B2C social)</li>
                   </ul>
                 </div>
               </div>
@@ -507,115 +561,148 @@ export default function SessionPage() {
               isCompleted={progress.completedSections.includes(sections[6].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                Learn from real-world <span className="text-red-400 font-bold">security breaches</span>.
-                Each scenario shows the attack, exploitation, and defense strategies.
+              <p className="text-lg mb-6">
+                Học từ các <span className="text-zinc-100 font-bold">vụ rò rỉ dữ liệu</span> thực tế.
+                Mỗi kịch bản sẽ chỉ ra cách tấn công, khai thác và phòng thủ.
               </p>
 
-              <div className="space-y-4">
-                {securityScenarios.map(scenario => (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <div className="relative w-full aspect-video mb-8 border border-white/10 rounded-none overflow-hidden group cursor-pointer">
+                    <Image
+                      src="/images/session/security-hacker.png"
+                      alt="Session Hijacking Scenario"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60" />
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <p className="text-sm font-mono text-red-500 font-bold uppercase tracking-wider">Cảnh_Báo: Phát_Hiện_Xâm_Nhập</p>
+                      </div>
+                      <span className="text-xs text-zinc-500 uppercase tracking-widest bg-black/50 px-2 py-1 border border-white/10 backdrop-blur-sm">Nhấn để xem</span>
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl bg-[#0a0a0a] border-white/10 p-0 overflow-hidden">
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src="/images/session/security-hacker.png"
+                      alt="Session Hijacking Scenario"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <div className="space-y-6">
+                {securityScenarios.map((scenario) => (
                   <SecurityScenario key={scenario.id} {...scenario} />
                 ))}
               </div>
             </SectionCard>
 
-            {/* Section 8: Scaling Patterns */}
+            {/* Section 8: Scaling */}
             <SectionCard
               {...sections[7]}
               isCompleted={progress.completedSections.includes(sections[7].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                Scaling session authentication to <span className="text-neon-400 font-bold">millions of users</span> requires
-                specialized patterns and infrastructure.
+              <p className="text-lg mb-6">
+                Scale session authen lên <span className="text-zinc-100 font-bold">hàng triệu users</span> cần các
+                mô hình và hạ tầng chuyên biệt để đảm bảo hiệu năng.
               </p>
 
-              <div className="space-y-4">
-                <div className="bg-gradient-to-r from-purple-950/30 to-pink-950/30 border-2 border-purple-500/30 rounded-lg p-5">
-                  <h4 className="text-purple-300 font-black text-lg mb-3 flex items-center gap-2">
-                    <Users className="w-6 h-6" />
-                    Pattern 1: Sticky Sessions (Session Affinity)
+              <div className="space-y-6">
+                {/* Pattern 1 */}
+                <div className="bg-zinc-900 border border-white/10 p-6 rounded-none relative overflow-hidden group hover:border-white/30 transition-all">
+                  <div className="absolute top-0 right-0 bg-white/10 px-3 py-1 text-xs font-bold uppercase rounded-bl text-gray-300">
+                    Easy Setup
+                  </div>
+                  <h4 className="text-xl font-bold text-white mb-2 group-hover:text-zinc-300 transition-colors">
+                    1. Sticky Sessions
                   </h4>
-                  <p className="text-gray-300 mb-3">
-                    Load balancer routes user to the <span className="text-purple-400">same server</span> for all requests.
-                    Session lives in server memory - no shared storage needed.
+                  <p className="text-zinc-400 mb-4 h-12">
+                    Load Balancer định tuyến user luôn vào <span className="text-zinc-100">cùng 1 server</span>.
                   </p>
-                  <div className="grid md:grid-cols-2 gap-3 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-sm bg-zinc-950/50 p-4 rounded-none">
                     <div>
-                      <span className="text-green-400 font-semibold">Pros:</span>
-                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
-                        <li>- Simple implementation</li>
-                        <li>- Ultra-fast (in-memory)</li>
-                        <li>- No shared storage cost</li>
+                      <span className="text-zinc-300 font-bold block mb-1">Ưu điểm</span>
+                      <ul className="space-y-1 text-zinc-500">
+                        <li>+ Setup đơn giản</li>
+                        <li>+ RAM truy cập nhanh</li>
+                        <li>+ Không tốn phí DB</li>
                       </ul>
                     </div>
                     <div>
-                      <span className="text-red-400 font-semibold">Cons:</span>
-                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
-                        <li>- Lost if server crashes</li>
-                        <li>- Uneven load distribution</li>
-                        <li>- Rolling deploys tricky</li>
+                      <span className="text-zinc-500 font-bold block mb-1">Nhược điểm</span>
+                      <ul className="space-y-1 text-zinc-500">
+                        <li>- Server lỗi = Mất session</li>
+                        <li>- Load không đều</li>
+                        <li>- Khó auto-scaling</li>
                       </ul>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-cyan-950/30 to-blue-950/30 border-2 border-cyan-500/30 rounded-lg p-5">
-                  <h4 className="text-cyan-300 font-black text-lg mb-3 flex items-center gap-2">
-                    <Database className="w-6 h-6" />
-                    Pattern 2: Centralized Session Store (Redis/Memcached)
+                {/* Pattern 2 */}
+                <div className="bg-zinc-900 border border-white/10 p-6 rounded-none relative overflow-hidden group hover:border-white/30 transition-all shadow-none">
+                  <div className="absolute top-0 right-0 bg-zinc-800 text-white px-3 py-1 text-xs font-bold uppercase rounded-bl">
+                    Industry Standard
+                  </div>
+                  <h4 className="text-xl font-bold text-white mb-2">
+                    2. Centralized Redis
                   </h4>
-                  <p className="text-gray-300 mb-3">
-                    All servers connect to a <span className="text-cyan-400">shared Redis cluster</span>.
-                    Session lookups happen in distributed memory - requests can hit any server.
+                  <p className="text-zinc-400 mb-4 h-12">
+                    Tất cả server dùng chung <span className="text-zinc-100">Redis Cluster</span> để lưu session.
                   </p>
-                  <div className="grid md:grid-cols-2 gap-3 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-sm bg-zinc-950/50 p-4 rounded-none">
                     <div>
-                      <span className="text-green-400 font-semibold">Pros:</span>
-                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
-                        <li>- True load balancing</li>
-                        <li>- Survives server crashes</li>
-                        <li>- Sub-millisecond lookups</li>
+                      <span className="text-zinc-300 font-bold block mb-1">Ưu điểm</span>
+                      <ul className="space-y-1 text-zinc-400">
+                        <li>+ Server nào xử lý cũng được</li>
+                        <li>+ Session vẫn còn khi server lỗi</li>
+                        <li>+ Tốc độ cực cao</li>
                       </ul>
                     </div>
                     <div>
-                      <span className="text-yellow-400 font-semibold">Considerations:</span>
-                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
-                        <li>- Redis infrastructure needed</li>
-                        <li>- Network latency (minor)</li>
-                        <li>- Redis cluster management</li>
+                      <span className="text-zinc-500 font-bold block mb-1">Nhược điểm</span>
+                      <ul className="space-y-1 text-zinc-400">
+                        <li>~ Tốn chi phí Redis</li>
+                        <li>~ Network latency (nhỏ)</li>
                       </ul>
                     </div>
                   </div>
-                  <Badge className="mt-3 bg-cyan-500/20 text-cyan-300 border border-cyan-500/50">
-                    Industry Standard for Production
-                  </Badge>
                 </div>
 
-                <div className="bg-gradient-to-r from-neon-950/30 to-green-950/30 border-2 border-neon-500/30 rounded-lg p-5">
-                  <h4 className="text-neon-300 font-black text-lg mb-3 flex items-center gap-2">
-                    <Zap className="w-6 h-6" />
-                    Pattern 3: Session Replication
+                {/* Pattern 3 */}
+                <div className="bg-zinc-900 border border-white/10 p-6 rounded-none relative overflow-hidden group hover:border-white/30 transition-all">
+                  <div className="absolute top-0 right-0 bg-zinc-800 text-zinc-300 px-3 py-1 text-xs font-bold uppercase rounded-bl border-l border-b border-white/10">
+                    Maximum Scale
+                  </div>
+                  <h4 className="text-xl font-bold text-white mb-2 group-hover:text-zinc-300 transition-colors">
+                    3. JWT (Stateless)
                   </h4>
-                  <p className="text-gray-300 mb-3">
-                    Each server stores sessions locally but <span className="text-neon-400">replicates</span> changes
-                    to other servers in real-time. Hybrid of sticky sessions + shared state.
+                  <p className="text-zinc-400 mb-4 h-12">
+                    Không lưu session! Dùng <span className="text-zinc-100">JWT Token</span> tự chứa dữ liệu.
                   </p>
-                  <div className="grid md:grid-cols-2 gap-3 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-sm bg-zinc-950/50 p-4 rounded-none">
                     <div>
-                      <span className="text-green-400 font-semibold">Pros:</span>
-                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
-                        <li>- Fast local reads</li>
-                        <li>- Failover support</li>
-                        <li>- No single point of failure</li>
+                      <span className="text-zinc-300 font-bold block mb-1">Ưu điểm</span>
+                      <ul className="space-y-1 text-zinc-500">
+                        <li>+ Scale vô cực</li>
+                        <li>+ Không tốn RAM/Redis</li>
+                        <li>+ Phù hợp Microservices</li>
                       </ul>
                     </div>
                     <div>
-                      <span className="text-red-400 font-semibold">Cons:</span>
-                      <ul className="text-gray-400 ml-4 mt-1 space-y-1">
-                        <li>- Complex implementation</li>
-                        <li>- Replication lag</li>
-                        <li>- High memory usage</li>
+                      <span className="text-zinc-500 font-bold block mb-1">Nhược điểm</span>
+                      <ul className="space-y-1 text-zinc-500">
+                        <li>- Không thể logout ngay</li>
+                        <li>- Token size lớn</li>
+                        <li>- Cannot revoke dễ dàng</li>
                       </ul>
                     </div>
                   </div>
@@ -629,58 +716,58 @@ export default function SessionPage() {
               isCompleted={progress.completedSections.includes(sections[8].id)}
               onComplete={handleSectionComplete}
             >
-              <p className="text-lg mb-4">
-                The <span className="text-neon-400 font-bold">Guardian&apos;s Checklist</span> - essential security
-                practices every production session system must follow.
+              <p className="text-lg mb-6">
+                Đừng chờ bị hack mới sửa. Hãy check lại code của bạn <span className="text-zinc-100 font-bold">ngay bây giờ</span> theo chuẩn công nghiệp.
               </p>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {[
                   {
                     icon: Clock,
                     title: 'Short Session Timeouts',
                     desc: 'Idle: 15-30 min | Absolute: 8 hours max',
-                    detail: 'Reduces window of opportunity for session hijacking on shared computers',
+                    detail: 'Giảm thiểu rủi ro khi dùng máy tính công cộng',
                     color: 'neon',
                   },
                   {
                     icon: RefreshCw,
-                    title: 'Regenerate Session ID on Login',
-                    desc: 'Create new ID after authentication',
-                    detail: 'Prevents session fixation attacks where attacker pre-sets session ID',
+                    title: 'Regenerate Session ID',
+                    desc: 'Tạo ID mới sau khi login',
+                    detail: 'Chặn đứng tấn công Session Fixation',
                     color: 'cyan',
                   },
                   {
                     icon: Shield,
-                    title: 'All Security Flags',
+                    title: 'Full Security Flags',
                     desc: 'HttpOnly + Secure + SameSite=Strict',
-                    detail: 'Protects against XSS, MITM, and CSRF attacks simultaneously',
+                    detail: 'Bảo vệ toàn diện trước XSS, MITM và CSRF',
                     color: 'purple',
                   },
                   {
                     icon: Database,
                     title: 'Monitor Active Sessions',
-                    desc: 'Show users list of active sessions',
-                    detail: 'Let users revoke sessions from unfamiliar locations/devices',
+                    desc: 'Hiển thị danh sách thiết bị đang đăng nhập',
+                    detail: 'Cho phép user thu hồi quyền truy cập từ xa',
                     color: 'yellow',
-                  },
-                  {
-                    icon: Lock,
-                    title: 'Remember Me (Optional)',
-                    desc: 'Separate long-lived token for convenience',
-                    detail: 'Use separate "remember me" token with lower privileges than active session',
-                    color: 'pink',
                   },
                 ].map((item, index) => {
                   const Icon = item.icon;
+                  // Map color names to tailwind classes explicitly if needed, or rely on safelist
+                  // Using inline style or explicit class names for dynamic colors might be safer if not safelisted
+                  // But assuming the previous code worked with these dynamic classes:
+                  const borderClass = 'border-white/10';
+                  const bgClass = 'bg-zinc-900/40';
+                  const textClass = 'text-white';
+                  const iconClass = 'text-white';
+
                   return (
-                    <div key={index} className={`border-l-4 border-${item.color}-500 bg-${item.color}-950/20 p-4 rounded-r-lg`}>
+                    <div key={index} className={`border-l-4 ${borderClass} ${bgClass} p-4 rounded-r-none`}>
                       <div className="flex items-start gap-3">
-                        <Icon className={`w-6 h-6 text-${item.color}-400 flex-shrink-0 mt-0.5`} />
+                        <Icon className={`w-6 h-6 ${iconClass} flex-shrink-0 mt-0.5`} />
                         <div className="flex-1">
-                          <h4 className={`text-${item.color}-300 font-black mb-1`}>{item.title}</h4>
-                          <p className="text-sm text-gray-300 mb-1">{item.desc}</p>
-                          <p className="text-xs text-gray-500">{item.detail}</p>
+                          <h4 className={`${textClass} font-black mb-1`}>{item.title}</h4>
+                          <p className="text-sm text-zinc-400 mb-1">{item.desc}</p>
+                          <p className="text-xs text-zinc-500">{item.detail}</p>
                         </div>
                       </div>
                     </div>
@@ -688,46 +775,38 @@ export default function SessionPage() {
                 })}
               </div>
 
-              <div className="mt-6 bg-gradient-to-r from-neon-950/50 to-cyan-950/50 border-2 border-neon-500 rounded-lg p-5">
-                <h4 className="text-neon-300 font-black text-lg mb-3 flex items-center gap-2">
+              <div className="mt-6 bg-zinc-900 border border-white/10 rounded-none p-5">
+                <h4 className="text-white font-black text-lg mb-3 flex items-center gap-2">
                   <CheckCircle2 className="w-6 h-6" />
                   Production Checklist
                 </h4>
                 <div className="grid md:grid-cols-2 gap-3 text-sm">
                   <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
-                      Cookie flags: HttpOnly, Secure, SameSite
+                    <label className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+                      <input type="checkbox" className="w-4 h-4 accent-white rounded-none bg-zinc-900 border-zinc-700" defaultChecked />
+                      Cookie flags: HttpOnly, Secure
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
-                      Session regeneration on login
+                    <label className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+                      <input type="checkbox" className="w-4 h-4 accent-white rounded-none bg-zinc-900 border-zinc-700" defaultChecked />
+                      Regenerate session ID sau login
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" defaultChecked />
-                      Timeout configuration (idle + absolute)
-                    </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      Redis/centralized session store
+                    <label className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+                      <input type="checkbox" className="w-4 h-4 accent-white rounded-none bg-zinc-900 border-zinc-700" defaultChecked />
+                      Timeout (idle + absolute)
                     </label>
                   </div>
                   <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      Session monitoring/analytics
+                    <label className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+                      <input type="checkbox" className="w-4 h-4 accent-white rounded-none bg-zinc-900 border-zinc-700" />
+                      Redis/centralized store
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
+                    <label className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+                      <input type="checkbox" className="w-4 h-4 accent-white rounded-none bg-zinc-900 border-zinc-700" />
                       Logout all devices feature
                     </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      HTTPS enforcement
-                    </label>
-                    <label className="flex items-center gap-2 text-gray-300">
-                      <input type="checkbox" className="w-4 h-4 accent-neon-500" />
-                      Audit logging for auth events
+                    <label className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors cursor-pointer">
+                      <input type="checkbox" className="w-4 h-4 accent-white rounded-none bg-zinc-900 border-zinc-700" />
+                      Audit logging events
                     </label>
                   </div>
                 </div>
@@ -735,23 +814,23 @@ export default function SessionPage() {
             </SectionCard>
 
             {/* Live Demo Section */}
-            <Card className="bg-gray-900/80 backdrop-blur border-2 border-cyan-500/30 shadow-[0_0_40px_rgba(34,211,238,0.3)]">
+            <Card className="bg-zinc-900/50 border border-white/10 shadow-none rounded-none">
               <CardHeader>
                 <CardTitle className="text-2xl font-black uppercase tracking-wider text-white flex items-center gap-2">
-                  <Shield className="w-7 h-7 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
+                  <Shield className="w-7 h-7 text-white" />
                   Live Demo: Try Session Authentication
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {!isLoggedIn ? (
                   <div className="space-y-5">
-                    <div className="bg-cyan-950/30 border-2 border-cyan-500/50 rounded-xl p-4">
-                      <p className="text-sm text-cyan-200 font-bold mb-2">
+                    <div className="bg-zinc-900 border border-white/10 rounded-none p-4">
+                      <p className="text-sm text-zinc-100 font-bold mb-2">
                         Demo Credentials:
                       </p>
-                      <div className="space-y-1 text-sm text-cyan-100">
-                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">admin123</code></p>
-                        <p>Username: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user</code> / Password: <code className="bg-gray-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">user123</code></p>
+                      <div className="space-y-1 text-sm text-zinc-400">
+                        <p>Username: <code className="bg-black text-orange-400 px-2 py-0.5 rounded-none border border-zinc-700">admin</code> / Password: <code className="bg-black text-orange-400 px-2 py-0.5 rounded-none border border-zinc-700">admin123</code></p>
+                        <p>Username: <code className="bg-black text-orange-400 px-2 py-0.5 rounded-none border border-zinc-700">user</code> / Password: <code className="bg-black text-orange-400 px-2 py-0.5 rounded-none border border-zinc-700">user123</code></p>
                       </div>
                     </div>
 
@@ -763,7 +842,7 @@ export default function SessionPage() {
                     )}
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-200 mb-2">
+                      <label className="block text-sm font-semibold text-zinc-200 mb-2">
                         Username
                       </label>
                       <Input
@@ -771,12 +850,12 @@ export default function SessionPage() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="admin"
-                        className="bg-gray-950 border-2 border-gray-700 text-white placeholder:text-gray-400"
+                        className="bg-black border-2 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-white"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-200 mb-2">
+                      <label className="block text-sm font-semibold text-zinc-200 mb-2">
                         Password
                       </label>
                       <Input
@@ -785,59 +864,56 @@ export default function SessionPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                         placeholder="admin123"
-                        className="bg-gray-950 border-2 border-gray-700 text-white placeholder:text-gray-400"
+                        className="bg-black border-2 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-white"
                       />
                     </div>
 
                     <Button
                       onClick={handleLogin}
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-700 hover:to-cyan-600 text-black font-semibold py-6"
+                      className="w-full bg-black hover:bg-zinc-900 text-white border border-white/10 font-bold uppercase tracking-widest py-6 rounded-none transition-all"
                     >
                       {isLoading ? (
                         <>
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Authenticating...
+                          INITIALIZING...
                         </>
                       ) : (
-                        <>
-                          Login with Session
-                          <ArrowRight className="w-5 h-5 ml-2" />
-                        </>
+                        'CONSOLE LOGIN'
                       )}
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-5">
-                    <div className="bg-gradient-to-br from-neon-950/50 to-emerald-950/50 border-2 border-neon-500 rounded-xl p-6">
+                    <div className="bg-zinc-900/50 border-2 border-green-500/50 rounded-none p-6">
                       <div className="flex items-center gap-3 mb-2">
-                        <CheckCircle2 className="w-8 h-8 text-neon-400" />
-                        <h3 className="text-2xl font-bold text-neon-200">Access Granted!</h3>
+                        <CheckCircle2 className="w-8 h-8 text-green-500" />
+                        <h3 className="text-2xl font-bold text-white">Access Granted!</h3>
                       </div>
-                      <p className="text-neon-100 text-lg">
-                        Logged in as <strong className="text-neon-300">{username}</strong>
+                      <p className="text-zinc-300 text-lg">
+                        Logged in as <strong className="text-white">{username}</strong>
                       </p>
                     </div>
 
-                    <Card className="bg-gray-900/50 border-2 border-gray-700">
+                    <Card className="bg-zinc-900/50 border-2 border-zinc-800 rounded-none">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-white">
-                          <Lock className="w-6 h-6 text-neon-400" />
+                          <Lock className="w-6 h-6 text-zinc-400" />
                           Session Information
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="flex justify-between items-center py-2 border-b border-gray-700">
-                          <span className="text-gray-200 font-medium text-sm">Session ID:</span>
-                          <span className="text-neon-300 font-mono text-xs break-all max-w-[250px]">{sessionData?.sessionId}</span>
+                          <span className="text-zinc-400 font-medium text-sm">Session ID:</span>
+                          <span className="text-orange-400 font-mono text-xs break-all max-w-[250px]">{sessionData?.sessionId}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-700">
                           <span className="text-gray-200 font-medium text-sm">Username:</span>
                           <span className="text-white font-semibold">{sessionData?.username}</span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-b border-gray-700">
-                          <span className="text-gray-200 font-medium text-sm">Status:</span>
-                          <Badge className="bg-neon-500/20 text-neon-300 border border-neon-500/50">
+                          <span className="text-zinc-200 font-medium text-sm">Status:</span>
+                          <Badge className="bg-green-900/20 text-green-400 border border-green-900/50 rounded-sm">
                             {sessionData?.status}
                           </Badge>
                         </div>
@@ -856,29 +932,29 @@ export default function SessionPage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="bg-gray-900/50 border-2 border-gray-700">
+                    <Card className="bg-zinc-900/50 border-2 border-zinc-800 rounded-none">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-white">
-                          <Cookie className="w-6 h-6 text-neon-400" />
+                          <Cookie className="w-6 h-6 text-zinc-400" />
                           Cookie Details
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="bg-gray-950 rounded-lg p-4 font-mono text-sm space-y-2 border-2 border-gray-800">
-                          <div className="text-gray-200">
-                            <span className="text-neon-400">Set-Cookie:</span> sessionId={sessionData?.sessionId?.substring(0, 20)}...
+                        <div className="bg-black rounded-none p-4 font-mono text-sm space-y-2 border-2 border-zinc-800">
+                          <div className="text-zinc-300">
+                            <span className="text-orange-400">Set-Cookie:</span> sessionId={sessionData?.sessionId?.substring(0, 20)}...
                           </div>
-                          <div className="text-gray-200 pl-4">
-                            <span className="text-cyan-400">HttpOnly;</span> <span className="text-gray-400">{`// JS cannot access`}</span>
+                          <div className="text-zinc-300 pl-4">
+                            <span className="text-blue-400">HttpOnly;</span> <span className="text-zinc-500">{`// JS cannot access`}</span>
                           </div>
-                          <div className="text-gray-200 pl-4">
-                            <span className="text-cyan-400">Secure;</span> <span className="text-gray-400">{`// HTTPS only`}</span>
+                          <div className="text-zinc-300 pl-4">
+                            <span className="text-blue-400">Secure;</span> <span className="text-zinc-500">{`// HTTPS only`}</span>
                           </div>
-                          <div className="text-gray-200 pl-4">
-                            <span className="text-cyan-400">SameSite=Strict;</span> <span className="text-gray-400">{`// CSRF protection`}</span>
+                          <div className="text-zinc-300 pl-4">
+                            <span className="text-blue-400">SameSite=Strict;</span> <span className="text-zinc-500">{`// CSRF protection`}</span>
                           </div>
-                          <div className="text-gray-200 pl-4">
-                            <span className="text-cyan-400">Max-Age=86400;</span> <span className="text-gray-400">{`// 24 hours`}</span>
+                          <div className="text-zinc-300 pl-4">
+                            <span className="text-blue-400">Max-Age=86400;</span> <span className="text-zinc-500">{`// 24 hours`}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -887,7 +963,7 @@ export default function SessionPage() {
                     <Button
                       onClick={handleLogout}
                       variant="secondary"
-                      className="w-full py-6 bg-gray-800 hover:bg-gray-700 text-white border-2 border-gray-700"
+                      className="w-full py-6 bg-zinc-800 hover:bg-zinc-700 text-white border-2 border-zinc-700 rounded-none"
                     >
                       Logout
                     </Button>
@@ -899,7 +975,7 @@ export default function SessionPage() {
             {/* Challenges Section */}
             <div className="space-y-4">
               <h2 className="text-3xl font-black uppercase tracking-wider text-white flex items-center gap-3">
-                <Zap className="w-8 h-8 text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
+                <Zap className="w-8 h-8 text-white" />
                 Interactive Challenges
               </h2>
               <p className="text-gray-300 leading-relaxed">
@@ -918,7 +994,7 @@ export default function SessionPage() {
             <AchievementTracker progress={progress} />
           </main>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
