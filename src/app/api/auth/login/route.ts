@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { mockDB } from '@/lib/mock-db';
 import { comparePassword, generateSessionId } from '@/lib/crypto';
 import { SESSION_EXPIRATION } from '@/lib/constants';
@@ -79,7 +80,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // Generate secure session ID
+    // SESSION REGENERATION - Prevent session fixation attacks
+    // If user already has a session, invalidate it before creating new one
+    const cookieStore = await cookies();
+    const existingSessionId = cookieStore.get('SessionID')?.value;
+    if (existingSessionId && mockDB.sessions[existingSessionId]) {
+      console.log('[Login] Invalidating old session:', existingSessionId.substring(0, 10) + '...');
+      delete mockDB.sessions[existingSessionId];
+    }
+
+    // Always generate a NEW session ID on login
     const sessionId = generateSessionId();
     const now = new Date();
     const expiresAt = new Date(Date.now() + SESSION_EXPIRATION);
@@ -120,7 +130,7 @@ export async function POST(request: Request) {
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
+      sameSite: 'strict' as const, // Strict for better CSRF protection
       maxAge: SESSION_EXPIRATION / 1000,
       path: '/',
     };

@@ -15,7 +15,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { JWTPayload } from '@/lib/types';
 
 interface AuthUser {

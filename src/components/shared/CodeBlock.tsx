@@ -14,7 +14,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 interface CodeBlockProps {
   /**
@@ -192,7 +192,7 @@ interface InlineCodeProps {
 /**
  * Inline code snippet (for use within text)
  */
-export function InlineCode({ code, language = 'typescript' }: InlineCodeProps) {
+export function InlineCode({ code, language: _language = 'typescript' }: InlineCodeProps) {
   return (
     <code className="px-2 py-1 bg-gray-100 text-gray-900 rounded text-sm font-mono">
       {code}

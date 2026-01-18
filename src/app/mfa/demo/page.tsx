@@ -10,7 +10,11 @@
 
 'use client';
 
-import { Alert, AlertDescription, Badge, Button, Card, CardContent, Progress } from '@/components/shared';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import {
   AlertCircle,
   CheckCircle2,
@@ -23,6 +27,7 @@ import {
   Smartphone
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function MFADemoPage() {
   const [step, setStep] = useState<'setup' | 'verified'>('setup');
@@ -70,15 +75,18 @@ export default function MFADemoPage() {
 
   const generateSecret = () => {
     setSecretGenerated(true);
+    toast.success('Secret key generated! 🔑');
   };
 
   const handleVerify = () => {
     if (userCode === totpCode) {
       setIsVerified(true);
       setError('');
+      toast.success('MFA setup complete! 🎉');
       setTimeout(() => setStep('verified'), 1000);
     } else {
       setError('Invalid code. Please try again with the current code from the simulator.');
+      toast.error('Invalid code. Try again!');
     }
   };
 
@@ -86,23 +94,32 @@ export default function MFADemoPage() {
     navigator.clipboard.writeText(text);
     setCopiedItem(item);
     setTimeout(() => setCopiedItem(null), 2000);
+
+    // Show toast notification
+    if (item === 'totp') {
+      toast.success('TOTP code copied!');
+    } else if (item === 'secret' || item === 'manual') {
+      toast.success('Secret key copied!');
+    } else if (item.startsWith('recovery-')) {
+      toast.success('Recovery code copied!');
+    }
   };
 
   const progressPercentage = (timeRemaining / 30) * 100;
-  const progressVariant = timeRemaining > 20 ? 'success' : timeRemaining > 10 ? 'warning' : 'danger';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-green-950 to-gray-950">
+      <Toaster position="top-right" />
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
           <div className="inline-flex items-center gap-3 mb-4">
-            <Shield className="w-10 h-10 md:w-12 md:h-12 text-orange-600 dark:text-orange-400" />
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white">
-              MFA/2FA Demo
+            <Shield className="w-10 h-10 md:w-12 md:h-12 text-neon-400 drop-shadow-[0_0_10px_rgba(74,255,0,0.5)]" />
+            <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-wider drop-shadow-[0_0_20px_rgba(74,255,0,0.3)]">
+              MFA/2FA <span className="text-neon-400">Demo</span>
             </h1>
           </div>
-          <p className="text-gray-600 dark:text-gray-300 text-base md:text-lg max-w-2xl mx-auto">
+          <p className="text-gray-300 text-base md:text-lg max-w-2xl mx-auto">
             Learn how Multi-Factor Authentication adds an extra layer of security
           </p>
         </div>
@@ -111,52 +128,52 @@ export default function MFADemoPage() {
         <div className="grid lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
           {/* Left Column - Education */}
           <div className="space-y-6">
-            <Card>
+            <Card className="bg-gray-900/80 backdrop-blur border-2 border-neon-500/30 shadow-[0_0_30px_rgba(74,255,0,0.2)]">
               <CardContent>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
-                  <Shield className="w-7 h-7 md:w-8 md:h-8 text-orange-600 dark:text-orange-400" />
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 flex items-center gap-2 uppercase tracking-wide">
+                  <Shield className="w-7 h-7 md:w-8 md:h-8 text-neon-400" />
                   Education
                 </h2>
 
                 <div className="space-y-6">
                   {/* What is MFA */}
-                  <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 rounded-xl p-5 border-2 border-orange-200 dark:border-orange-800">
-                    <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm md:text-base">
+                  <div className="bg-gradient-to-br from-neon-950/50 to-green-950/50 rounded-xl p-5 border-2 border-neon-500/50">
+                    <h3 className="font-semibold text-white mb-3 text-sm md:text-base">
                       What is MFA?
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p className="text-sm text-gray-200 leading-relaxed">
                       Multi-Factor Authentication (MFA) requires two or more verification factors to gain access.
                       Even if your password is compromised, attackers cannot access your account without the second factor.
                     </p>
                   </div>
 
                   {/* TOTP Explanation */}
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-5 border-2 border-blue-200 dark:border-blue-800">
-                    <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm md:text-base">
+                  <div className="bg-cyan-950/50 rounded-xl p-5 border-2 border-cyan-400/50">
+                    <h3 className="font-semibold text-white mb-3 text-sm md:text-base">
                       TOTP Explanation
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
+                    <p className="text-sm text-gray-200 leading-relaxed mb-3">
                       <strong>Time-Based One-Time Password</strong> (TOTP) generates a 6-digit code that changes every 30 seconds.
                     </p>
-                    <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <ul className="space-y-2 text-sm text-gray-200">
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 dark:text-blue-400">•</span>
+                        <span className="text-cyan-400">•</span>
                         <span>Based on current time + shared secret</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 dark:text-blue-400">•</span>
+                        <span className="text-cyan-400">•</span>
                         <span>Works offline (no internet needed)</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-600 dark:text-blue-400">•</span>
+                        <span className="text-cyan-400">•</span>
                         <span>Synced via initial QR code scan</span>
                       </li>
                     </ul>
                   </div>
 
                   {/* How Setup Works */}
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-5 border-2 border-green-200 dark:border-green-800">
-                    <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm md:text-base">
+                  <div className="bg-green-950/50 rounded-xl p-5 border-2 border-green-400/50">
+                    <h3 className="font-semibold text-white mb-3 text-sm md:text-base">
                       How Setup Works
                     </h3>
                     <div className="space-y-3">
@@ -169,22 +186,22 @@ export default function MFADemoPage() {
                         'Save recovery codes',
                       ].map((stepText, index) => (
                         <div key={index} className="flex items-center gap-3">
-                          <div className="w-6 h-6 bg-green-600 dark:bg-green-700 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          <div className="w-6 h-6 bg-neon-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
                             {index + 1}
                           </div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{stepText}</span>
+                          <span className="text-sm text-gray-200">{stepText}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Recovery Codes */}
-                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-5 border-2 border-amber-200 dark:border-amber-800">
-                    <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm md:text-base flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <div className="bg-amber-950/50 rounded-xl p-5 border-2 border-amber-400/50">
+                    <h3 className="font-semibold text-white mb-3 text-sm md:text-base flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-400" />
                       Recovery Codes
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p className="text-sm text-gray-200 leading-relaxed">
                       Always save recovery codes in a secure location. They allow access if you lose your device.
                       Each code can typically be used only once.
                     </p>
@@ -192,7 +209,7 @@ export default function MFADemoPage() {
 
                   {/* Compatible Apps */}
                   <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-5 border-2 border-purple-200 dark:border-purple-800">
-                    <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm md:text-base">
+                    <h3 className="font-semibold text-white mb-3 text-sm md:text-base">
                       Compatible Apps
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -210,18 +227,18 @@ export default function MFADemoPage() {
 
           {/* Middle Column - Setup */}
           <div>
-            <Card>
+            <Card className="bg-gray-900/80 backdrop-blur border-2 border-neon-500/30 shadow-[0_0_30px_rgba(74,255,0,0.2)]">
               <CardContent>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
-                  <Key className="w-7 h-7 md:w-8 md:h-8 text-orange-600 dark:text-orange-400" />
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 flex items-center gap-2 uppercase tracking-wide">
+                  <Key className="w-7 h-7 md:w-8 md:h-8 text-neon-400" />
                   Setup
                 </h2>
 
                 {step === 'setup' && (
                   <div className="space-y-6">
                     {/* Step 1: Generate Secret */}
-                    <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 rounded-xl p-5 border-2 border-orange-200 dark:border-orange-800">
-                      <h3 className="font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2 text-sm md:text-base">
+                    <div className="bg-gradient-to-br from-neon-950/50 to-green-950/50 rounded-xl p-5 border-2 border-neon-500/50">
+                      <h3 className="font-semibold text-white mb-4 flex items-center gap-2 text-sm md:text-base">
                         <span className="w-6 h-6 bg-orange-600 dark:bg-orange-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
                           1
                         </span>
@@ -239,13 +256,13 @@ export default function MFADemoPage() {
                       ) : (
                         <div className="bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 rounded-lg p-3">
                           <div className="flex items-center gap-2 mb-2">
-                            <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                            <span className="text-sm font-semibold text-green-800 dark:text-green-300">
+                            <CheckCircle2 className="w-5 h-5 text-green-400" />
+                            <span className="text-sm font-semibold text-neon-200">
                               Secret Generated
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <code className="flex-1 text-xs font-mono text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 rounded px-2 py-1">
+                            <code className="flex-1 text-xs font-mono text-gray-200 bg-white dark:bg-gray-800 rounded px-2 py-1">
                               {secret}
                             </code>
                             <button
@@ -266,36 +283,36 @@ export default function MFADemoPage() {
                     {secretGenerated && (
                       <>
                         {/* Step 2: Scan QR Code */}
-                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-5 border-2 border-blue-200 dark:border-blue-800">
-                          <h3 className="font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2 text-sm md:text-base">
+                        <div className="bg-cyan-950/50 rounded-xl p-5 border-2 border-cyan-400/50">
+                          <h3 className="font-semibold text-white mb-4 flex items-center gap-2 text-sm md:text-base">
                             <span className="w-6 h-6 bg-blue-600 dark:bg-blue-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
                               2
                             </span>
                             Scan QR Code
                           </h3>
-                          <div className="bg-white dark:bg-gray-700 rounded-xl p-6 flex items-center justify-center mb-3">
+                          <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-6 flex items-center justify-center mb-3">
                             <div className="w-40 h-40 bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900 dark:to-amber-900 rounded-lg flex items-center justify-center">
-                              <QrCode className="w-32 h-32 text-orange-600 dark:text-orange-400" />
+                              <QrCode className="w-32 h-32 text-neon-400" />
                             </div>
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
+                          <p className="text-xs text-gray-400 text-center">
                             Scan with your authenticator app
                           </p>
                         </div>
 
                         {/* Step 3: Manual Entry */}
-                        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-5 border-2 border-amber-200 dark:border-amber-800">
-                          <h3 className="font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2 text-sm md:text-base">
+                        <div className="bg-amber-950/50 rounded-xl p-5 border-2 border-amber-400/50">
+                          <h3 className="font-semibold text-white mb-3 flex items-center gap-2 text-sm md:text-base">
                             <span className="w-6 h-6 bg-amber-600 dark:bg-amber-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
                               3
                             </span>
                             Manual Entry (Optional)
                           </h3>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                          <p className="text-xs text-gray-400 mb-2">
                             If you can&apos;t scan, enter this secret manually:
                           </p>
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-white dark:bg-gray-700 rounded-lg p-2 font-mono text-xs break-all text-gray-800 dark:text-gray-200">
+                            <div className="flex-1 bg-gray-900/50 border border-gray-700 rounded-lg p-2 font-mono text-xs break-all text-gray-200">
                               {secret}
                             </div>
                             <button
@@ -312,14 +329,14 @@ export default function MFADemoPage() {
                         </div>
 
                         {/* Step 4: Verify Code */}
-                        <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-5 border-2 border-green-200 dark:border-green-800">
-                          <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm md:text-base">
-                            <span className="w-6 h-6 bg-green-600 dark:bg-green-700 text-white rounded-full inline-flex items-center justify-center text-xs font-bold mr-2">
+                        <div className="bg-green-950/50 rounded-xl p-5 border-2 border-green-400/50">
+                          <h3 className="font-semibold text-white mb-3 text-sm md:text-base">
+                            <span className="w-6 h-6 bg-neon-500 text-white rounded-full inline-flex items-center justify-center text-xs font-bold mr-2">
                               4
                             </span>
                             Verify Code
                           </h3>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">
+                          <p className="text-xs text-gray-400 mb-4">
                             Enter the 6-digit code from your authenticator app:
                           </p>
 
@@ -341,7 +358,7 @@ export default function MFADemoPage() {
                               value={userCode}
                               onChange={(e) => setUserCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                               onKeyDown={(e) => e.key === 'Enter' && userCode.length === 6 && handleVerify()}
-                              className="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:border-orange-500 dark:focus:border-orange-400 focus:outline-none transition-colors text-center text-2xl font-mono tracking-wider"
+                              className="flex-1 px-4 py-3 border-2 border-gray-700 bg-gray-950 text-white rounded-xl focus:border-neon-500 focus:outline-none transition-colors text-center text-2xl font-mono tracking-wider"
                               placeholder="000000"
                               maxLength={6}
                             />
@@ -362,44 +379,44 @@ export default function MFADemoPage() {
                 {step === 'verified' && (
                   <div className="space-y-6">
                     {/* Success Message */}
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-700 rounded-xl p-6 text-center">
-                      <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600 dark:bg-green-700 rounded-full mb-4">
+                    <div className="bg-gradient-to-br from-neon-950/50 to-green-950/50 border-2 border-neon-500 rounded-xl p-6 text-center">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-neon-500 rounded-full mb-4">
                         <CheckCircle2 className="w-10 h-10 text-white" />
                       </div>
-                      <h3 className="text-2xl font-bold text-green-800 dark:text-green-300 mb-2">
+                      <h3 className="text-2xl font-bold text-neon-200 mb-2">
                         MFA Enabled!
                       </h3>
-                      <p className="text-sm text-green-700 dark:text-green-300">
+                      <p className="text-sm text-neon-100">
                         Your account is now protected with two-factor authentication
                       </p>
                     </div>
 
                     {/* Recovery Codes */}
-                    <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-5 border-2 border-amber-200 dark:border-amber-800">
-                      <h3 className="font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
-                        <Key className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <div className="bg-amber-950/50 rounded-xl p-5 border-2 border-amber-400/50">
+                      <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+                        <Key className="w-5 h-5 text-amber-400" />
                         Recovery Codes
                       </h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                      <p className="text-xs text-gray-400 mb-3">
                         Save these codes securely. Each can be used once if you lose access to your authenticator:
                       </p>
                       <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
                         {recoveryCodes.map((code, index) => (
                           <div
                             key={index}
-                            className="bg-white dark:bg-gray-700 rounded-lg p-2 flex items-center justify-between gap-2"
+                            className="bg-gray-900/50 border border-gray-700 rounded-lg p-2 flex items-center justify-between gap-2"
                           >
-                            <code className="text-xs font-mono text-gray-800 dark:text-gray-200">
+                            <code className="text-xs font-mono text-gray-200">
                               {code}
                             </code>
                             <button
                               onClick={() => copyToClipboard(code, `recovery-${index}`)}
-                              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors"
+                              className="p-1 hover:bg-gray-800 rounded transition-colors"
                             >
                               {copiedItem === `recovery-${index}` ? (
-                                <CheckCircle2 className="w-3 h-3 text-green-600 dark:text-green-400" />
+                                <CheckCircle2 className="w-3 h-3 text-green-400" />
                               ) : (
-                                <Copy className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                                <Copy className="w-3 h-3 text-gray-400" />
                               )}
                             </button>
                           </div>
@@ -428,32 +445,32 @@ export default function MFADemoPage() {
 
           {/* Right Column - Live Authenticator */}
           <div>
-            <Card>
+            <Card className="bg-gray-900/80 backdrop-blur border-2 border-neon-500/30 shadow-[0_0_30px_rgba(74,255,0,0.2)]">
               <CardContent>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
-                  <Smartphone className="w-7 h-7 md:w-8 md:h-8 text-orange-600 dark:text-orange-400" />
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 flex items-center gap-2 uppercase tracking-wide">
+                  <Smartphone className="w-7 h-7 md:w-8 md:h-8 text-neon-400" />
                   Live Authenticator
                 </h2>
 
                 <div className="space-y-6">
                   {/* TOTP Display */}
-                  <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 rounded-xl p-6 border-2 border-orange-200 dark:border-orange-800">
+                  <div className="bg-gradient-to-br from-neon-950/50 to-green-950/50 rounded-xl p-6 border-2 border-neon-500/50">
                     <div className="text-center mb-6">
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Account</div>
-                      <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      <div className="text-xs text-gray-300 mb-1">Account</div>
+                      <div className="text-sm font-semibold text-gray-200">
                         admin@example.com
                       </div>
                     </div>
 
                     <div className="text-center mb-6">
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Current Code</div>
-                      <div className="text-5xl font-bold text-orange-600 dark:text-orange-400 font-mono tracking-wider mb-4">
+                      <div className="text-xs text-gray-300 mb-2">Current Code</div>
+                      <div className="text-5xl font-bold text-neon-400 font-mono tracking-wider mb-4">
                         {totpCode}
                       </div>
                       <Button
                         variant="default"
                         onClick={() => copyToClipboard(totpCode, 'totp')}
-                        className="!bg-orange-600 hover:!bg-orange-700 mx-auto"
+                        className="!bg-neon-600 hover:!bg-neon-700 mx-auto"
                       >
                         {copiedItem === 'totp' ? (
                           <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -466,11 +483,11 @@ export default function MFADemoPage() {
 
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                        <span className="text-gray-200 flex items-center gap-2">
                           <Clock className="w-4 h-4" />
                           Time remaining:
                         </span>
-                        <span className="font-semibold text-orange-600 dark:text-orange-400">
+                        <span className="font-semibold text-neon-400">
                           {timeRemaining}s
                         </span>
                       </div>
@@ -482,59 +499,59 @@ export default function MFADemoPage() {
                   </div>
 
                   {/* How It Works */}
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-5 border-2 border-blue-200 dark:border-blue-800">
-                    <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm">
+                  <div className="bg-cyan-950/50 rounded-xl p-5 border-2 border-cyan-400/50">
+                    <h3 className="font-semibold text-white mb-3 text-sm">
                       How It Works
                     </h3>
-                    <ul className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
+                    <ul className="space-y-2 text-xs text-gray-200">
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
                         <span>Code changes every 30 seconds</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
                         <span>Generated using TOTP algorithm</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
                         <span>Synced with server time</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
                         <span>Works offline</span>
                       </li>
                     </ul>
                   </div>
 
                   {/* Security Tips */}
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-5 border-2 border-green-200 dark:border-green-800">
-                    <h3 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <div className="bg-green-950/50 rounded-xl p-5 border-2 border-green-400/50">
+                    <h3 className="font-semibold text-white mb-3 text-sm flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-green-400" />
                       Security Tips
                     </h3>
-                    <ul className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
+                    <ul className="space-y-2 text-xs text-gray-200">
                       <li className="flex items-start gap-2">
-                        <span className="text-green-600 dark:text-green-400">•</span>
+                        <span className="text-green-400">•</span>
                         <span>Never share your secret key</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-green-600 dark:text-green-400">•</span>
+                        <span className="text-green-400">•</span>
                         <span>Store recovery codes securely</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-green-600 dark:text-green-400">•</span>
+                        <span className="text-green-400">•</span>
                         <span>Use different authenticators for different accounts</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-green-600 dark:text-green-400">•</span>
+                        <span className="text-green-400">•</span>
                         <span>Backup your authenticator app data</span>
                       </li>
                     </ul>
                   </div>
 
                   {/* Demo Mode Notice */}
-                  <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border border-orange-200 dark:border-orange-800">
-                    <p className="text-xs text-orange-800 dark:text-orange-300 italic">
+                  <div className="bg-neon-950/50 rounded-xl p-4 border-2 border-neon-500/50">
+                    <p className="text-xs text-neon-200 italic">
                       <strong>Demo Mode:</strong> This simulates a real authenticator app. In production, only your phone generates these codes.
                     </p>
                   </div>

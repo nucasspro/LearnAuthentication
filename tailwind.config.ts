@@ -10,6 +10,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        neon: {
+          50: '#f0ffe4',
+          100: '#dcffc9',
+          200: '#bbff99',
+          300: '#8fff5e',
+          400: '#6dff2d',
+          500: '#4aff00',
+          600: '#3dd600',
+          700: '#2fa300',
+          800: '#288105',
+          900: '#236b0a',
+        },
+        surface: {
+          DEFAULT: '#1a1a1a',
+          elevated: '#2a2a2a',
+          overlay: 'rgba(26, 26, 26, 0.9)',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -134,13 +151,22 @@ const config: Config = {
       },
       borderRadius: {
         none: '0',
-        sm: '0.25rem',
-        DEFAULT: '0.5rem',
-        md: '0.75rem',
-        lg: '1rem',
-        xl: '1.5rem',
-        '2xl': '2rem',
+        sm: '2px',
+        DEFAULT: '4px',
+        md: '4px',
+        lg: '6px',
+        xl: '8px',
+        '2xl': '12px',
         full: '9999px',
+      },
+      borderWidth: {
+        DEFAULT: '1px',
+        0: '0',
+        2: '2px',
+        4: '4px',
+        8: '8px',
+        thin: '1px',
+        thick: '2px',
       },
       boxShadow: {
         xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
@@ -151,10 +177,13 @@ const config: Config = {
         xl: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
         inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+        subtle: '0 2px 8px rgba(0, 0, 0, 0.3)',
+        base: '0 4px 12px rgba(0, 0, 0, 0.4)',
         primary: '0 10px 30px -5px rgba(59, 130, 246, 0.3)',
         secondary: '0 10px 30px -5px rgba(168, 85, 247, 0.3)',
         success: '0 10px 30px -5px rgba(34, 197, 94, 0.3)',
         danger: '0 10px 30px -5px rgba(239, 68, 68, 0.3)',
+        neon: '0 0 10px rgba(74, 255, 0, 0.2)',
       },
       animation: {
         'fade-in': 'fadeIn 200ms ease-out',

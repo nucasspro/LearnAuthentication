@@ -233,3 +233,56 @@ export interface AuthError {
   message: string;
   status: number;
 }
+
+/**
+ * Learning Platform Types
+ * For session authentication lesson components
+ */
+export interface CodeExample {
+  language: 'javascript' | 'python' | 'csharp' | 'ruby';
+  code: string;
+  label: string;
+}
+
+export interface Section {
+  id: string;
+  title: string;
+  icon: string;
+  category: 'concepts' | 'success' | 'security' | 'advanced' | 'best_practices' | 'system';
+  estimatedTime: number;
+  content?: React.ReactNode;
+}
+
+export interface SecurityScenario {
+  id: string;
+  title: string;
+  threatLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+  attack: string;
+  exploitation: string;
+  defense: string;
+  vulnerableCode?: CodeExample;
+  secureCode?: CodeExample;
+}
+
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  points: number;
+}
+
+export interface ProgressData {
+  completedSections: string[];
+  percentage: number;
+  level: 'Protocol Initiate' | 'Security Operative' | 'Elite Guardian' | 'Master Architect';
+  achievements: string[];
+}
+
+export interface AchievementLevel {
+  name: string;
+  minPercentage: number;
+  maxPercentage: number;
+  icon: string;
+  color: string;
+}

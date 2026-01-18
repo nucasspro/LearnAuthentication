@@ -10,11 +10,15 @@
  * - Verify JWT-based authentication
  * - Protect API endpoints requiring authentication
  * - Extract authenticated user info from requests
+ *
+ * NOTE: This middleware runs synchronously because it uses an in-memory mockDB.
+ * In a real production app with a database (Postgres, MongoDB), these functions
+ * should be ASYNC to avoid blocking the event loop.
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { mockDB } from './mock-db';
 import { verifyAccessToken } from './jwt';
+import { mockDB } from './mock-db';
 
 /**
  * Verify Session Authentication

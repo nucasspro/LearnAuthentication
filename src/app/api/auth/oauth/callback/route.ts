@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
     // Extract query parameters
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
-    const state = searchParams.get('state');
+    // TODO: In production, extract and validate state parameter for CSRF protection
+    // const state = searchParams.get('state');
     const error = searchParams.get('error');
     const error_description = searchParams.get('error_description');
 
